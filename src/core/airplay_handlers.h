@@ -191,10 +191,11 @@ airplay_handler_play(airplay_conn_t* conn,
 	double start_pos_sec = 0, start_pos = 0, volume = 0;
 	char* url = NULL;
 
-	plist_get_real_val(start_pos_sec_node, &start_pos_sec);
-	plist_get_real_val(start_pos_node, &start_pos);
-	plist_get_real_val(volume_node, &volume);
-	plist_get_string_val(content_location_node, &url);
+	/* libplist asserts on a NULL node, so only read the keys that are present */
+	if (start_pos_sec_node) plist_get_real_val(start_pos_sec_node, &start_pos_sec);
+	if (start_pos_node) plist_get_real_val(start_pos_node, &start_pos);
+	if (volume_node) plist_get_real_val(volume_node, &volume);
+	if (content_location_node) plist_get_string_val(content_location_node, &url);
 
 	auto video_play = conn->airplay->callbacks.video_play;
 	if (video_play != NULL) {
