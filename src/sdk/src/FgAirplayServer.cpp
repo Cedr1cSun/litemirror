@@ -161,15 +161,8 @@ void FgAirplayServer::clearChannels()
 
 FgAirplayChannel* FgAirplayServer::getChannel(const char* remoteDeviceId)
 {
-	std::string deviceId(remoteDeviceId);
-	FgAirplayChannel* pChannel = m_mapChannel[deviceId];
-	if (NULL == pChannel)
-	{
-		pChannel = new FgAirplayChannel(m_pCallback);
-		m_mapChannel[deviceId] = pChannel;
-	}
-
-	return pChannel;
+	FgAirplayChannelMap::iterator it = m_mapChannel.find(remoteDeviceId);
+	return it == m_mapChannel.end() ? NULL : it->second;
 }
 
 
@@ -181,7 +174,10 @@ void FgAirplayServer::connected(void* cls, const char* remoteName, const char* r
 		return;
 	}
 	CAutoLock oLock(pServer->m_mutexMap, "connected");
-	pServer->getChannel(remoteDeviceId);
+	if (pServer->getChannel(remoteDeviceId) == NULL)
+	{
+		pServer->m_mapChannel[remoteDeviceId] = new FgAirplayChannel(pServer->m_pCallback);
+	}
 
 	if (pServer->m_pCallback != NULL)
 	{
