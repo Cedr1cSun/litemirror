@@ -361,30 +361,30 @@ void FgAirplayServer::log_callback(void* cls, int level, const char* msg)
 
 BOOL GetMacAddress(char strMac[6])
 {
-	PIP_ADAPTER_INFO pAdapterInfo;
-	DWORD AdapterInfoSize;
-	DWORD Err;
-	AdapterInfoSize = 0;
-	Err = GetAdaptersInfo(NULL, &AdapterInfoSize);
-	if ((Err != 0) && (Err != ERROR_BUFFER_OVERFLOW)) {
-		printf("GetAdaptersInfo failed to query buffer size\n");
-		return   FALSE;
+	// The MAC is our identity towards iOS. Take it from the adapter that
+	// routes to the internet: VPN and Hyper-V adapters change the enumeration
+	// order between runs and would make the phone see a new receiver each time.
+	DWORD best = (DWORD)-1;
+	GetBestInterface(0x08080808, &best);   // 8.8.8.8, same bytes in either byte order
+
+	ULONG size = 0;
+	if (GetAdaptersInfo(NULL, &size) != ERROR_BUFFER_OVERFLOW) {
+		return FALSE;
 	}
-	pAdapterInfo = (PIP_ADAPTER_INFO)GlobalAlloc(GPTR, AdapterInfoSize);
-	if (pAdapterInfo == NULL) {
-		printf("GlobalAlloc for adapter info failed\n");
-		return   FALSE;
-	}
-	if (GetAdaptersInfo(pAdapterInfo, &AdapterInfoSize) != 0) {
-		printf("GetAdaptersInfo failed\n");
-		GlobalFree(pAdapterInfo);
-		return   FALSE;
-	}
-	for (int i = 0; i < 6; i++)
-	{
-		strMac[i] = pAdapterInfo->Address[i];
+	PIP_ADAPTER_INFO list = (PIP_ADAPTER_INFO)malloc(size);
+	if (list == NULL || GetAdaptersInfo(list, &size) != NO_ERROR) {
+		free(list);
+		return FALSE;
 	}
 
-	GlobalFree(pAdapterInfo);
-	return   TRUE;
+	PIP_ADAPTER_INFO pick = list;   // no default route: fall back to the first adapter
+	for (PIP_ADAPTER_INFO a = list; a != NULL; a = a->Next) {
+		if (a->Index == best) {
+			pick = a;
+			break;
+		}
+	}
+	memcpy(strMac, pick->Address, 6);
+	free(list);
+	return TRUE;
 }

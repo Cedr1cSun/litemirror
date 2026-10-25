@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 LiteMirror contributors
 import plistlib
+import subprocess
 import unittest
 
 from common import TestHost
@@ -51,6 +52,17 @@ class Rtsp(unittest.TestCase):
             airplay = browser.wait_for('_airplay._tcp.local.')
         self.assertEqual(info['deviceID'], airplay.properties[b'deviceid'].decode())
         self.assertEqual(info['model'], airplay.properties[b'model'].decode())
+
+    def test_device_id_is_the_mac_of_the_default_route_adapter(self):
+        """VPN and Hyper-V adapters come and go; the id must follow the real NIC
+        or iOS forgets the receiver between runs."""
+        ps = ('(Get-NetAdapter -InterfaceIndex (Get-NetRoute -DestinationPrefix 0.0.0.0/0 '
+              '| Sort-Object RouteMetric,InterfaceMetric | Select-Object -First 1).InterfaceIndex).MacAddress')
+        mac = subprocess.run(['powershell', '-NoProfile', '-Command', ps],
+                             capture_output=True, text=True, errors='ignore').stdout.strip()
+        self.assertRegex(mac, r'^([0-9A-F]{2}-){5}[0-9A-F]{2}$', 'could not read the default route adapter')
+        info = plistlib.loads(self.client.info()[2])
+        self.assertEqual(info['deviceID'], mac.lower().replace('-', ':'))
 
     def test_pair_setup_returns_server_ed25519_key(self):
         status, body = self.client.pair_setup()
