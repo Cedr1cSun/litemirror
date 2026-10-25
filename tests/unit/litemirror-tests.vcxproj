@@ -93,6 +93,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="test_base64.cpp" />
+    <ClCompile Include="test_byteutils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\litemirror-core.vcxproj">
