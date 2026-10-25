@@ -8,5 +8,6 @@
     <ClCompile Include="test_byteutils.cpp" />
     <ClCompile Include="test_utils.cpp" />
     <ClCompile Include="test_http_request.cpp" />
+    <ClCompile Include="test_pairing.cpp" />
   </ItemGroup>
 </Project>
