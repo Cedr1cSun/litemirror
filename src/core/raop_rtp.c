@@ -584,6 +584,10 @@ raop_rtp_start_audio(raop_rtp_t *raop_rtp, int use_udp, unsigned short control_r
     raop_rtp->running = 1;
     raop_rtp->joined = 0;
 
+    if (raop_rtp->callbacks.connected != NULL) {
+        raop_rtp->callbacks.connected(raop_rtp->callbacks.cls, raop_rtp->remoteName, raop_rtp->remoteDeviceId);
+    }
+
     THREAD_CREATE(raop_rtp->thread, raop_rtp_thread_udp, raop_rtp);
     THREAD_CREATE(raop_rtp->thread_time, raop_rtp_thread_time, raop_rtp);
     MUTEX_UNLOCK(raop_rtp->run_mutex);
@@ -725,4 +729,8 @@ raop_rtp_stop(raop_rtp_t *raop_rtp)
     MUTEX_LOCK(raop_rtp->run_mutex);
     raop_rtp->joined = 1;
     MUTEX_UNLOCK(raop_rtp->run_mutex);
+
+    if (raop_rtp->callbacks.disconnected != NULL) {
+        raop_rtp->callbacks.disconnected(raop_rtp->callbacks.cls, raop_rtp->remoteName, raop_rtp->remoteDeviceId);
+    }
 }
