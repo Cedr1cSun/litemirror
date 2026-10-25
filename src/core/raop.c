@@ -43,6 +43,11 @@ struct raop_s {
 	httpd_t *httpd;
 
     unsigned short port;
+
+	/* Identity reported in /info */
+	char name[128];
+	char hwaddr[6];
+	int hwaddrlen;
 };
 
 struct raop_conn_s {
@@ -328,6 +333,21 @@ raop_get_callback_cls(raop_t *raop)
 {
     assert(raop);
     return raop->callbacks.cls;
+}
+
+void
+raop_set_identity(raop_t *raop, const char *name, const char *hwaddr, int hwaddrlen)
+{
+	assert(raop);
+
+	if (name) {
+		strncpy(raop->name, name, sizeof(raop->name) - 1);
+		raop->name[sizeof(raop->name) - 1] = '\0';
+	}
+	if (hwaddr && hwaddrlen > 0 && hwaddrlen <= (int)sizeof(raop->hwaddr)) {
+		memcpy(raop->hwaddr, hwaddr, hwaddrlen);
+		raop->hwaddrlen = hwaddrlen;
+	}
 }
 
 void

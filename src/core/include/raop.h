@@ -57,6 +57,8 @@ RAOP_API void raop_set_log_level(raop_t *raop, int level);
 RAOP_API void raop_set_log_callback(raop_t *raop, raop_log_callback_t callback, void *cls);
 RAOP_API void raop_log(raop_t* raop, int level, const char* fmt, ...);
 RAOP_API void raop_set_port(raop_t *raop, unsigned short port);
+/* Name and MAC reported in /info; call before raop_start */
+RAOP_API void raop_set_identity(raop_t *raop, const char *name, const char *hwaddr, int hwaddrlen);
 RAOP_API unsigned short raop_get_port(raop_t *raop);
 RAOP_API void *raop_get_callback_cls(raop_t *raop);
 RAOP_API int raop_start(raop_t *raop, unsigned short *port);

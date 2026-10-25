@@ -5,6 +5,7 @@ import unittest
 
 from common import TestHost
 from rtsp_client import RtspClient
+from test_lifecycle import MdnsBrowser
 
 
 class Rtsp(unittest.TestCase):
@@ -38,6 +39,18 @@ class Rtsp(unittest.TestCase):
         info = plistlib.loads(body)
         for key in ('features', 'model', 'sourceVersion', 'deviceID'):
             self.assertIn(key, info)
+
+    def test_info_describes_this_receiver(self):
+        """iOS keeps pk and deviceID from /info; they must be ours, not an Apple TV's."""
+        _, server_ed_pub = self.client.pair_setup()
+        info = plistlib.loads(self.client.info()[2])
+        self.assertEqual(info['pk'], server_ed_pub)
+        self.assertEqual(info['name'], 'LiteMirrorTest')
+        self.assertEqual(info['deviceID'], info['macAddress'])
+        with MdnsBrowser('LiteMirrorTest') as browser:
+            airplay = browser.wait_for('_airplay._tcp.local.')
+        self.assertEqual(info['deviceID'], airplay.properties[b'deviceid'].decode())
+        self.assertEqual(info['model'], airplay.properties[b'model'].decode())
 
     def test_pair_setup_returns_server_ed25519_key(self):
         status, body = self.client.pair_setup()

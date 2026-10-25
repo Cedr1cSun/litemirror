@@ -84,6 +84,7 @@ lm_error FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
 
 		raop_set_log_level(m_pRaop, RAOP_LOG_DEBUG);
 		raop_set_log_callback(m_pRaop, &log_callback, this);
+		raop_set_identity(m_pRaop, serverName, hwaddr, sizeof(hwaddr));
 		if (raop_start(m_pRaop, &raop_port) < 0) {
 			err = LM_E_RAOP_PORT;
 			break;
