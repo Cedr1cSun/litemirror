@@ -12,7 +12,6 @@ public:
 public:
 	void start(CSDLPlayer* pPlayer);
 	void stop();
-	float setVideoScale(float fRatio);
 
 private:
 	CAirServerCallback* m_pCallback;

@@ -11,7 +11,8 @@ typedef struct SFgAudioFrame {
 	unsigned char* data;
 } SFgAudioFrame;
 
-// Decoded video frame
+// Decoded video frame, NV12: data holds the Y plane, the interleaved UV
+// plane starts at data + dataLen[0]; pitch[0] and pitch[1] apply.
 typedef struct SFgVideoFrame {
 	unsigned long long pts;
 	int isKey;

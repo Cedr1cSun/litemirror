@@ -13,5 +13,8 @@
     <ClCompile Include="test_plist.cpp" />
     <ClCompile Include="test_h264_decoder.cpp" />
     <ClCompile Include="..\..\src\sdk\MfH264Decoder.cpp" />
+    <ClCompile Include="test_channel.cpp" />
+    <ClCompile Include="..\..\src\sdk\FgAirplayChannel.cpp" />
+    <ClCompile Include="..\..\src\sdk\src\CAutoLock.cpp" />
   </ItemGroup>
 </Project>

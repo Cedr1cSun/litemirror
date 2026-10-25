@@ -23,13 +23,3 @@ void fgServerStop(void* handle)
 		pServer = NULL;
 	}
 }
-
-float fgServerScale(void* handle, float fRatio)
-{
-	if (handle != NULL) {
-		FgAirplayServer* pServer = (FgAirplayServer*)handle;
-		return pServer->setScale(fRatio);
-	}
-
-	return 1.0f;
-}

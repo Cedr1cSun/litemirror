@@ -11,6 +11,7 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="FgAirplayChannel.cpp" />
+    <ClCompile Include="MfH264Decoder.cpp" />
     <ClCompile Include="src\Airplay2Export.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ClInclude Include="CAutoLock.h" />
     <ClInclude Include="FgAirplayChannel.h" />
+    <ClInclude Include="MfH264Decoder.h" />
     <ClInclude Include="FgAirplayServer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\Airplay2Def.h">

@@ -1,18 +1,6 @@
 #pragma once
-#include <queue>
 #include "Airplay2Head.h"
-
-extern "C"
-{
-#include <libavcodec/avcodec.h>
-	//#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
-#include <libavutil/time.h>
-#include <libavutil/parseutils.h>
-#include <libavutil/opt.h>
-//#include <libswresample/swresample.h>
-#include <libswscale/swscale.h>
-}
+#include "MfH264Decoder.h"
 
 // H264 data for decoding
 typedef struct SFgH264Data {
@@ -24,9 +12,8 @@ typedef struct SFgH264Data {
 	unsigned char* data;
 }SFgH264Data;
 
-typedef std::queue<SFgH264Data*> FgH264DataQueue;
 
-
+// One connected device: decodes its mirror stream and reports frames.
 class FgAirplayChannel
 {
 public:
@@ -40,28 +27,15 @@ public:
 	// Live streams (audio, mirror) from this device; FgAirplayServer updates it under its map lock.
 	int						m_nStreams;
 
-	int initFFmpeg(const void* privatedata, int privatedatalen);
-	void unInitFFmpeg();
-	float setScale(float fRatio);
+	// Packets arrive as Annex B: the first one (is_key) carries SPS and PPS,
+	// the rest one frame each. Anything before the first key packet is dropped.
 	int decodeH264Data(SFgH264Data* data, const char* remoteName, const char* remoteDeviceId);
-	int scaleH264Data(SFgVideoFrame* ppFrame);
 
 protected:
 	long m_nRef;
 
-	FgH264DataQueue			m_h264Queue;
 	IAirServerCallback*		m_pCallback;
-
-	AVCodec*				m_pCodec;
-	AVCodecContext*			m_pCodecCtx;
-	SwsContext*				m_pSwsCtx;
-	bool					m_bCodecOpened;
-
-	void*					m_mutexAudio;
+	MfH264Decoder			m_decoder;
+	bool					m_bDecoderOpen;
 	void*					m_mutexVideo;
-
-	SFgVideoFrame			m_sVideoFrameOri;
-	SFgVideoFrame			m_sVideoFrameScale;
-	float					m_fScaleRatio;
 };
-

@@ -101,16 +101,6 @@ void CSDLPlayer::loopEvents()
 					SDL_WM_SetCaption("AirPlay Demo - Started [s - start server, q - stop server]", NULL);
 					break;
 				}
-				case SDLK_EQUALS: {
-					m_fRatio *= 2;
-					m_fRatio = m_server.setVideoScale(m_fRatio);
-					break;
-				}
-				case SDLK_MINUS: {
-					m_fRatio /= 2;
-					m_fRatio = m_server.setVideoScale(m_fRatio);
-					break;
-				}
 			}
 				break;
 		}

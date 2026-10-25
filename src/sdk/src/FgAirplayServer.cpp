@@ -16,7 +16,6 @@ FgAirplayServer::FgAirplayServer()
 	, m_pDnsSd(NULL)
 	, m_pAirplay(NULL)
 	, m_pRaop(NULL)
-	, m_fScaleRatio(1.0f)
 {
 	memset(&m_stAirplayCB, 0, sizeof(airplay_callbacks_t));
 	memset(&m_stRaopCB, 0, sizeof(raop_callbacks_t));
@@ -134,19 +133,6 @@ void FgAirplayServer::stop()
 
 	clearChannels();
 	m_pCallback = NULL;
-}
-
-float FgAirplayServer::setScale(float fRatio)
-{
-	m_fScaleRatio = min(10, max(0.1, fRatio));
-
-	CAutoLock oLock(m_mutexMap, "setScale");
-	FgAirplayChannelMap::iterator it;
-	for (it = m_mapChannel.begin(); it != m_mapChannel.end(); ++it)
-	{
-		it->second->setScale(m_fScaleRatio);
-	}
-	return m_fScaleRatio;
 }
 
 void FgAirplayServer::clearChannels()

@@ -33,10 +33,10 @@ public:
 		f.is_key = d->isKey;
 		f.width = d->width;
 		f.height = d->height;
-		f.plane[0] = d->data;
+		f.plane[0] = d->data;                   // NV12: Y, then UV at dataLen[0]
 		f.plane[1] = d->data + d->dataLen[0];
-		f.plane[2] = f.plane[1] + d->dataLen[1];
-		memcpy(f.pitch, d->pitch, sizeof(f.pitch));
+		f.pitch[0] = d->pitch[0];
+		f.pitch[1] = d->pitch[1];
 		m_cb.on_video(m_cb.user, id, &f);
 	}
 	void audioSetVolume(float volume, const char*, const char* id) {

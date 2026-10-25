@@ -22,7 +22,6 @@ public:
 		unsigned int raopPort, unsigned int airplayPort,
 		IAirServerCallback* callback);
 	void stop();
-	float setScale(float fRatio);
 
 protected:
 	void clearChannels();
@@ -54,7 +53,6 @@ protected:
 
 	void*					m_mutexMap;
 
-	float					m_fScaleRatio;
 	FgAirplayChannelMap		m_mapChannel;
 };
 

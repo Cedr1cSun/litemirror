@@ -46,13 +46,14 @@ typedef struct lm_config {
 	uint16_t    airplay_port;
 } lm_config;
 
-/* YUV420P. Planes are valid only until the callback returns. */
+/* NV12: plane[0] is Y, plane[1] is interleaved UV at half height. The
+ * planes are valid only until the callback returns. */
 typedef struct lm_video_frame {
 	uint64_t       pts;
 	int            is_key;
 	uint32_t       width, height;
-	const uint8_t* plane[3];
-	uint32_t       pitch[3];
+	const uint8_t* plane[2];
+	uint32_t       pitch[2];
 } lm_video_frame;
 
 /* Interleaved PCM, signed 16-bit. Valid only until the callback returns. */
