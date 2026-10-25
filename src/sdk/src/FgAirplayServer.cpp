@@ -140,6 +140,7 @@ float FgAirplayServer::setScale(float fRatio)
 {
 	m_fScaleRatio = min(10, max(0.1, fRatio));
 
+	CAutoLock oLock(m_mutexMap, "setScale");
 	FgAirplayChannelMap::iterator it;
 	for (it = m_mapChannel.begin(); it != m_mapChannel.end(); ++it)
 	{
