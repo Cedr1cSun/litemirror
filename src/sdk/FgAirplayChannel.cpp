@@ -7,6 +7,8 @@ FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* s
 , m_cb(callbacks)
 , m_sink(sink)
 , m_bDecoderOpen(false)
+, m_reportedW(0)
+, m_reportedH(0)
 {
 	m_mutexVideo = CreateMutex(NULL, FALSE, NULL);
 }
@@ -56,6 +58,11 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 	}
 	while (m_decoder.receive()) {
 		const MfH264Decoder::Frame& f = m_decoder.frame();
+		if ((f.width != m_reportedW || f.height != m_reportedH) && m_cb->on_video_size) {
+			m_reportedW = f.width;
+			m_reportedH = f.height;
+			m_cb->on_video_size(m_cb->user, remoteDeviceId, f.width, f.height);
+		}
 		if (m_sink) {
 			// shortcut: nothing is drawn if the MFT declined the sink's device
 			// and decoded in software; add an NV12 upload path if that shows up

@@ -83,6 +83,8 @@ typedef struct lm_callbacks {
 	void (*on_cover_art)   (void* user, const char* device_id, const void* image, size_t size);
 	void (*on_play_url)    (void* user, const char* url, float volume, double start_pos);
 	void (*on_log)         (void* user, lm_log_level level, const char* msg);
+	/* the picture size changed (first frame, phone rotated); also with a window set */
+	void (*on_video_size)  (void* user, const char* device_id, uint32_t width, uint32_t height);
 } lm_callbacks;
 
 LM_API lm_error    lm_server_create (const lm_callbacks* cb, lm_server** out);

@@ -41,5 +41,6 @@ protected:
 	LmVideoSink*			m_sink;
 	MfH264Decoder			m_decoder;
 	bool					m_bDecoderOpen;
+	uint32_t				m_reportedW, m_reportedH;   // last size given to on_video_size
 	void*					m_mutexVideo;
 };

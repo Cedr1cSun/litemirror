@@ -49,7 +49,9 @@ static int nal_type(const std::vector<uint8_t>& n) { return n[n[2] == 1 ? 3 : 4]
 
 struct Recording {
 	int frames = 0;
+	int sizes = 0;   // on_video_size calls
 	unsigned width = 0, height = 0;
+	unsigned sizeWidth = 0, sizeHeight = 0;
 	uint8_t y00 = 0, y160_120 = 0, u160_120 = 0, v160_120 = 0;
 
 	static void onVideo(void* user, const char*, const lm_video_frame* f) {
@@ -65,11 +67,18 @@ struct Recording {
 			self->v160_120 = uv[60 * f->pitch[1] + 161];
 		}
 	}
+	static void onVideoSize(void* user, const char*, uint32_t w, uint32_t h) {
+		Recording* self = (Recording*)user;
+		self->sizes++;
+		self->sizeWidth = w;
+		self->sizeHeight = h;
+	}
 	lm_callbacks callbacks() {
 		lm_callbacks cb;
 		memset(&cb, 0, sizeof(cb));
 		cb.user = this;
 		cb.on_video = onVideo;
+		cb.on_video_size = onVideoSize;
 		return cb;
 	}
 };
@@ -130,6 +139,9 @@ TEST_CASE("channel decodes mirror packets and reports NV12 frames")
 	CHECK(cb.frames == 10);
 	CHECK(cb.width == 320);
 	CHECK(cb.height == 240);
+	CHECK(cb.sizes == 1);   // once, not per frame
+	CHECK(cb.sizeWidth == 320);
+	CHECK(cb.sizeHeight == 240);
 	CHECK(cb.y00 == 16);
 	CHECK(cb.y160_120 == 210);
 	CHECK(cb.u160_120 == 16);
@@ -179,6 +191,9 @@ TEST_CASE("channel with a window sink presents frames instead of calling on_vide
 	sink.swapChain()->GetLastPresentCount(&after);
 	CHECK(after - before == 10);
 	CHECK(cb.frames == 0);
+	CHECK(cb.sizes == 1);   // the shell still learns the picture size to shape its window
+	CHECK(cb.sizeWidth == 320);
+	CHECK(cb.sizeHeight == 240);
 	sink.close();
 	DestroyWindow(hwnd);
 }
