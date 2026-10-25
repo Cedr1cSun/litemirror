@@ -18,6 +18,7 @@
 #pragma comment(lib, "mfuuid.lib")
 #pragma comment(lib, "wmcodecdspuuid.lib")   // CLSID_CMSH264DecoderMFT
 #pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "oleaut32.lib")   // VariantInit
 #pragma comment(lib, "d3d11.lib")
 
 template <class T> static void release(T*& p) { if (p) { p->Release(); p = NULL; } }
