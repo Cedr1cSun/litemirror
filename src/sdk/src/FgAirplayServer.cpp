@@ -250,18 +250,16 @@ void FgAirplayServer::audio_process(void* cls, pcm_data_struct* data, const char
 
 	if (pServer->m_pCallback != NULL)
 	{
-		SFgAudioFrame* frame = new SFgAudioFrame();
-		frame->bitsPerSample = data->bits_per_sample;
-		frame->channels = data->channels;
-		frame->pts = data->pts;
-		frame->sampleRate = data->sample_rate;
-		frame->dataLen = data->data_len;
-		frame->data = new uint8_t[frame->dataLen];
-		memcpy(frame->data, data->data, frame->dataLen);
+		// The core's buffer stays valid for the whole callback; no copy needed.
+		SFgAudioFrame frame;
+		frame.bitsPerSample = data->bits_per_sample;
+		frame.channels = data->channels;
+		frame.pts = data->pts;
+		frame.sampleRate = data->sample_rate;
+		frame.dataLen = data->data_len;
+		frame.data = (unsigned char*)data->data;   // 16-bit PCM, dataLen is in bytes
 
-		pServer->m_pCallback->outputAudio(frame, remoteName, remoteDeviceId);
-		delete[] frame->data;
-		delete frame;
+		pServer->m_pCallback->outputAudio(&frame, remoteName, remoteDeviceId);
 	}
 }
 
