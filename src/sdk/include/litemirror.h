@@ -28,8 +28,8 @@ typedef enum lm_error {
 	LM_E_NO_MEMORY,
 	LM_E_RAOP_PORT,          /* RTSP port bind failed */
 	LM_E_AIRPLAY_PORT,       /* HTTP port bind failed */
-	LM_E_BONJOUR_MISSING,    /* dnssd.dll not found or wrong version */
-	LM_E_BONJOUR_REGISTER,   /* service registration refused */
+	LM_E_MDNS_UNAVAILABLE,   /* dnsapi.dll lacks DnsServiceRegister (Windows 10 before 1809) */
+	LM_E_MDNS_REGISTER,      /* Windows refused or timed out registering the service */
 	LM_E_INTERNAL
 } lm_error;
 

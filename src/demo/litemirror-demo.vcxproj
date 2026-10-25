@@ -118,9 +118,6 @@ xcopy /y "$(SolutionDir)third_party\prebuilt\ffmpeg\lib\$(PlatformTarget)\*.dll"
     <ProjectReference Include="..\sdk\litemirror.vcxproj">
       <Project>{5787e6b6-1c4e-5c36-aeb9-6d9d53e54633}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\dnssd\dnssd.vcxproj">
-      <Project>{b5aacf0f-2de2-52df-8a05-2d24120354a9}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

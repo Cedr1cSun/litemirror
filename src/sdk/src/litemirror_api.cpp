@@ -117,8 +117,8 @@ const char* lm_error_string(lm_error e)
 	case LM_E_NO_MEMORY:        return "out of memory";
 	case LM_E_RAOP_PORT:        return "RTSP port already in use";
 	case LM_E_AIRPLAY_PORT:     return "AirPlay HTTP port already in use";
-	case LM_E_BONJOUR_MISSING:  return "Bonjour (dnssd.dll) not installed";
-	case LM_E_BONJOUR_REGISTER: return "Bonjour refused the service registration";
+	case LM_E_MDNS_UNAVAILABLE: return "mDNS registration needs Windows 10 1809 or later";
+	case LM_E_MDNS_REGISTER:    return "Windows refused the mDNS service registration";
 	case LM_E_INTERNAL:         return "internal error";
 	}
 	return "unknown error";

@@ -9,8 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "litemirror", "src\sdk\litem
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "litemirror-demo", "src\demo\litemirror-demo.vcxproj", "{47EEB03C-B47C-5BAB-A4E1-A4EF66762EA6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dnssd", "src\dnssd\dnssd.vcxproj", "{B5AACF0F-2DE2-52DF-8A05-2D24120354A9}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "litemirror-testhost", "src\testhost\litemirror-testhost.vcxproj", "{161C5775-963F-5AED-AC1D-FC76F5DBBF6A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "litemirror-tests", "tests\unit\litemirror-tests.vcxproj", "{0C31F9B2-FCE9-5CE3-AE8E-1F799F3920B1}"
@@ -33,10 +31,6 @@ Global
 		{47EEB03C-B47C-5BAB-A4E1-A4EF66762EA6}.Debug|x64.Build.0 = Debug|x64
 		{47EEB03C-B47C-5BAB-A4E1-A4EF66762EA6}.Release|x64.ActiveCfg = Release|x64
 		{47EEB03C-B47C-5BAB-A4E1-A4EF66762EA6}.Release|x64.Build.0 = Release|x64
-		{B5AACF0F-2DE2-52DF-8A05-2D24120354A9}.Debug|x64.ActiveCfg = Debug|x64
-		{B5AACF0F-2DE2-52DF-8A05-2D24120354A9}.Debug|x64.Build.0 = Debug|x64
-		{B5AACF0F-2DE2-52DF-8A05-2D24120354A9}.Release|x64.ActiveCfg = Release|x64
-		{B5AACF0F-2DE2-52DF-8A05-2D24120354A9}.Release|x64.Build.0 = Release|x64
 		{161C5775-963F-5AED-AC1D-FC76F5DBBF6A}.Debug|x64.ActiveCfg = Debug|x64
 		{161C5775-963F-5AED-AC1D-FC76F5DBBF6A}.Debug|x64.Build.0 = Debug|x64
 		{161C5775-963F-5AED-AC1D-FC76F5DBBF6A}.Release|x64.ActiveCfg = Release|x64

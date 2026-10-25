@@ -2,6 +2,7 @@
 # Copyright (C) 2026 LiteMirror contributors
 import contextlib
 import socket
+import subprocess
 import threading
 import time
 import unittest
@@ -81,6 +82,14 @@ class Lifecycle(unittest.TestCase):
             self.assertEqual(self.host.stop(), 'OK')
             self.assertTrue(browser.wait_gone('_raop._tcp.local.'), 'raop still advertised after stop')
             self.assertTrue(browser.wait_gone('_airplay._tcp.local.'), 'airplay still advertised after stop')
+
+    def test_runs_without_bonjour(self):
+        """Most users have no Bonjour; the server must never load Apple's dnssd.dll."""
+        self.assertEqual(self.host.start(), 'OK')
+        modules = subprocess.run(['tasklist', '/M', 'dnssd.dll', '/FI', f'PID eq {self.host.proc.pid}'],
+                                 capture_output=True, text=True, errors='ignore').stdout
+        self.assertNotIn('dnssd.dll', modules.lower(), 'testhost loaded Bonjour')
+        self.assertEqual(self.host.stop(), 'OK')
 
     def test_mdns_registers_again_after_restart(self):
         name = 'LiteMirrorAgain'
