@@ -124,9 +124,6 @@ raop_handler_pairverify(raop_conn_t *conn,
                         http_request_t *request, http_response_t *response,
                         char **response_data, int *response_datalen)
 {
-    if (pairing_session_check_handshake_status(conn->pairing)) {
-        return;
-    }
 	unsigned char public_key[32];
 	unsigned char signature[64];
 	const unsigned char *data;
@@ -139,6 +136,11 @@ raop_handler_pairverify(raop_conn_t *conn,
 	}
 	switch (data[0]) {
 	case 1:
+		/* Step 1 needs pair-setup first; step 2 is checked by pairing_session_finish */
+		if (pairing_session_check_handshake_status(conn->pairing)) {
+			logger_log(conn->raop->logger, LOGGER_ERR, "pair-verify before pair-setup");
+			return;
+		}
 		if (datalen != 4 + 32 + 32) {
 			logger_log(conn->raop->logger, LOGGER_ERR, "Invalid pair-verify data");
 			return;
