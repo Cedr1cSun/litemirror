@@ -45,32 +45,31 @@ static std::vector<std::vector<uint8_t>> nal_units(const std::vector<uint8_t>& s
 
 static int nal_type(const std::vector<uint8_t>& n) { return n[n[2] == 1 ? 3 : 4] & 0x1f; }
 
-struct RecordingCallback : public IAirServerCallback {
+struct Recording {
 	int frames = 0;
 	unsigned width = 0, height = 0;
 	uint8_t y00 = 0, y160_120 = 0, u160_120 = 0, v160_120 = 0;
 
-	void connected(const char*, const char*) {}
-	void disconnected(const char*, const char*) {}
-	void outputAudio(SFgAudioFrame*, const char*, const char*) {}
-	void outputVideo(SFgVideoFrame* f, const char*, const char*) {
-		if (frames++ == 0) {
-			width = f->width;
-			height = f->height;
-			const uint8_t* y = f->data;
-			const uint8_t* uv = f->data + f->dataLen[0];
-			y00 = y[0];
-			y160_120 = y[120 * f->pitch[0] + 160];
-			u160_120 = uv[60 * f->pitch[1] + 160];
-			v160_120 = uv[60 * f->pitch[1] + 161];
+	static void onVideo(void* user, const char*, const lm_video_frame* f) {
+		Recording* self = (Recording*)user;
+		if (self->frames++ == 0) {
+			self->width = f->width;
+			self->height = f->height;
+			const uint8_t* y = f->plane[0];
+			const uint8_t* uv = f->plane[1];
+			self->y00 = y[0];
+			self->y160_120 = y[120 * f->pitch[0] + 160];
+			self->u160_120 = uv[60 * f->pitch[1] + 160];
+			self->v160_120 = uv[60 * f->pitch[1] + 161];
 		}
 	}
-	void audioSetVolume(float, const char*, const char*) {}
-	void audioSetMetadata(const void*, int, const char*, const char*) {}
-	void audioSetCoverArt(const void*, int, const char*, const char*) {}
-	void videoPlay(char*, double, double) {}
-	void videoGetPlayInfo(double* d, double* p, double* r) { *d = *p = *r = 0; }
-	void log(int, const char*) {}
+	lm_callbacks callbacks() {
+		lm_callbacks cb;
+		memset(&cb, 0, sizeof(cb));
+		cb.user = this;
+		cb.on_video = onVideo;
+		return cb;
+	}
 };
 
 static SFgH264Data packet(std::vector<uint8_t>& bytes, int is_key, int pts)
@@ -89,8 +88,9 @@ TEST_CASE("channel decodes mirror packets and reports NV12 frames")
 	std::vector<std::vector<uint8_t>> nals = nal_units(read_clip());
 	REQUIRE(nals.size() > 10);
 
-	RecordingCallback cb;
-	FgAirplayChannel* channel = new FgAirplayChannel(&cb);
+	Recording cb;
+	lm_callbacks callbacks = cb.callbacks();
+	FgAirplayChannel* channel = new FgAirplayChannel(&callbacks);
 
 	// The mirror stream sends SPS+PPS as one key packet, then one packet per
 	// frame (SEI and slice together). Frames before the first key packet

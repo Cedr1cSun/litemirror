@@ -41,8 +41,10 @@ typedef enum lm_log_level {  /* syslog values, same as the core */
 	LM_LOG_DEBUG   = 7
 } lm_log_level;
 
+#define LM_NAME_MAX 128      /* receiver name buffer size, including the NUL */
+
 typedef struct lm_config {
-	const char* name;        /* receiver name shown on the iPhone, UTF-8, under 128 bytes */
+	const char* name;        /* receiver name shown on the iPhone, UTF-8, under LM_NAME_MAX bytes */
 	uint16_t    raop_port;   /* 0 = let the OS pick */
 	uint16_t    airplay_port;
 } lm_config;

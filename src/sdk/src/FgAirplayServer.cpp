@@ -1,22 +1,21 @@
 #include "pch.h"
 #include "FgAirplayServer.h"
-#include "Airplay2Head.h"
 #include <thread>
 #include "CAutoLock.h"
 
 #ifdef WIN32
-#include   "iphlpapi.h"  
-#pragma   comment(lib,   "iphlpapi.lib   ")  
+#include   "iphlpapi.h"
+#pragma   comment(lib,   "iphlpapi.lib   ")
 #endif
 
 BOOL GetMacAddress(char strMac[6]);
 
 FgAirplayServer::FgAirplayServer()
-	: m_pCallback(NULL)
-	, m_pDnsSd(NULL)
+	: m_pDnsSd(NULL)
 	, m_pAirplay(NULL)
 	, m_pRaop(NULL)
 {
+	memset(&m_cb, 0, sizeof(m_cb));
 	memset(&m_stAirplayCB, 0, sizeof(airplay_callbacks_t));
 	memset(&m_stRaopCB, 0, sizeof(raop_callbacks_t));
 	m_stAirplayCB.cls = this;
@@ -39,18 +38,15 @@ FgAirplayServer::FgAirplayServer()
 
 FgAirplayServer::~FgAirplayServer()
 {
-	m_pCallback = NULL;
-
 	clearChannels();
 
 	CloseHandle(m_mutexMap);
 }
 
-lm_error FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
-	unsigned int raopPort, unsigned int airplayPort,
-	IAirServerCallback* callback)
+lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
+                                const lm_callbacks* callbacks)
 {
-	m_pCallback = callback;
+	m_cb = *callbacks;
 
 	unsigned short raop_port = raopPort;
 	unsigned short airplay_port = airplayPort;
@@ -132,7 +128,7 @@ void FgAirplayServer::stop()
 	}
 
 	clearChannels();
-	m_pCallback = NULL;
+	memset(&m_cb, 0, sizeof(m_cb));
 }
 
 void FgAirplayServer::clearChannels()
@@ -165,14 +161,14 @@ void FgAirplayServer::connected(void* cls, const char* remoteName, const char* r
 	bool bFirstStream = (pChannel == NULL);
 	if (bFirstStream)
 	{
-		pChannel = new FgAirplayChannel(pServer->m_pCallback);
+		pChannel = new FgAirplayChannel(&pServer->m_cb);
 		pServer->m_mapChannel[remoteDeviceId] = pChannel;
 	}
 	pChannel->m_nStreams++;
 
-	if (bFirstStream && pServer->m_pCallback != NULL)
+	if (bFirstStream && pServer->m_cb.on_connected)
 	{
-		pServer->m_pCallback->connected(remoteName, remoteDeviceId);
+		pServer->m_cb.on_connected(pServer->m_cb.user, remoteDeviceId, remoteName);
 	}
 }
 
@@ -194,73 +190,63 @@ void FgAirplayServer::disconnected(void* cls, const char* remoteName, const char
 		pServer->m_mapChannel.erase(it);
 	}
 
-	if (pServer->m_pCallback != NULL)
+	if (pServer->m_cb.on_disconnected)
 	{
-		pServer->m_pCallback->disconnected(remoteName, remoteDeviceId);
+		pServer->m_cb.on_disconnected(pServer->m_cb.user, remoteDeviceId, remoteName);
 	}
 }
 
 void FgAirplayServer::audio_set_volume(void* cls, void* session, float volume, const char* remoteName, const char* remoteDeviceId)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (pServer && pServer->m_pCallback)
+	if (pServer && pServer->m_cb.on_volume)
 	{
-		pServer->m_pCallback->audioSetVolume(volume, remoteName, remoteDeviceId);
+		pServer->m_cb.on_volume(pServer->m_cb.user, remoteDeviceId, volume);
 	}
 }
 
 void FgAirplayServer::audio_set_metadata(void* cls, void* session, const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (pServer && pServer->m_pCallback)
+	if (pServer && pServer->m_cb.on_metadata)
 	{
-		pServer->m_pCallback->audioSetMetadata(buffer, buflen, remoteName, remoteDeviceId);
+		pServer->m_cb.on_metadata(pServer->m_cb.user, remoteDeviceId, buffer, (size_t)buflen);
 	}
 }
 
 void FgAirplayServer::audio_set_coverart(void* cls, void* session, const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (pServer && pServer->m_pCallback)
+	if (pServer && pServer->m_cb.on_cover_art)
 	{
-		pServer->m_pCallback->audioSetCoverArt(buffer, buflen, remoteName, remoteDeviceId);
+		pServer->m_cb.on_cover_art(pServer->m_cb.user, remoteDeviceId, buffer, (size_t)buflen);
 	}
 }
 
 void FgAirplayServer::audio_process(void* cls, pcm_data_struct* data, const char* remoteName, const char* remoteDeviceId)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (!pServer)
+	if (!pServer || !pServer->m_cb.on_audio)
 	{
 		return;
 	}
-
-	if (pServer->m_pCallback != NULL)
-	{
-		// The core's buffer stays valid for the whole callback; no copy needed.
-		SFgAudioFrame frame;
-		frame.bitsPerSample = data->bits_per_sample;
-		frame.channels = data->channels;
-		frame.pts = data->pts;
-		frame.sampleRate = data->sample_rate;
-		frame.dataLen = data->data_len;
-		frame.data = (unsigned char*)data->data;   // 16-bit PCM, dataLen is in bytes
-
-		pServer->m_pCallback->outputAudio(&frame, remoteName, remoteDeviceId);
-	}
+	// The core's buffer stays valid for the whole callback; no copy needed.
+	lm_audio_frame frame;
+	frame.pts = data->pts;
+	frame.sample_rate = data->sample_rate;
+	frame.channels = data->channels;
+	frame.bits_per_sample = data->bits_per_sample;
+	frame.data = (const uint8_t*)data->data;   // 16-bit PCM, size in bytes
+	frame.size = data->data_len;
+	pServer->m_cb.on_audio(pServer->m_cb.user, remoteDeviceId, &frame);
 }
 
 void FgAirplayServer::audio_flush(void* cls, void* session, const char* remoteName, const char* remoteDeviceId)
 {
 }
 
-void FgAirplayServer::audio_destroy(void* cls, void* session, const char* remoteName, const char* remoteDeviceId)
-{
-}
-
 void FgAirplayServer::video_process(void* cls, h264_decode_struct* h264data, const char* remoteName, const char* remoteDeviceId)
 {
-
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
 	if (!pServer)
 	{
@@ -271,22 +257,12 @@ void FgAirplayServer::video_process(void* cls, h264_decode_struct* h264data, con
 		return;
 	}
 
-	SFgH264Data* pData = new SFgH264Data();
-	memset(pData, 0, sizeof(SFgH264Data));
-
-	if (h264data->frame_type == 0)
-	{
-		pData->size = h264data->data_len;
-		pData->data = new uint8_t[pData->size];
-		pData->is_key = 1;
-		memcpy(pData->data, h264data->data, h264data->data_len);
-	}
-	else if (h264data->frame_type == 1)
-	{
-		pData->size = h264data->data_len;
-		pData->data = new uint8_t[pData->size];
-		memcpy(pData->data, h264data->data, h264data->data_len);
-	}
+	SFgH264Data packet;
+	memset(&packet, 0, sizeof(packet));
+	packet.size = h264data->data_len;
+	packet.data = h264data->data;
+	packet.is_key = h264data->frame_type == 0;   // frame_type 0: SPS/PPS, 1: a frame
+	packet.pts = h264data->pts;
 
 	FgAirplayChannel* pChannel = NULL;
 	{
@@ -298,49 +274,31 @@ void FgAirplayServer::video_process(void* cls, h264_decode_struct* h264data, con
 	}
 	if (pChannel)
 	{
-		pChannel->decodeH264Data(pData, remoteName, remoteDeviceId);
+		pChannel->decodeH264Data(&packet, remoteName, remoteDeviceId);
 		pChannel->release();
 	}
-	delete[] pData->data;
-	delete pData;
 }
 
 void FgAirplayServer::ap_video_play(void* cls, char* url, double volume, double start_pos)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (!pServer)
+	if (pServer && pServer->m_cb.on_play_url)
 	{
-		return;
-	}
-	if (pServer->m_pCallback)
-	{
-		pServer->m_pCallback->videoPlay(url, volume, start_pos);
+		pServer->m_cb.on_play_url(pServer->m_cb.user, url, (float)volume, start_pos);
 	}
 }
 
 void FgAirplayServer::ap_video_get_play_info(void* cls, double* duration, double* position, double* rate)
 {
-	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (!pServer)
-	{
-		return;
-	}
-	if (pServer->m_pCallback)
-	{
-		pServer->m_pCallback->videoGetPlayInfo(duration, position, rate);
-	}
+	*duration = *position = *rate = 0;   // URL playback is up to the shell; nothing to report
 }
 
 void FgAirplayServer::log_callback(void* cls, int level, const char* msg)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (!pServer) 
+	if (pServer && pServer->m_cb.on_log)
 	{
-		return;
-	}
-	if (pServer->m_pCallback)
-	{
-		pServer->m_pCallback->log(level, msg);
+		pServer->m_cb.on_log(pServer->m_cb.user, (lm_log_level)level, msg);
 	}
 }
 

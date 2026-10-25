@@ -1,10 +1,10 @@
 #include "FgAirplayChannel.h"
 #include "CAutoLock.h"
 
-FgAirplayChannel::FgAirplayChannel(IAirServerCallback* pCallback)
+FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks)
 : m_nRef(1)
 , m_nStreams(0)
-, m_pCallback(pCallback)
+, m_cb(callbacks)
 , m_bDecoderOpen(false)
 {
 	m_mutexVideo = CreateMutex(NULL, FALSE, NULL);
@@ -12,7 +12,6 @@ FgAirplayChannel::FgAirplayChannel(IAirServerCallback* pCallback)
 
 FgAirplayChannel::~FgAirplayChannel()
 {
-	m_pCallback = NULL;
 	{
 		CAutoLock oLock(m_mutexVideo, "~FgAirplayChannel");
 		m_decoder.close();
@@ -56,24 +55,20 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 	}
 	while (m_decoder.receive()) {
 		const MfH264Decoder::Frame& f = m_decoder.frame();
-		if (m_pCallback == NULL) {
+		if (m_cb->on_video == NULL) {
 			continue;
 		}
-		// NV12 straight from the decoder: Y plane, then interleaved UV.
-		// dataLen[0] is the byte offset of the UV plane, not width*height.
-		SFgVideoFrame frame;
-		memset(&frame, 0, sizeof(frame));
+		// NV12 straight from the decoder's buffer, no copy
+		lm_video_frame frame;
 		frame.pts = f.pts;
-		frame.isKey = f.key;
+		frame.is_key = f.key;
 		frame.width = f.width;
 		frame.height = f.height;
-		frame.data = (unsigned char*)f.plane[0];
+		frame.plane[0] = f.plane[0];
+		frame.plane[1] = f.plane[1];
 		frame.pitch[0] = f.pitch[0];
 		frame.pitch[1] = f.pitch[1];
-		frame.dataLen[0] = (unsigned int)(f.plane[1] - f.plane[0]);
-		frame.dataLen[1] = f.pitch[1] * ((f.height + 1) / 2);
-		frame.dataTotalLen = frame.dataLen[0] + frame.dataLen[1];
-		m_pCallback->outputVideo(&frame, remoteName, remoteDeviceId);
+		m_cb->on_video(m_cb->user, remoteDeviceId, &frame);
 	}
 	return 0;
 }

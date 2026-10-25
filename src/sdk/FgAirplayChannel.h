@@ -1,10 +1,10 @@
 #pragma once
-#include "Airplay2Head.h"
+#include "litemirror.h"
 #include "MfH264Decoder.h"
 
 // H264 data for decoding
 typedef struct SFgH264Data {
-	int pts;
+	uint64_t pts;
 	int size;
 	int is_key;
 	int width;
@@ -17,7 +17,8 @@ typedef struct SFgH264Data {
 class FgAirplayChannel
 {
 public:
-	FgAirplayChannel(IAirServerCallback* pCallback);
+	// callbacks must outlive the channel; FgAirplayServer owns both
+	explicit FgAirplayChannel(const lm_callbacks* callbacks);
 	~FgAirplayChannel();
 
 public:
@@ -34,7 +35,7 @@ public:
 protected:
 	long m_nRef;
 
-	IAirServerCallback*		m_pCallback;
+	const lm_callbacks*		m_cb;
 	MfH264Decoder			m_decoder;
 	bool					m_bDecoderOpen;
 	void*					m_mutexVideo;
