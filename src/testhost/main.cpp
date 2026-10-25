@@ -12,7 +12,9 @@
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
 // EVENT video <w>x<h>, EVENT audio <bytes>, EVENT play <url>, LOG <level> <msg>
 
+#include <crtdbg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "litemirror.h"
 
@@ -47,6 +49,12 @@ static void on_log(void*, lm_log_level level, const char* msg)
 int main()
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
+	// Headless: a failed assert or abort() must print and exit, not pop a dialog
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 
 	lm_callbacks cb;
 	memset(&cb, 0, sizeof(cb));
