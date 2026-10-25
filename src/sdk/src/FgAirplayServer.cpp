@@ -110,7 +110,7 @@ int FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
 		stop();
 	}
 
-	return 0;
+	return ret;
 }
 
 void FgAirplayServer::stop()
