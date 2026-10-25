@@ -19,6 +19,7 @@
     <!-- same folder as litemirror.dll -->
     <OutputPath>..\..\..\build\bin\$(Configuration)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en;zh-CN</SatelliteResourceLanguages>
   </PropertyGroup>
 

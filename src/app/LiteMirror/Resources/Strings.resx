@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="AppName" xml:space="preserve"><value>LiteMirror</value></data>
+  <data name="Ready" xml:space="preserve"><value>Ready to receive</value></data>
+  <data name="NotRunning" xml:space="preserve"><value>Not running</value></data>
+  <data name="HintBody" xml:space="preserve"><value>On your iPhone or iPad, open Control Centre, tap Screen Mirroring and choose:</value></data>
+
+  <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="ReceiverNameLabel" xml:space="preserve"><value>Receiver name (shown on your iPhone)</value></data>
+  <data name="RunAtStartup" xml:space="preserve"><value>Run when I sign in to Windows</value></data>
+  <data name="AlwaysOnTop" xml:space="preserve"><value>Keep the window on top</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="LanguageAuto" xml:space="preserve"><value>Same as Windows</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+
+  <data name="TrayOpen" xml:space="preserve"><value>Open LiteMirror</value></data>
+  <data name="TraySettings" xml:space="preserve"><value>Settings...</value></data>
+  <data name="TrayQuit" xml:space="preserve"><value>Quit</value></data>
+
+  <data name="ErrNoDecoder" xml:space="preserve"><value>No H.264 video decoder was found.
+
+On Windows N editions, install the Media Feature Pack (Settings &gt; Apps &gt; Optional features), then start LiteMirror again.</value></data>
+  <data name="ErrMdnsUnavailable" xml:space="preserve"><value>LiteMirror needs Windows 10 version 1809 or later.</value></data>
+  <data name="ErrMdnsRegister" xml:space="preserve"><value>Windows could not announce LiteMirror on the network. Check that the computer is on the same Wi-Fi as your phone and that the network is set to Private.</value></data>
+  <data name="ErrPort" xml:space="preserve"><value>Another program is using the network port LiteMirror needs. Close it and start LiteMirror again.</value></data>
+  <data name="ErrNoD3D" xml:space="preserve"><value>Direct3D 11 is not available on this computer, so the picture cannot be shown. Update the graphics driver and try again.</value></data>
+  <data name="ErrOther" xml:space="preserve"><value>LiteMirror could not start: {0}</value></data>
+</root>

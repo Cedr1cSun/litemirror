@@ -17,7 +17,9 @@ namespace LiteMirror
         readonly Native.DeviceCallback onConnected;
         readonly Native.DeviceCallback onDisconnected;
         readonly Native.SizeCallback onVideoSize;
-        Settings settings = Settings.Load();
+        Settings settings;
+        string deviceName;      // connected phone, or null
+        bool running;
         Forms.NotifyIcon tray;
         bool quitting;
         // full screen: the window is sized to the monitor by hand (no WindowState games with the custom chrome)
@@ -25,9 +27,10 @@ namespace LiteMirror
         Rect savedBounds;
         WindowState savedState;
 
-        public MainWindow()
+        public MainWindow(Settings settings)
         {
             InitializeComponent();
+            this.settings = settings;
             onConnected = (user, id, name) => Dispatcher.BeginInvoke(new Action(() => ShowDevice(Native.Utf8(name))));
             onDisconnected = (user, id, name) => Dispatcher.BeginInvoke(new Action(() => ShowDevice(null)));
             onVideoSize = (user, id, w, h) => Dispatcher.BeginInvoke(new Action(() => FitToPicture(w, h)));
@@ -51,31 +54,49 @@ namespace LiteMirror
             if (err == Native.Error.Ok) err = Native.lm_server_set_window(server, Video.Handle);
             if (err == Native.Error.Ok) err = Native.lm_server_set_audio(server, 1);
             if (err == Native.Error.Ok) err = Start();
+            ApplyStrings();
             if (err != Native.Error.Ok)
             {
-                MessageBox.Show(this, Explain(err), "LiteMirror", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, Explain(err), Strings.Get("AppName"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         Native.Error Start()
         {
+            if (settings.Name.Length == 0)
+            {
+                settings.Name = Strings.Get("AppName") + " (" + Environment.MachineName + ")";
+            }
             Native.Error err = Native.Start(server, settings.Name);
-            ReceiverName.Text = settings.Name;
-            HintTitle.Text = err == Native.Error.Ok ? "Ready to receive" : "Not running";
+            running = err == Native.Error.Ok;
             return err;
+        }
+
+        // Every piece of text, so a language change in Settings applies at once
+        void ApplyStrings()
+        {
+            string app = Strings.Get("AppName");
+            Title = TitleBar.Title = deviceName != null ? app + " – " + deviceName : app;
+            HintTitle.Text = Strings.Get(running ? "Ready" : "NotRunning");
+            HintBody.Text = Strings.Get("HintBody");
+            ReceiverName.Text = settings.Name;
+            SettingsButton.ToolTip = Strings.Get("Settings");
+            tray.Text = app;
+            tray.ContextMenuStrip.Items[0].Text = Strings.Get("TrayOpen");
+            tray.ContextMenuStrip.Items[1].Text = Strings.Get("TraySettings");
+            tray.ContextMenuStrip.Items[3].Text = Strings.Get("TrayQuit");
         }
 
         void SetupTray()
         {
             var menu = new Forms.ContextMenuStrip();
-            menu.Items.Add("Open LiteMirror", null, (s, e) => ShowFromTray());
-            menu.Items.Add("Settings...", null, (s, e) => { ShowFromTray(); OpenSettings(s, null); });
+            menu.Items.Add("", null, (s, e) => ShowFromTray());
+            menu.Items.Add("", null, (s, e) => { ShowFromTray(); OpenSettings(s, null); });
             menu.Items.Add(new Forms.ToolStripSeparator());
-            menu.Items.Add("Quit", null, (s, e) => { quitting = true; Close(); });
+            menu.Items.Add("", null, (s, e) => { quitting = true; Close(); });
             tray = new Forms.NotifyIcon
             {
                 Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location),
-                Text = "LiteMirror",
                 ContextMenuStrip = menu,
                 Visible = true
             };
@@ -108,11 +129,11 @@ namespace LiteMirror
 
         void ShowDevice(string name)
         {
+            deviceName = name;
             bool connected = name != null;
             Video.Visibility = connected ? Visibility.Visible : Visibility.Hidden;
             Hint.Visibility = connected ? Visibility.Collapsed : Visibility.Visible;
-            TitleBar.Title = connected ? "LiteMirror – " + name : "LiteMirror";
-            Title = TitleBar.Title;
+            ApplyStrings();
         }
 
         // Resize the window so the video area has the picture's aspect ratio: the
@@ -183,16 +204,20 @@ namespace LiteMirror
             var dialog = new SettingsWindow(settings) { Owner = this };
             if (dialog.ShowDialog() != true) return;
             bool rename = dialog.Result.Name != settings.Name;
+            bool relanguage = dialog.Result.Language != settings.Language;
             settings = dialog.Result;
             Topmost = settings.AlwaysOnTop;
+            if (relanguage) Strings.Use(settings.Language);
+            Native.Error err = Native.Error.Ok;
             if (rename && server != IntPtr.Zero)
             {
                 Native.lm_server_stop(server);   // the name is announced at start, so start again
-                Native.Error err = Start();
-                if (err != Native.Error.Ok)
-                {
-                    MessageBox.Show(this, Explain(err), "LiteMirror", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                err = Start();
+            }
+            ApplyStrings();
+            if (err != Native.Error.Ok)
+            {
+                MessageBox.Show(this, Explain(err), Strings.Get("AppName"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -200,19 +225,13 @@ namespace LiteMirror
         {
             switch (err)
             {
-                case Native.Error.NoH264Decoder:
-                    return "No H.264 video decoder was found.\n\nOn Windows N editions, install the Media Feature Pack (Settings > Apps > Optional features), then start LiteMirror again.";
-                case Native.Error.MdnsUnavailable:
-                    return "LiteMirror needs Windows 10 version 1809 or later.";
-                case Native.Error.MdnsRegister:
-                    return "Windows could not announce LiteMirror on the network. Check that the computer is connected to the same Wi-Fi as your phone and that the network is set to Private.";
+                case Native.Error.NoH264Decoder:   return Strings.Get("ErrNoDecoder");
+                case Native.Error.MdnsUnavailable: return Strings.Get("ErrMdnsUnavailable");
+                case Native.Error.MdnsRegister:    return Strings.Get("ErrMdnsRegister");
                 case Native.Error.RaopPort:
-                case Native.Error.AirplayPort:
-                    return "Another program is using the network port LiteMirror needs. Close it and start LiteMirror again.";
-                case Native.Error.Internal:
-                    return "Direct3D 11 is not available on this computer, so the picture cannot be shown. Update the graphics driver and try again.";
-                default:
-                    return "LiteMirror could not start: " + Native.Utf8(Native.lm_error_string(err));
+                case Native.Error.AirplayPort:     return Strings.Get("ErrPort");
+                case Native.Error.Internal:        return Strings.Get("ErrNoD3D");
+                default: return string.Format(Strings.Get("ErrOther"), Native.Utf8(Native.lm_error_string(err)));
             }
         }
     }

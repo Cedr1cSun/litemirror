@@ -15,8 +15,9 @@ namespace LiteMirror
         const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
         const string RunValue = "LiteMirror";
 
-        public string Name = "LiteMirror (" + Environment.MachineName + ")";
+        public string Name = "";        // "" until the first run picks a default in the UI language
         public bool AlwaysOnTop;
+        public string Language = "";    // "" = same as Windows, else "en" or "zh-CN"
 
         static string File_ => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LiteMirror", "settings.txt");
 
@@ -30,8 +31,9 @@ namespace LiteMirror
                     int eq = line.IndexOf('=');
                     if (eq <= 0) continue;
                     string key = line.Substring(0, eq), value = line.Substring(eq + 1);
-                    if (key == "Name" && value.Length > 0) s.Name = value;
+                    if (key == "Name") s.Name = value;
                     if (key == "AlwaysOnTop") s.AlwaysOnTop = value == "1";
+                    if (key == "Language") s.Language = value;
                 }
             }
             catch (IOException) { }   // first run
@@ -41,7 +43,12 @@ namespace LiteMirror
         public void Save()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(File_));
-            File.WriteAllLines(File_, new[] { "Name=" + Name, "AlwaysOnTop=" + (AlwaysOnTop ? "1" : "0") }, Encoding.UTF8);
+            File.WriteAllLines(File_, new[] { "Name=" + Name, "AlwaysOnTop=" + (AlwaysOnTop ? "1" : "0"), "Language=" + Language }, Encoding.UTF8);
+        }
+
+        public Settings Copy()
+        {
+            return new Settings { Name = Name, AlwaysOnTop = AlwaysOnTop, Language = Language };
         }
 
         public static bool RunAtStartup
@@ -64,12 +71,26 @@ namespace LiteMirror
 
     public partial class SettingsWindow
     {
+        static readonly string[] Languages = { "", "en", "zh-CN" };
         public readonly Settings Result;
 
         public SettingsWindow(Settings current)
         {
             InitializeComponent();
-            Result = new Settings { Name = current.Name, AlwaysOnTop = current.AlwaysOnTop };
+            Result = current.Copy();
+            Title = TitleBar.Title = Strings.Get("Settings");
+            NameLabel.Text = Strings.Get("ReceiverNameLabel");
+            StartupSwitch.Content = Strings.Get("RunAtStartup");
+            TopmostSwitch.Content = Strings.Get("AlwaysOnTop");
+            LanguageLabel.Text = Strings.Get("Language");
+            CancelButton.Content = Strings.Get("Cancel");
+            SaveButton.Content = Strings.Get("Save");
+            // each language is named in itself, so anyone can find their own
+            LanguageBox.Items.Add(Strings.Get("LanguageAuto"));
+            LanguageBox.Items.Add("English");
+            LanguageBox.Items.Add("简体中文");
+            LanguageBox.SelectedIndex = Math.Max(0, Array.IndexOf(Languages, current.Language));
+
             NameBox.Text = current.Name;
             TopmostSwitch.IsChecked = current.AlwaysOnTop;
             StartupSwitch.IsChecked = Settings.RunAtStartup;
@@ -85,6 +106,7 @@ namespace LiteMirror
             }
             Result.Name = name;
             Result.AlwaysOnTop = TopmostSwitch.IsChecked == true;
+            Result.Language = Languages[Math.Max(0, LanguageBox.SelectedIndex)];
             Result.Save();
             try { Settings.RunAtStartup = StartupSwitch.IsChecked == true; }
             catch (Exception) { }   // a locked-down account: the other settings still apply

@@ -11,9 +11,11 @@ namespace LiteMirror
         {
             base.OnStartup(e);
             Wpf.Ui.Appearance.ApplicationThemeManager.ApplySystemTheme();
+            Settings settings = Settings.Load();
+            Strings.Use(settings.Language);
             // --tray (the Run key uses it): start receiving in the tray without opening the window
             bool toTray = Array.IndexOf(e.Args, "--tray") >= 0;
-            MainWindow = new MainWindow();
+            MainWindow = new MainWindow(settings);
             if (toTray)
             {
                 // a minimised, hidden show still creates the video window the receiver draws into
