@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 LiteMirror contributors
+import contextlib
 import shutil
 import socket
 import subprocess
@@ -7,6 +8,10 @@ import time
 import unittest
 
 from common import TestHost, free_port
+
+# lm_error values from src/sdk/include/litemirror.h
+LM_E_RAOP_PORT = 4
+LM_E_AIRPLAY_PORT = 5
 
 
 class Lifecycle(unittest.TestCase):
@@ -25,17 +30,31 @@ class Lifecycle(unittest.TestCase):
             self.assertLess(time.monotonic() - t, 5.0, f'stop #{i} hung')
 
     def test_start_fails_when_raop_port_is_taken(self):
-        blocker = socket.socket()
-        blocker.bind(('0.0.0.0', 0))
-        blocker.listen(1)
-        taken = blocker.getsockname()[1]
-        try:
-            self.assertEqual(self.host.start(raop_port=taken), 'FAIL')
-        finally:
-            blocker.close()
+        with self._blocked_port() as taken:
+            self.assertEqual(self._start_error(raop_port=taken), LM_E_RAOP_PORT)
         # and recovers once the port is free
         self.assertEqual(self.host.start(raop_port=taken), 'OK')
         self.assertEqual(self.host.stop(), 'OK')
+
+    def test_start_fails_when_airplay_port_is_taken(self):
+        with self._blocked_port() as taken:
+            self.assertEqual(self._start_error(airplay_port=taken), LM_E_AIRPLAY_PORT)
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _blocked_port():
+        blocker = socket.socket()
+        blocker.bind(('0.0.0.0', 0))
+        blocker.listen(1)
+        try:
+            yield blocker.getsockname()[1]
+        finally:
+            blocker.close()
+
+    def _start_error(self, **ports):
+        reply = self.host.start(**ports)
+        self.assertTrue(reply.startswith('FAIL '), reply)
+        return int(reply.split()[1])
 
     def test_rtsp_port_accepts_connections_only_while_running(self):
         self.assertEqual(self.host.start(), 'OK')

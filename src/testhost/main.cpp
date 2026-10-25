@@ -5,69 +5,79 @@
 // server events on stdout, one line each, so scripts can drive the server
 // without a window:
 //
-//   start <name> <raopPort> <airplayPort>   -> OK | FAIL
+//   start <name> <raopPort> <airplayPort>   -> OK | FAIL <code> <message>
 //   stop                                    -> OK
 //   quit
 //
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
 // EVENT video <w>x<h>, EVENT audio <bytes>, EVENT play <url>, LOG <level> <msg>
 
-#include <windows.h>
 #include <stdio.h>
 #include <string.h>
-#include "Airplay2Head.h"
+#include "litemirror.h"
 
-class HostCallback : public IAirServerCallback {
-public:
-	HostCallback() : m_video(0), m_audio(0) {}
+static unsigned g_video, g_audio;
 
-	void connected(const char* remoteName, const char* remoteDeviceId) {
-		printf("EVENT connected %s %s\n", remoteName, remoteDeviceId);
-	}
-	void disconnected(const char* remoteName, const char* remoteDeviceId) {
-		printf("EVENT disconnected %s %s\n", remoteName, remoteDeviceId);
-	}
-	void outputAudio(SFgAudioFrame* data, const char*, const char*) {
-		// shortcut: report every 100th frame, enough to see audio flowing
-		if (m_audio++ % 100 == 0) printf("EVENT audio %u\n", data->dataLen);
-	}
-	void outputVideo(SFgVideoFrame* data, const char*, const char*) {
-		if (m_video++ % 60 == 0) printf("EVENT video %ux%u\n", data->width, data->height);
-	}
-	void videoPlay(char* url, double, double) {
-		printf("EVENT play %s\n", url);
-	}
-	void videoGetPlayInfo(double* duration, double* position, double* rate) {
-		*duration = 0; *position = 0; *rate = 0;
-	}
-	void log(int level, const char* msg) {
-		printf("LOG %d %s\n", level, msg);
-	}
-
-private:
-	unsigned m_video;
-	unsigned m_audio;
-};
+static void on_connected(void*, const char* id, const char* name)
+{
+	printf("EVENT connected %s %s\n", name, id);
+}
+static void on_disconnected(void*, const char* id, const char* name)
+{
+	printf("EVENT disconnected %s %s\n", name, id);
+}
+static void on_audio(void*, const char*, const lm_audio_frame* f)
+{
+	// shortcut: report every 100th frame, enough to see audio flowing
+	if (g_audio++ % 100 == 0) printf("EVENT audio %zu\n", f->size);
+}
+static void on_video(void*, const char*, const lm_video_frame* f)
+{
+	if (g_video++ % 60 == 0) printf("EVENT video %ux%u\n", f->width, f->height);
+}
+static void on_play_url(void*, const char* url, float, double)
+{
+	printf("EVENT play %s\n", url);
+}
+static void on_log(void*, lm_log_level level, const char* msg)
+{
+	printf("LOG %d %s\n", (int)level, msg);
+}
 
 int main()
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
-	HostCallback callback;
-	void* server = NULL;
-	char line[512];
 
+	lm_callbacks cb;
+	memset(&cb, 0, sizeof(cb));
+	cb.on_connected = on_connected;
+	cb.on_disconnected = on_disconnected;
+	cb.on_audio = on_audio;
+	cb.on_video = on_video;
+	cb.on_play_url = on_play_url;
+	cb.on_log = on_log;
+
+	lm_server* server = NULL;
+	lm_error err = lm_server_create(&cb, &server);
+	if (err != LM_OK) {
+		printf("FAIL %d %s\n", (int)err, lm_error_string(err));
+		return 1;
+	}
+
+	char line[512];
 	printf("READY\n");
 	while (fgets(line, sizeof(line), stdin)) {
-		char name[AIRPLAY_NAME_LEN] = {0};
+		char name[128] = {0};
 		unsigned raopPort = 0, airplayPort = 0;
 
 		if (sscanf(line, "start %127s %u %u", name, &raopPort, &airplayPort) == 3) {
-			if (server) fgServerStop(server);
-			server = fgServerStart(name, raopPort, airplayPort, &callback);
-			printf(server ? "OK\n" : "FAIL\n");
+			lm_server_stop(server);
+			lm_config cfg = { name, (uint16_t)raopPort, (uint16_t)airplayPort };
+			err = lm_server_start(server, &cfg);
+			if (err == LM_OK) printf("OK\n");
+			else printf("FAIL %d %s\n", (int)err, lm_error_string(err));
 		} else if (strncmp(line, "stop", 4) == 0) {
-			if (server) fgServerStop(server);
-			server = NULL;
+			lm_server_stop(server);
 			printf("OK\n");
 		} else if (strncmp(line, "quit", 4) == 0) {
 			break;
@@ -75,6 +85,6 @@ int main()
 			printf("ERR unknown command\n");
 		}
 	}
-	if (server) fgServerStop(server);
+	lm_server_destroy(server);
 	return 0;
 }
