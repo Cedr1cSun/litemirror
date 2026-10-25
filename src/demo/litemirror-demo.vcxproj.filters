@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="airplay-dll-demo.cpp" />
+    <ClCompile Include="CAirServer.cpp" />
+    <ClCompile Include="CAirServerCallback.cpp" />
+    <ClCompile Include="CAutoLock.cpp" />
+    <ClCompile Include="CSDLPlayer.cpp" />
+    <ClCompile Include="FgUtf8Utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CAirServer.h" />
+    <ClInclude Include="CAirServerCallback.h" />
+    <ClInclude Include="CAutoLock.h" />
+    <ClInclude Include="CSDLPlayer.h" />
+    <ClInclude Include="FgUtf8Utils.h" />
+  </ItemGroup>
+</Project>
