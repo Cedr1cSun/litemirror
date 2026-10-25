@@ -1,0 +1,9 @@
+build/
+.vs/
+*.user
+*.suo
+
+# local notes, never committed
+CLAUDE.md
+docs/
+NOTICE.md
