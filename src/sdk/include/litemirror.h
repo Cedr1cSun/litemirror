@@ -30,7 +30,8 @@ typedef enum lm_error {
 	LM_E_AIRPLAY_PORT,       /* HTTP port bind failed */
 	LM_E_MDNS_UNAVAILABLE,   /* dnsapi.dll lacks DnsServiceRegister (Windows 10 before 1809) */
 	LM_E_MDNS_REGISTER,      /* Windows refused or timed out registering the service */
-	LM_E_INTERNAL
+	LM_E_INTERNAL,
+	LM_E_NO_H264_DECODER     /* no Media Foundation H.264 decoder: Windows N without the Media Feature Pack */
 } lm_error;
 
 typedef enum lm_log_level {  /* syslog values, same as the core */

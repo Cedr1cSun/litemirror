@@ -67,7 +67,7 @@ TEST_CASE("stop and destroy accept NULL")
 TEST_CASE("every error code has its own message")
 {
 	std::set<std::string> seen;
-	for (int e = LM_OK; e <= LM_E_INTERNAL; e++) {
+	for (int e = LM_OK; e <= LM_E_NO_H264_DECODER; e++) {
 		const char* msg = lm_error_string((lm_error)e);
 		REQUIRE(msg != NULL);
 		CHECK(strlen(msg) > 0);

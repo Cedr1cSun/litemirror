@@ -8,6 +8,7 @@
 #include <string.h>
 #include "litemirror.h"
 #include "FgAirplayServer.h"
+#include "MfH264Decoder.h"
 
 namespace {
 
@@ -82,6 +83,8 @@ lm_error lm_server_start(lm_server* s, const lm_config* cfg)
 	if (!s || !cfg || !cfg->name || !cfg->name[0] || strlen(cfg->name) >= AIRPLAY_NAME_LEN)
 		return LM_E_INVALID_ARG;
 	if (s->impl) return LM_E_RUNNING;
+	// Check up front so the shell can tell the user before the phone connects
+	if (!MfH264Decoder::available()) return LM_E_NO_H264_DECODER;
 
 	FgAirplayServer* impl = new (std::nothrow) FgAirplayServer();
 	if (!impl) return LM_E_NO_MEMORY;
@@ -120,6 +123,7 @@ const char* lm_error_string(lm_error e)
 	case LM_E_MDNS_UNAVAILABLE: return "mDNS registration needs Windows 10 1809 or later";
 	case LM_E_MDNS_REGISTER:    return "Windows refused the mDNS service registration";
 	case LM_E_INTERNAL:         return "internal error";
+	case LM_E_NO_H264_DECODER:  return "No H.264 decoder found. On Windows N editions install the Media Feature Pack.";
 	}
 	return "unknown error";
 }
