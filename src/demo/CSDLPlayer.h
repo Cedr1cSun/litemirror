@@ -1,26 +1,24 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 LiteMirror contributors
 #pragma once
-#include <Windows.h>
-#include "Airplay2Head.h"
+#include <windows.h>
 #include <queue>
+#include <vector>
+#define SDL_MAIN_HANDLED
 #include "SDL.h"
-#include "SDL_thread.h"
-#undef main 
+#include "litemirror.h"
 #include "CAirServer.h"
 
-typedef void sdlAudioCallback(void* userdata, Uint8* stream, int len);
-
 typedef struct SDemoAudioFrame {
-	unsigned long long pts;
 	unsigned int dataTotal;
 	unsigned int dataLeft;
 	unsigned char* data;
 } SDemoAudioFrame;
 
-typedef std::queue<SDemoAudioFrame*> SDemoAudioFrameQueue;
-typedef std::queue<SFgVideoFrame*> SFgVideoFrameQueue;
-
-#define VIDEO_SIZE_CHANGED_CODE 1
-
+// SDL2 window: NV12 frames go to a GPU texture, PCM to the audio device.
+// Callbacks arrive on the receiver's threads; rendering happens on the
+// main thread inside loopEvents(), so frames are copied once and handed
+// over through an SDL event.
 class CSDLPlayer
 {
 public:
@@ -28,34 +26,34 @@ public:
 	~CSDLPlayer();
 
 	bool init();
-	void unInit();
 	void loopEvents();
 
-	void outputVideo(SFgVideoFrame* data);
-	void outputAudio(SFgAudioFrame* data);
+	void outputVideo(const lm_video_frame* frame);
+	void outputAudio(const lm_audio_frame* frame);
 
-	void initVideo(int width, int height);
-	void unInitVideo();
-	void initAudio(SFgAudioFrame* data);
+private:
+	void startServer();
+	void stopServer();
+	void render();
+	void initAudio(const lm_audio_frame* frame);
 	void unInitAudio();
 	static void sdlAudioCallback(void* userdata, Uint8* stream, int len);
 
-	SDL_Surface* m_surface;
-	SDL_Overlay* m_yuv;
-	SDL_Rect m_rect;
+	SDL_Window*		m_window;
+	SDL_Renderer*	m_renderer;
+	SDL_Texture*	m_texture;
+	int				m_texW, m_texH;
 
-	SFgAudioFrame m_sAudioFmt;
-	bool m_bAudioInited;
-	SDemoAudioFrameQueue m_queueAudio;
-	HANDLE m_mutexAudio;
-	HANDLE m_mutexVideo;
+	// latest decoded frame, copied out of the callback
+	HANDLE					m_mutexVideo;
+	std::vector<uint8_t>	m_y, m_uv;
+	int						m_frameW, m_frameH, m_pitchY, m_pitchUV;
+	LONG					m_framePending;
 
-	SDL_Event m_evtVideoSizeChange;
-
-	bool m_bDumpAudio;
-	FILE* m_fileWav;
+	SDL_AudioDeviceID				m_audio;
+	unsigned						m_audioRate, m_audioChannels;
+	HANDLE							m_mutexAudio;
+	std::queue<SDemoAudioFrame*>	m_queueAudio;
 
 	CAirServer m_server;
-	float m_fRatio;
 };
-

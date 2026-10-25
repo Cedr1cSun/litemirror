@@ -61,16 +61,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRTDBG_MAP_ALLOC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\sdk\include;$(SolutionDir)third_party\prebuilt\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\sdk\include;$(SolutionDir)third_party\prebuilt\sdl2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)third_party\prebuilt\sdl\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL.lib;ws2_32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)third_party\prebuilt\sdl2\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;ws2_32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\sdl\lib\$(PlatformTarget)\SDL.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\sdl2\lib\$(PlatformTarget)\SDL2.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -83,34 +83,30 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\sdk\include;$(SolutionDir)third_party\prebuilt\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\sdk\include;$(SolutionDir)third_party\prebuilt\sdl2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)third_party\prebuilt\sdl\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL.lib;ws2_32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)third_party\prebuilt\sdl2\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;ws2_32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\sdl\lib\$(PlatformTarget)\SDL.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\sdl2\lib\$(PlatformTarget)\SDL2.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="airplay-dll-demo.cpp" />
     <ClCompile Include="CAirServer.cpp" />
-    <ClCompile Include="CAirServerCallback.cpp" />
     <ClCompile Include="CAutoLock.cpp" />
     <ClCompile Include="CSDLPlayer.cpp" />
-    <ClCompile Include="FgUtf8Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CAirServer.h" />
-    <ClInclude Include="CAirServerCallback.h" />
     <ClInclude Include="CAutoLock.h" />
     <ClInclude Include="CSDLPlayer.h" />
-    <ClInclude Include="FgUtf8Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\sdk\litemirror.vcxproj">

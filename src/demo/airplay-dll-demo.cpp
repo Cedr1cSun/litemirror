@@ -1,25 +1,21 @@
-// airplay-dll-demo.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 LiteMirror contributors
 //
+// Minimal receiver window: start the server, show the mirrored screen,
+// play the audio. [s] starts, [q] stops, closing the window quits.
 #include <windows.h>
-#include <iostream>
-#include "Airplay2Head.h"
-#include "CAirServerCallback.h"
-#include "SDL.h"
+#include <stdio.h>
 #include "CSDLPlayer.h"
 
 int main()
 {
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	SetConsoleOutputCP(CP_UTF8);   // device names are UTF-8
+	printf("LiteMirror demo\n [s] start server\n [q] stop server\n\n");
 
-    printf("Usage: \n [s] to start server\n [q] to stop\n [-] and [=] to scale video size.\n\n");
-
-    CSDLPlayer player;
-    player.init();
-
-    player.loopEvents();
-
-    /* This should never happen */
-    printf("SDL_WaitEvent error: %s\n", SDL_GetError());
-
-    return 0;
+	CSDLPlayer player;
+	if (!player.init()) {
+		return 1;
+	}
+	player.loopEvents();
+	return 0;
 }
