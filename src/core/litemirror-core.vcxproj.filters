@@ -1,0 +1,996 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{137420bc-18d7-5d64-9c97-8c22d9ebb76b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party">
+      <UniqueIdentifier>{ee9d6416-0f1e-5cdd-9392-e18a427cf934}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\axtls">
+      <UniqueIdentifier>{913322ad-3bb2-5c59-84eb-f96aa78922d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\curve25519">
+      <UniqueIdentifier>{1c8697c7-eccb-56de-a76f-7dd5542b4d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\ed25519">
+      <UniqueIdentifier>{abef1700-820e-5857-bbbf-fcf1ef4950c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac">
+      <UniqueIdentifier>{7a4b943c-2a70-563f-b274-c0421cc1e91d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libAACdec">
+      <UniqueIdentifier>{bd4a68f0-d881-5a24-b510-d3c90b4bae19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libAACdec\include">
+      <UniqueIdentifier>{bf37ed51-8e9b-5966-8514-da278c8c33cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libAACdec\src">
+      <UniqueIdentifier>{4cddf459-2f87-5448-a2b0-bf9474455146}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libArithCoding">
+      <UniqueIdentifier>{77a6ba3c-8950-5599-af5b-8ad0b5d61c25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libArithCoding\include">
+      <UniqueIdentifier>{fc84834a-d4f6-57ae-a3d1-5747fe4e3ac9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libArithCoding\src">
+      <UniqueIdentifier>{ee8630e3-e21e-5171-a1cd-66540b532e2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libDRCdec">
+      <UniqueIdentifier>{17f561d6-333d-5810-bf1c-7fd9340889d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libDRCdec\include">
+      <UniqueIdentifier>{4d86b2d9-1e40-565d-b36e-c1c8ec8ec8be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libDRCdec\src">
+      <UniqueIdentifier>{501b6b6b-99d9-50bb-9afe-fce6aed55af9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libFDK">
+      <UniqueIdentifier>{48550cdb-d821-58ba-baeb-fa6deb73afb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libFDK\include">
+      <UniqueIdentifier>{3fe83f87-5c73-5d82-b2a2-2d5e262484be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libFDK\src">
+      <UniqueIdentifier>{489be718-a2ca-56fc-8edc-3c02aeed4c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libMpegTPDec">
+      <UniqueIdentifier>{3626573d-6f98-5320-8023-e6011c4a6cb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libMpegTPDec\include">
+      <UniqueIdentifier>{c35ac1f6-e42f-54af-8cc9-1a1a91ee8402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libMpegTPDec\src">
+      <UniqueIdentifier>{b0c09c81-168f-5288-ab1f-a4ee1dcd55ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libPCMutils">
+      <UniqueIdentifier>{6d7ef7e6-5828-5c7f-b2ba-254e971f8c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libPCMutils\include">
+      <UniqueIdentifier>{86f731e1-9f52-5d5f-b3c8-d120006603a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libPCMutils\src">
+      <UniqueIdentifier>{172a5321-99eb-55a5-b246-3644ca3d05dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSACdec">
+      <UniqueIdentifier>{6b063e69-d61b-5502-ab4b-254a725210c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSACdec\include">
+      <UniqueIdentifier>{01287332-8fc5-5f7e-9955-7aac984aa291}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSACdec\src">
+      <UniqueIdentifier>{04b5e45a-ff9f-51c3-8ef5-e11a779afe00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSBRdec">
+      <UniqueIdentifier>{3db9bfe1-2117-59d1-b32c-b4a13fc08833}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSBRdec\include">
+      <UniqueIdentifier>{8a9b7215-a470-5150-b7b0-5fe4d6c213fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSBRdec\src">
+      <UniqueIdentifier>{0aa30318-2ca3-554f-a429-00316c40f9ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSYS">
+      <UniqueIdentifier>{7167eff9-1f64-5427-a93b-a08ecd76639a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSYS\include">
+      <UniqueIdentifier>{0160a514-0d0c-598f-8b4d-f255893cfc9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\fdk-aac\libSYS\src">
+      <UniqueIdentifier>{8b6f4b0e-8892-5cfc-9d67-1cc49ed39540}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\http_parser">
+      <UniqueIdentifier>{85f5dac0-b42c-507d-b070-ef3d5b18e63c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\playfair">
+      <UniqueIdentifier>{0ed37956-599d-561c-bb95-eaff68e84fed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\tiny-aes">
+      <UniqueIdentifier>{7172bf4a-c8f1-5491-9f1c-3a541e244b06}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="compat.c" />
+    <ClCompile Include="..\..\third_party\tiny-aes\aes.c">
+      <Filter>third_party\tiny-aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes_ctr.c" />
+    <ClCompile Include="airplay.c" />
+    <ClCompile Include="base64.c" />
+    <ClCompile Include="byteutils.c" />
+    <ClCompile Include="..\..\third_party\axtls\aes.c">
+      <Filter>third_party\axtls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\axtls\bigint.c">
+      <Filter>third_party\axtls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\axtls\hmac.c">
+      <Filter>third_party\axtls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\axtls\md5.c">
+      <Filter>third_party\axtls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\axtls\rc4.c">
+      <Filter>third_party\axtls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\axtls\sha1.c">
+      <Filter>third_party\axtls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\curve25519\curve25519-donna.c">
+      <Filter>third_party\curve25519</Filter>
+    </ClCompile>
+    <ClCompile Include="digest.c" />
+    <ClCompile Include="dnssd.c" />
+    <ClCompile Include="..\..\third_party\ed25519\add_scalar.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\fe.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\ge.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\keypair.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\key_exchange.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\sc.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\seed.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\sha512.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\sign.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\ed25519\verify.c">
+      <Filter>third_party\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="fairplay_playfair.c" />
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdecoder.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdecoder_lib.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_drc.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcr.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcrs.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcr_bit.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_pns.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_tns.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aac_ram.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\aac_rom.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\block.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\channel.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\channelinfo.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\conceal.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\FDK_delay.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\ldfiltbank.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\pulsedata.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\rvlc.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\rvlcbit.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\rvlcconceal.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\stereo.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_acelp.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_ace_d4t64.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_ace_ltp.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_fac.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_lpc.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_lpd.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_rom.cpp">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libArithCoding\src\ac_arith_coder.cpp">
+      <Filter>third_party\fdk-aac\libArithCoding\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_gainDecoder.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_reader.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_rom.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_selectionProcess.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_tools.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcGainDec_init.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcGainDec_preprocess.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\drcGainDec_process.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libDRCdec\src\FDK_drcDecLib.cpp">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\autocorr2nd.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\dct.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_bitbuffer.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_core.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_crc.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_decorrelate.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_hybrid.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_lpc.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_matrixCalloc.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_qmf_domain.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_tools_rom.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\FDK_trigFcts.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\fft.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\fft_rad2.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\fixpoint_math.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\huff_nodes.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\mdct.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\nlc_dec.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\qmf.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libFDK\src\scale.cpp">
+      <Filter>third_party\fdk-aac\libFDK\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_adif.cpp">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_adts.cpp">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_asc.cpp">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_drm.cpp">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_latm.cpp">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_lib.cpp">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libPCMutils\src\limiter.cpp">
+      <Filter>third_party\fdk-aac\libPCMutils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libPCMutils\src\pcmdmx_lib.cpp">
+      <Filter>third_party\fdk-aac\libPCMutils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libPCMutils\src\pcm_utils.cpp">
+      <Filter>third_party\fdk-aac\libPCMutils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_bitdec.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_calcM1andM2.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec_conceal.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec_lib.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_process.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_qmf.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_reshapeBBEnv.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_rom.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_smoothing.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_stp.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSACdec\src\sac_tsd.cpp">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\env_calc.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\env_dec.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\env_extr.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\hbe.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\HFgen_preFlat.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\huff_dec.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\lpp_tran.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\psbitdec.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\psdec.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\psdecrom_drm.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\psdec_drm.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\pvc_dec.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbrdecoder.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbrdec_drc.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbrdec_freq_sca.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_crc.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_deb.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_dec.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_ram.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_rom.cpp">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSYS\src\genericStds.cpp">
+      <Filter>third_party\fdk-aac\libSYS\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\fdk-aac\libSYS\src\syslib_channelMapDescr.cpp">
+      <Filter>third_party\fdk-aac\libSYS\src</Filter>
+    </ClCompile>
+    <ClCompile Include="httpd.c" />
+    <ClCompile Include="..\..\third_party\http_parser\http_parser.c">
+      <Filter>third_party\http_parser</Filter>
+    </ClCompile>
+    <ClCompile Include="http_request.c" />
+    <ClCompile Include="http_response.c" />
+    <ClCompile Include="logger.c" />
+    <ClCompile Include="mirror_buffer.c" />
+    <ClCompile Include="netutils.c" />
+    <ClCompile Include="pairing.c" />
+    <ClCompile Include="..\..\third_party\playfair\hand_garble.c">
+      <Filter>third_party\playfair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\playfair\modified_md5.c">
+      <Filter>third_party\playfair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\playfair\omg_hax.c">
+      <Filter>third_party\playfair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\playfair\playfair.c">
+      <Filter>third_party\playfair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\playfair\sap_hash.c">
+      <Filter>third_party\playfair</Filter>
+    </ClCompile>
+    <ClCompile Include="plist.c" />
+    <ClCompile Include="raop.c" />
+    <ClCompile Include="raop_buffer.c" />
+    <ClCompile Include="raop_rtp.c" />
+    <ClCompile Include="raop_rtp_mirror.c" />
+    <ClCompile Include="rsakey.c" />
+    <ClCompile Include="rsapem.c" />
+    <ClCompile Include="sdp.c" />
+    <ClCompile Include="utils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\airplay.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dnssd.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\raop.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\tiny-aes\aes.h">
+      <Filter>third_party\tiny-aes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\tiny-aes\aes.hpp">
+      <Filter>third_party\tiny-aes</Filter>
+    </ClInclude>
+    <ClInclude Include="aes_ctr.h" />
+    <ClInclude Include="airplay_handlers.h" />
+    <ClInclude Include="base64.h" />
+    <ClInclude Include="byteutils.h" />
+    <ClInclude Include="compat.h" />
+    <ClInclude Include="..\..\third_party\axtls\bigint.h">
+      <Filter>third_party\axtls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\axtls\bigint_impl.h">
+      <Filter>third_party\axtls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\axtls\config.h">
+      <Filter>third_party\axtls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\axtls\crypto.h">
+      <Filter>third_party\axtls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\axtls\os_port.h">
+      <Filter>third_party\axtls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\curve25519\curve25519.h">
+      <Filter>third_party\curve25519</Filter>
+    </ClInclude>
+    <ClInclude Include="digest.h" />
+    <ClInclude Include="dnssdint.h" />
+    <ClInclude Include="..\..\third_party\ed25519\ed25519.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\ed25519\fe.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\ed25519\fixedint.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\ed25519\ge.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\ed25519\precomp_data.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\ed25519\sc.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\ed25519\sha512.h">
+      <Filter>third_party\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="fairplay.h" />
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\include\aacdecoder_lib.h">
+      <Filter>third_party\fdk-aac\libAACdec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdecoder.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_drc.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_drc_types.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcr.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcrs.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcr_bit.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_hcr_types.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_pns.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aacdec_tns.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aac_ram.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\aac_rom.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\block.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\channel.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\channelinfo.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\conceal.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\conceal_types.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\FDK_delay.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\ldfiltbank.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\overlapadd.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\pulsedata.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\rvlc.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\rvlcbit.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\rvlcconceal.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\rvlc_info.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\stereo.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_acelp.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_ace_d4t64.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_ace_ltp.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_const.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_fac.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_lpc.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_lpd.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libAACdec\src\usacdec_rom.h">
+      <Filter>third_party\fdk-aac\libAACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libArithCoding\include\ac_arith_coder.h">
+      <Filter>third_party\fdk-aac\libArithCoding\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\include\FDK_drcDecLib.h">
+      <Filter>third_party\fdk-aac\libDRCdec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDecoder.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_gainDecoder.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_reader.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_rom.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_selectionProcess.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_tools.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcDec_types.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcGainDec_init.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcGainDec_preprocess.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libDRCdec\src\drcGainDec_process.h">
+      <Filter>third_party\fdk-aac\libDRCdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\abs.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\autocorr2nd.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\clz.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\common_fix.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\cplx_mul.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\dct.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_archdef.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_bitbuffer.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_bitstream.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_core.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_crc.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_decorrelate.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_hybrid.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_lpc.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_matrixCalloc.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_qmf_domain.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_tools_rom.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\FDK_trigFcts.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\fft.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\fft_rad2.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\fixmadd.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\fixminmax.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\fixmul.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\fixpoint_math.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\huff_nodes.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\mdct.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\nlc_dec.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\qmf.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\qmf_pcm.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\scale.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libFDK\include\scramble.h">
+      <Filter>third_party\fdk-aac\libFDK\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\include\tpdec_lib.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\include\tp_data.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_adif.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_adts.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_drm.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tpdec_latm.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libMpegTPDec\src\tp_version.h">
+      <Filter>third_party\fdk-aac\libMpegTPDec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libPCMutils\include\limiter.h">
+      <Filter>third_party\fdk-aac\libPCMutils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libPCMutils\include\pcmdmx_lib.h">
+      <Filter>third_party\fdk-aac\libPCMutils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libPCMutils\include\pcm_utils.h">
+      <Filter>third_party\fdk-aac\libPCMutils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libPCMutils\src\version.h">
+      <Filter>third_party\fdk-aac\libPCMutils\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\include\sac_dec_errorcodes.h">
+      <Filter>third_party\fdk-aac\libSACdec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\include\sac_dec_lib.h">
+      <Filter>third_party\fdk-aac\libSACdec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_bitdec.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_calcM1andM2.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec_conceal.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec_interface.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_dec_ssc_struct.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_process.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_qmf.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_reshapeBBEnv.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_rom.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_smoothing.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_stp.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSACdec\src\sac_tsd.h">
+      <Filter>third_party\fdk-aac\libSACdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\include\sbrdecoder.h">
+      <Filter>third_party\fdk-aac\libSBRdec\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\env_calc.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\env_dec.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\env_extr.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\hbe.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\HFgen_preFlat.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\huff_dec.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\lpp_tran.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\psbitdec.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\psdec.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\psdec_drm.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\pvc_dec.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbrdec_drc.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbrdec_freq_sca.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_crc.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_deb.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_dec.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_ram.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\sbr_rom.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSBRdec\src\transcendent.h">
+      <Filter>third_party\fdk-aac\libSBRdec\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSYS\include\FDK_audio.h">
+      <Filter>third_party\fdk-aac\libSYS\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSYS\include\genericStds.h">
+      <Filter>third_party\fdk-aac\libSYS\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSYS\include\machine_type.h">
+      <Filter>third_party\fdk-aac\libSYS\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\fdk-aac\libSYS\include\syslib_channelMapDescr.h">
+      <Filter>third_party\fdk-aac\libSYS\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h" />
+    <ClInclude Include="httpd.h" />
+    <ClInclude Include="..\..\third_party\http_parser\http_parser.h">
+      <Filter>third_party\http_parser</Filter>
+    </ClInclude>
+    <ClInclude Include="http_request.h" />
+    <ClInclude Include="http_response.h" />
+    <ClInclude Include="logger.h" />
+    <ClInclude Include="memalign.h" />
+    <ClInclude Include="mirror_buffer.h" />
+    <ClInclude Include="netutils.h" />
+    <ClInclude Include="pairing.h" />
+    <ClInclude Include="..\..\third_party\playfair\omg_hax.h">
+      <Filter>third_party\playfair</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\playfair\playfair.h">
+      <Filter>third_party\playfair</Filter>
+    </ClInclude>
+    <ClInclude Include="plist.h" />
+    <ClInclude Include="raop_buffer.h" />
+    <ClInclude Include="raop_handlers.h" />
+    <ClInclude Include="raop_rtp.h" />
+    <ClInclude Include="raop_rtp_mirror.h" />
+    <ClInclude Include="rsakey.h" />
+    <ClInclude Include="rsapem.h" />
+    <ClInclude Include="sdp.h" />
+    <ClInclude Include="sockets.h" />
+    <ClInclude Include="threads.h" />
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\third_party\playfair\LICENSE.md">
+      <Filter>third_party\playfair</Filter>
+    </None>
+  </ItemGroup>
+</Project>
