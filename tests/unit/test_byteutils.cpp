@@ -43,3 +43,14 @@ TEST_CASE("ntptopts converts 64-bit NTP to microseconds")
 	uint64_t ntp = (3ULL << 32) | 0x80000000ULL;   // 3.5 s
 	CHECK(ntptopts(ntp) == doctest::Approx(3500000).epsilon(0.001));
 }
+
+#include <windows.h>
+
+TEST_CASE("now_us counts wall-clock microseconds")
+{
+	uint64_t a = now_us();
+	Sleep(1100);   // longer than a second so a wrong seconds multiplier shows
+	uint64_t d = now_us() - a;
+	CHECK(d >= 1000000);
+	CHECK(d <= 1600000);
+}

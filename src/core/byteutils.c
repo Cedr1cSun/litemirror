@@ -66,7 +66,7 @@ void byteutils_put_timeStamp(unsigned char* b, int offset, uint64_t time) {
 
 #ifdef WIN32
 // https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows?r=SearchResults
-#define CLOCK_PROCESS_CPUTIME_ID 0
+#define CLOCK_MONOTONIC 0   /* the shim below ignores the id and reads QueryPerformanceCounter */
 LARGE_INTEGER
 getFILETIMEoffset()
 {
@@ -124,13 +124,13 @@ clock_gettime(int X, struct timespec* tv)
     microseconds = (double)t.QuadPart / frequencyToMicroseconds;
     t.QuadPart = (LONGLONG)microseconds;
     tv->tv_sec = (long)(t.QuadPart / 1000000);
-    tv->tv_nsec = t.QuadPart % 1000000;
+    tv->tv_nsec = (long)(t.QuadPart % 1000000) * 1000;   /* timespec carries nanoseconds */
     return (0);
 }
 #endif // WIN32
 
 uint64_t now_us() {
     struct timespec time;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
-    return (uint64_t)time.tv_sec * 10000000L + (uint64_t)(time.tv_nsec / 1000);
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return (uint64_t)time.tv_sec * 1000000ULL + (uint64_t)(time.tv_nsec / 1000);
 }
