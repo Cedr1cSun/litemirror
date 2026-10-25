@@ -52,6 +52,11 @@ class Rtsp(unittest.TestCase):
             airplay = browser.wait_for('_airplay._tcp.local.')
         self.assertEqual(info['deviceID'], airplay.properties[b'deviceid'].decode())
         self.assertEqual(info['model'], airplay.properties[b'model'].decode())
+        # what we ask the phone for: 1080p at 60 fps
+        display = info['displays'][0]
+        self.assertEqual((display['widthPixels'], display['heightPixels']), (1920, 1080))
+        self.assertEqual(display['maxFPS'], 60)
+        self.assertEqual(display['refreshRate'], 60)
 
     def test_device_id_is_the_mac_of_the_default_route_adapter(self):
         """VPN and Hyper-V adapters come and go; the id must follow the real NIC

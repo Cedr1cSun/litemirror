@@ -93,7 +93,7 @@ raop_handler_info(raop_conn_t *conn,
 	plist_dict_set_item(display, "widthPhysical", plist_new_bool(0));
 	plist_dict_set_item(display, "heightPhysical", plist_new_bool(0));
 	plist_dict_set_item(display, "refreshRate", plist_new_uint(60));
-	plist_dict_set_item(display, "maxFPS", plist_new_uint(30));
+	plist_dict_set_item(display, "maxFPS", plist_new_uint(60));   /* the phone caps its frame rate at this */
 	plist_dict_set_item(display, "features", plist_new_uint(14));
 	plist_dict_set_item(display, "overscanned", plist_new_bool(0));
 	plist_dict_set_item(display, "rotation", plist_new_bool(0));
