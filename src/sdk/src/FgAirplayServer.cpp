@@ -15,6 +15,7 @@ FgAirplayServer::FgAirplayServer()
 	, m_pAirplay(NULL)
 	, m_pRaop(NULL)
 	, m_sink(NULL)
+	, m_audioSink(NULL)
 {
 	memset(&m_cb, 0, sizeof(m_cb));
 	memset(&m_stAirplayCB, 0, sizeof(airplay_callbacks_t));
@@ -45,10 +46,11 @@ FgAirplayServer::~FgAirplayServer()
 }
 
 lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
-                                const lm_callbacks* callbacks, LmVideoSink* sink)
+                                const lm_callbacks* callbacks, LmVideoSink* video, LmAudioSink* audio)
 {
 	m_cb = *callbacks;
-	m_sink = sink;
+	m_sink = video;
+	m_audioSink = audio;
 
 	unsigned short raop_port = raopPort;
 	unsigned short airplay_port = airplayPort;
@@ -228,7 +230,7 @@ void FgAirplayServer::audio_set_coverart(void* cls, void* session, const void* b
 void FgAirplayServer::audio_process(void* cls, pcm_data_struct* data, const char* remoteName, const char* remoteDeviceId)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (!pServer || !pServer->m_cb.on_audio)
+	if (!pServer || (!pServer->m_audioSink && !pServer->m_cb.on_audio))
 	{
 		return;
 	}
@@ -240,11 +242,21 @@ void FgAirplayServer::audio_process(void* cls, pcm_data_struct* data, const char
 	frame.bits_per_sample = data->bits_per_sample;
 	frame.data = (const uint8_t*)data->data;   // 16-bit PCM, size in bytes
 	frame.size = data->data_len;
+	if (pServer->m_audioSink)
+	{
+		pServer->m_audioSink->play(&frame);
+		return;
+	}
 	pServer->m_cb.on_audio(pServer->m_cb.user, remoteDeviceId, &frame);
 }
 
 void FgAirplayServer::audio_flush(void* cls, void* session, const char* remoteName, const char* remoteDeviceId)
 {
+	FgAirplayServer* pServer = (FgAirplayServer*)cls;
+	if (pServer && pServer->m_audioSink)
+	{
+		pServer->m_audioSink->flush();
+	}
 }
 
 void FgAirplayServer::video_process(void* cls, h264_decode_struct* h264data, const char* remoteName, const char* remoteDeviceId)

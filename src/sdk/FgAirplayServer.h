@@ -8,6 +8,7 @@
 #include "airplay.h"
 #include "raop.h"
 #include "FgAirplayChannel.h"
+#include "LmAudioSink.h"
 
 typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
@@ -20,7 +21,7 @@ public:
 	virtual ~FgAirplayServer();
 
 	lm_error start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
-	               const lm_callbacks* callbacks, LmVideoSink* sink);
+	               const lm_callbacks* callbacks, LmVideoSink* video, LmAudioSink* audio);
 	void stop();
 
 protected:
@@ -42,7 +43,8 @@ protected:
 
 protected:
 	lm_callbacks			m_cb;
-	LmVideoSink*			m_sink;   // NULL: frames go to m_cb.on_video
+	LmVideoSink*			m_sink;        // NULL: frames go to m_cb.on_video
+	LmAudioSink*			m_audioSink;   // NULL: PCM goes to m_cb.on_audio
 
 	dnssd_t*				m_pDnsSd;
 	airplay_t*				m_pAirplay;

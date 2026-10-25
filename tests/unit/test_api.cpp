@@ -77,6 +77,23 @@ TEST_CASE("every error code has its own message")
 	CHECK(lm_error_string((lm_error)999) != NULL);
 }
 
+TEST_CASE("set_audio switches built-in playback only while stopped")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_audio(NULL, 1) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_audio(server, 1) == LM_OK);
+	CHECK(lm_server_set_audio(server, 1) == LM_OK);   // already on
+
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_audio(server, 0) == LM_E_RUNNING);
+	lm_server_stop(server);
+	CHECK(lm_server_set_audio(server, 0) == LM_OK);
+	lm_server_destroy(server);
+}
+
 TEST_CASE("set_window takes a real window and only while stopped")
 {
 	lm_callbacks cb = no_callbacks();

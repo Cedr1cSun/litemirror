@@ -105,6 +105,8 @@
     <ClCompile Include="..\..\src\sdk\src\CAutoLock.cpp" />
     <ClCompile Include="test_video_sink.cpp" />
     <ClCompile Include="..\..\src\sdk\LmVideoSink.cpp" />
+    <ClCompile Include="test_audio_sink.cpp" />
+    <ClCompile Include="..\..\src\sdk\LmAudioSink.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\litemirror-core.vcxproj">
