@@ -61,7 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;$(SolutionDir)src\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -80,7 +80,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;$(SolutionDir)src\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,10 +98,14 @@
     <ClCompile Include="test_utils.cpp" />
     <ClCompile Include="test_http_request.cpp" />
     <ClCompile Include="test_pairing.cpp" />
+    <ClCompile Include="test_api.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\litemirror-core.vcxproj">
       <Project>{797d16e5-bc14-5502-8e52-fe5abaa6c322}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\sdk\litemirror.vcxproj">
+      <Project>{5787E6B6-1C4E-5C36-AEB9-6D9D53E54633}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

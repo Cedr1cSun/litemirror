@@ -97,6 +97,7 @@
     <ClCompile Include="src\Airplay2Export.cpp" />
     <ClCompile Include="src\CAutoLock.cpp" />
     <ClCompile Include="src\FgAirplayServer.cpp" />
+    <ClCompile Include="src\litemirror_api.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CAutoLock.h" />
@@ -105,6 +106,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\Airplay2Def.h" />
     <ClInclude Include="include\Airplay2Head.h" />
+    <ClInclude Include="include\litemirror.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\core\litemirror-core.vcxproj">

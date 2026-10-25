@@ -47,7 +47,7 @@ FgAirplayServer::~FgAirplayServer()
 	CloseHandle(m_mutexMap);
 }
 
-int FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN], 
+lm_error FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
 	unsigned int raopPort, unsigned int airplayPort,
 	IAirServerCallback* callback)
 {
@@ -59,17 +59,18 @@ int FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
 	char* pemstr = NULL;
 
 	int ret = 0;
+	lm_error err = LM_OK;
 	do {
 
 		GetMacAddress(hwaddr);
 
 		m_pAirplay = airplay_init(10, &m_stAirplayCB, pemstr, &ret);
 		if (m_pAirplay == NULL) {
-			ret = -1;
+			err = LM_E_INTERNAL;
 			break;
 		}
-		ret = airplay_start(m_pAirplay, &airplay_port, hwaddr, sizeof(hwaddr), NULL);
-		if (ret < 0) {
+		if (airplay_start(m_pAirplay, &airplay_port, hwaddr, sizeof(hwaddr), NULL) < 0) {
+			err = LM_E_AIRPLAY_PORT;
 			break;
 		}
 		airplay_set_log_level(m_pAirplay, RAOP_LOG_DEBUG);
@@ -77,40 +78,37 @@ int FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
 
 		m_pRaop = raop_init(10, &m_stRaopCB);
 		if (m_pRaop == NULL) {
-			ret = -1;
+			err = LM_E_INTERNAL;
 			break;
 		}
 
 		raop_set_log_level(m_pRaop, RAOP_LOG_DEBUG);
 		raop_set_log_callback(m_pRaop, &log_callback, this);
-		ret = raop_start(m_pRaop, &raop_port);
-		if (ret < 0) {
+		if (raop_start(m_pRaop, &raop_port) < 0) {
+			err = LM_E_RAOP_PORT;
 			break;
 		}
 		raop_set_port(m_pRaop, raop_port);
 
 		m_pDnsSd = dnssd_init(&ret);
 		if (m_pDnsSd == NULL) {
-			ret = -1;
+			err = ret == DNSSD_ERROR_OUTOFMEM ? LM_E_NO_MEMORY : LM_E_BONJOUR_MISSING;
 			break;
 		}
-		ret = dnssd_register_raop(m_pDnsSd, serverName, raop_port, hwaddr, sizeof(hwaddr), 0);
-		if (ret < 0) {
-			break;
-		}
-		ret = dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr));
-		if (ret < 0) {
+		if (dnssd_register_raop(m_pDnsSd, serverName, raop_port, hwaddr, sizeof(hwaddr), 0) < 0 ||
+		    dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr)) < 0) {
+			err = LM_E_BONJOUR_REGISTER;
 			break;
 		}
 
 		raop_log_info(m_pRaop, "Startup complete... Kill with Ctrl+C\n");
 	} while (false);
 
-	if (ret != 0) {
+	if (err != LM_OK) {
 		stop();
 	}
 
-	return ret;
+	return err;
 }
 
 void FgAirplayServer::stop()

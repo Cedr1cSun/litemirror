@@ -1,5 +1,6 @@
 #pragma once
 #include "Airplay2Head.h"
+#include "litemirror.h"
 #include "stream.h"
 #include <map>
 #include <string>
@@ -17,7 +18,7 @@ public:
 	FgAirplayServer();   // standard constructor
 	virtual ~FgAirplayServer();
 
-	int start(const char serverName[AIRPLAY_NAME_LEN], 
+	lm_error start(const char serverName[AIRPLAY_NAME_LEN],
 		unsigned int raopPort, unsigned int airplayPort,
 		IAirServerCallback* callback);
 	void stop();
