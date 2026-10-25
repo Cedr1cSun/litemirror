@@ -6,11 +6,13 @@
     .\build.ps1                 # Debug x64
     .\build.ps1 -Config Release
     .\build.ps1 -Rebuild
+    .\build.ps1 -Test           # build, then run unit and integration tests
 #>
 param(
     [ValidateSet('Debug', 'Release')] [string] $Config = 'Debug',
     [ValidateSet('x64')] [string] $Platform = 'x64',
-    [switch] $Rebuild
+    [switch] $Rebuild,
+    [switch] $Test
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,4 +24,11 @@ if (-not $msbuild) { throw "MSBuild.exe not found" }
 
 $target = if ($Rebuild) { 'Rebuild' } else { 'Build' }
 & $msbuild "$PSScriptRoot\litemirror.sln" "-t:$target" "-p:Configuration=$Config" "-p:Platform=$Platform" -m -nologo -v:m
-exit $LASTEXITCODE
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+if ($Test) {
+    & "$PSScriptRoot\build\bin\$Config\litemirror-tests.exe"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & python "$PSScriptRoot\tests\integration\run.py" --config $Config
+    exit $LASTEXITCODE
+}
