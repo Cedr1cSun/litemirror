@@ -1,0 +1,29 @@
+<Project>
+
+  <!-- keep obj/ next to the native build output instead of inside src/ -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>..\..\..\build\obj\LiteMirror\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>LiteMirror</RootNamespace>
+    <AssemblyName>LiteMirror</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- same folder as litemirror.dll -->
+    <OutputPath>..\..\..\build\bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <SatelliteResourceLanguages>en;zh-CN</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="3.1.1" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

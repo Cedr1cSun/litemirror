@@ -1,0 +1,31 @@
+<ui:FluentWindow x:Class="LiteMirror.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:local="clr-namespace:LiteMirror"
+                 Title="LiteMirror"
+                 Width="960" Height="600" MinWidth="320" MinHeight="240"
+                 WindowStartupLocation="CenterScreen"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar x:Name="TitleBar" Grid.Row="0" Title="LiteMirror" />
+
+        <Grid Grid.Row="1">
+            <StackPanel x:Name="Hint" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24">
+                <TextBlock x:Name="HintTitle" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center"
+                           Text="Ready to receive" />
+                <TextBlock x:Name="HintBody" Margin="0,12,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="420"
+                           Text="On your iPhone or iPad, open Control Centre, tap Screen Mirroring and choose:" />
+                <TextBlock x:Name="ReceiverName" Margin="0,8,0,0" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
+            </StackPanel>
+            <local:VideoHost x:Name="Video" Visibility="Hidden" />
+        </Grid>
+    </Grid>
+</ui:FluentWindow>
