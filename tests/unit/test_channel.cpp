@@ -9,6 +9,8 @@
 #include <string.h>
 #include <vector>
 #include "FgAirplayChannel.h"
+#include <dxgi1_2.h>
+#include "LmVideoSink.h"
 
 static std::vector<uint8_t> read_clip()
 {
@@ -132,4 +134,51 @@ TEST_CASE("channel decodes mirror packets and reports NV12 frames")
 	CHECK(cb.y160_120 == 210);
 	CHECK(cb.u160_120 == 16);
 	CHECK(cb.v160_120 == 146);
+}
+
+TEST_CASE("channel with a window sink presents frames instead of calling on_video")
+{
+	std::vector<std::vector<uint8_t>> nals = nal_units(read_clip());
+	REQUIRE(nals.size() > 10);
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	UINT before = 0;
+	sink.swapChain()->GetLastPresentCount(&before);
+
+	Recording cb;
+	lm_callbacks callbacks = cb.callbacks();
+	FgAirplayChannel* channel = new FgAirplayChannel(&callbacks, &sink);
+
+	int pts = 0;
+	std::vector<uint8_t> params, frame;
+	for (size_t i = 0; i < nals.size(); i++) {
+		int t = nal_type(nals[i]);
+		if (t == 7 || t == 8) {
+			params.insert(params.end(), nals[i].begin(), nals[i].end());
+			if (t == 8) {
+				SFgH264Data key = packet(params, 1, pts);
+				channel->decodeH264Data(&key, "TestPhone", "AA:BB:CC:DD:EE:FF");
+				params.clear();
+			}
+			continue;
+		}
+		frame.assign(nals[i].begin(), nals[i].end());
+		if (t == 6) {
+			frame.insert(frame.end(), nals[i + 1].begin(), nals[i + 1].end());
+			i++;
+		}
+		SFgH264Data d = packet(frame, 0, pts);
+		channel->decodeH264Data(&d, "TestPhone", "AA:BB:CC:DD:EE:FF");
+		pts += 33333;
+	}
+	channel->release();
+
+	UINT after = 0;
+	sink.swapChain()->GetLastPresentCount(&after);
+	CHECK(after - before == 10);
+	CHECK(cb.frames == 0);
+	sink.close();
+	DestroyWindow(hwnd);
 }

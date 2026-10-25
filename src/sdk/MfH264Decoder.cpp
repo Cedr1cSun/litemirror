@@ -34,7 +34,7 @@ static IMFTransform* createDecoder()
 
 MfH264Decoder::MfH264Decoder()
 	: m_mft(NULL), m_outSample(NULL), m_locked(NULL), m_locked2d(NULL),
-	  m_codedWidth(0), m_codedHeight(0), m_draining(false), m_hardware(false),
+	  m_codedWidth(0), m_codedHeight(0), m_draining(false), m_hardware(false), m_shared(false),
 	  m_device(NULL), m_context(NULL), m_manager(NULL), m_staging(NULL), m_mapped(false)
 {
 	memset(&m_frame, 0, sizeof(m_frame));
@@ -54,18 +54,25 @@ bool MfH264Decoder::available()
 	return ok;
 }
 
-// A D3D11 device for the decoder. Fails without a GPU (or over some remote
-// sessions); the caller then stays on the software path.
-bool MfH264Decoder::setupD3D11()
+// A D3D11 device for the decoder: the caller's, or our own. Creating one
+// fails without a GPU (or over some remote sessions); the caller then
+// stays on the software path.
+bool MfH264Decoder::setupD3D11(ID3D11Device* shared)
 {
-	static const D3D_FEATURE_LEVEL levels[] = {
-		D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0
-	};
-	HRESULT hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
-	                               D3D11_CREATE_DEVICE_VIDEO_SUPPORT | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-	                               levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &m_device, NULL, &m_context);
-	if (FAILED(hr)) {
-		return false;
+	if (shared) {
+		m_device = shared;
+		m_device->AddRef();
+		m_device->GetImmediateContext(&m_context);
+	} else {
+		static const D3D_FEATURE_LEVEL levels[] = {
+			D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0
+		};
+		HRESULT hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+		                               D3D11_CREATE_DEVICE_VIDEO_SUPPORT | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+		                               levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &m_device, NULL, &m_context);
+		if (FAILED(hr)) {
+			return false;
+		}
 	}
 	// the decoder uses the device from its own threads
 	ID3D11Multithread* mt = NULL;
@@ -81,9 +88,10 @@ bool MfH264Decoder::setupD3D11()
 	return true;
 }
 
-bool MfH264Decoder::open()
+bool MfH264Decoder::open(ID3D11Device* device)
 {
 	close();
+	m_shared = device != NULL;
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);   // RPC_E_CHANGED_MODE is fine: COM is up
 	if (FAILED(MFStartup(MF_VERSION, MFSTARTUP_LITE))) {
 		return false;
@@ -111,7 +119,7 @@ bool MfH264Decoder::open()
 		attrs->GetUINT32(MF_SA_D3D11_AWARE, &aware);
 		release(attrs);
 	}
-	if (aware && setupD3D11()) {
+	if (aware && setupD3D11(device)) {
 		m_hardware = SUCCEEDED(m_mft->ProcessMessage(MFT_MESSAGE_SET_D3D_MANAGER, (ULONG_PTR)m_manager));
 	}
 
@@ -173,6 +181,7 @@ void MfH264Decoder::close()
 	release(m_device);
 	m_draining = false;
 	m_hardware = false;
+	m_shared = false;
 }
 
 void MfH264Decoder::unlockFrame()
@@ -188,6 +197,7 @@ void MfH264Decoder::unlockFrame()
 	}
 	release(m_locked2d);
 	release(m_locked);
+	release(m_frame.texture);
 	release(m_outSample);   // the decoder refuses a sample it has already filled once
 	m_frame.plane[0] = m_frame.plane[1] = NULL;
 }
@@ -290,6 +300,27 @@ bool MfH264Decoder::readback(IMFSample* sample)
 	return true;
 }
 
+// Shared device: hand out the decoder's texture itself. The sample stays
+// alive (m_outSample) until the next picture so the texture is not reused.
+bool MfH264Decoder::hold(IMFSample* sample)
+{
+	IMFMediaBuffer* buffer = NULL;
+	IMFDXGIBuffer* dxgi = NULL;
+	UINT sub = 0;
+	bool ok = SUCCEEDED(sample->GetBufferByIndex(0, &buffer)) &&
+	          SUCCEEDED(buffer->QueryInterface(IID_PPV_ARGS(&dxgi))) &&
+	          SUCCEEDED(dxgi->GetResource(IID_PPV_ARGS(&m_frame.texture))) &&
+	          SUCCEEDED(dxgi->GetSubresourceIndex(&sub));
+	release(dxgi);
+	release(buffer);
+	if (!ok) {
+		release(m_frame.texture);
+		return false;
+	}
+	m_frame.subresource = sub;
+	return true;
+}
+
 // One ProcessOutput call. Fills m_frame and keeps the picture locked.
 bool MfH264Decoder::output()
 {
@@ -332,7 +363,10 @@ bool MfH264Decoder::output()
 		IMFSample* sample = out.pSample;
 		if (!sample) return false;
 		bool got;
-		if (m_hardware) {
+		if (m_hardware && m_shared) {
+			got = hold(sample);
+			if (got && !weAllocate) m_outSample = sample;
+		} else if (m_hardware) {
 			got = readback(sample);
 		} else {
 			IMFMediaBuffer* buffer = NULL;
@@ -364,7 +398,7 @@ bool MfH264Decoder::output()
 			m_frame.pts = (uint64_t)t / 10;
 			m_frame.key = MFGetAttributeUINT32(sample, MFSampleExtension_CleanPoint, 0) != 0;
 		}
-		if (!weAllocate) sample->Release();   // the staging copy or locked buffer keeps the pixels
+		if (!weAllocate && m_outSample != sample) sample->Release();   // the staging copy or locked buffer keeps the pixels
 		return got;
 	}
 	return false;

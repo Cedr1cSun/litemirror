@@ -16,5 +16,7 @@
     <ClCompile Include="test_channel.cpp" />
     <ClCompile Include="..\..\src\sdk\FgAirplayChannel.cpp" />
     <ClCompile Include="..\..\src\sdk\src\CAutoLock.cpp" />
+    <ClCompile Include="test_video_sink.cpp" />
+    <ClCompile Include="..\..\src\sdk\LmVideoSink.cpp" />
   </ItemGroup>
 </Project>

@@ -86,6 +86,11 @@ typedef struct lm_callbacks {
 } lm_callbacks;
 
 LM_API lm_error    lm_server_create (const lm_callbacks* cb, lm_server** out);
+/* Draw the mirror picture into this window (an HWND), letterboxed, straight
+ * from the GPU decoder; on_video is then not called. Set it before
+ * lm_server_start(); NULL goes back to on_video. LM_E_RUNNING while
+ * started, LM_E_INTERNAL when Direct3D 11 is unavailable. */
+LM_API lm_error    lm_server_set_window(lm_server* s, void* hwnd);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

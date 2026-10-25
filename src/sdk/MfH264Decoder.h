@@ -28,6 +28,10 @@ public:
 		uint32_t pitch[2];
 		uint64_t pts;                // microseconds, as given to decode()
 		bool key;
+		// Set instead of plane[] when the decoder was opened on a caller's
+		// device: the picture is array slice `subresource` of `texture`.
+		ID3D11Texture2D* texture;
+		uint32_t subresource;
 	};
 
 	MfH264Decoder();
@@ -37,7 +41,9 @@ public:
 	// without the Media Feature Pack.
 	static bool available();
 
-	bool open();
+	// With a device, pictures stay on the GPU as textures on that device
+	// (frame().texture); without one they are read back into memory.
+	bool open(ID3D11Device* device = NULL);
 	void close();
 
 	// Feed one access unit; true when the decoder took it. Call receive()
@@ -54,10 +60,11 @@ public:
 	bool hardware() const { return m_hardware; }
 
 private:
-	bool setupD3D11();
+	bool setupD3D11(ID3D11Device* shared);
 	bool pickOutputType();
 	bool output();
 	bool readback(IMFSample* sample);
+	bool hold(IMFSample* sample);
 	void unlockFrame();
 
 	IMFTransform* m_mft;
@@ -67,6 +74,7 @@ private:
 	uint32_t m_codedWidth, m_codedHeight;
 	bool m_draining;
 	bool m_hardware;
+	bool m_shared;   // pictures go out as textures, not memory
 	Frame m_frame;
 
 	// D3D11 path

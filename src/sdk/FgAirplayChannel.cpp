@@ -1,10 +1,11 @@
 #include "FgAirplayChannel.h"
 #include "CAutoLock.h"
 
-FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks)
+FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink)
 : m_nRef(1)
 , m_nStreams(0)
 , m_cb(callbacks)
+, m_sink(sink)
 , m_bDecoderOpen(false)
 {
 	m_mutexVideo = CreateMutex(NULL, FALSE, NULL);
@@ -44,7 +45,7 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 		if (!data->is_key) {
 			return 0;   // cannot start mid-stream without SPS/PPS
 		}
-		m_bDecoderOpen = m_decoder.open();
+		m_bDecoderOpen = m_decoder.open(m_sink ? m_sink->device() : NULL);
 		if (!m_bDecoderOpen) {
 			return -1;
 		}
@@ -55,6 +56,12 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 	}
 	while (m_decoder.receive()) {
 		const MfH264Decoder::Frame& f = m_decoder.frame();
+		if (m_sink) {
+			// shortcut: nothing is drawn if the MFT declined the sink's device
+			// and decoded in software; add an NV12 upload path if that shows up
+			if (m_sink->draw(f.texture, f.subresource, f.width, f.height)) m_sink->present();
+			continue;
+		}
 		if (m_cb->on_video == NULL) {
 			continue;
 		}

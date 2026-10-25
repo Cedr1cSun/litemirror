@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 LiteMirror contributors
 #include "doctest.h"
+#include <windows.h>
 #include <string.h>
 #include <set>
 #include <string>
@@ -74,4 +75,26 @@ TEST_CASE("every error code has its own message")
 		CHECK(seen.insert(msg).second);
 	}
 	CHECK(lm_error_string((lm_error)999) != NULL);
+}
+
+TEST_CASE("set_window takes a real window and only while stopped")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 64, 64, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+
+	CHECK(lm_server_set_window(NULL, hwnd) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_window(server, (void*)0x1234) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_window(server, hwnd) == LM_OK);
+
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_window(server, NULL) == LM_E_RUNNING);
+	lm_server_stop(server);
+	CHECK(lm_server_set_window(server, NULL) == LM_OK);
+
+	lm_server_destroy(server);
+	DestroyWindow(hwnd);
 }

@@ -20,7 +20,7 @@ public:
 	virtual ~FgAirplayServer();
 
 	lm_error start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
-	               const lm_callbacks* callbacks);
+	               const lm_callbacks* callbacks, LmVideoSink* sink);
 	void stop();
 
 protected:
@@ -42,6 +42,7 @@ protected:
 
 protected:
 	lm_callbacks			m_cb;
+	LmVideoSink*			m_sink;   // NULL: frames go to m_cb.on_video
 
 	dnssd_t*				m_pDnsSd;
 	airplay_t*				m_pAirplay;

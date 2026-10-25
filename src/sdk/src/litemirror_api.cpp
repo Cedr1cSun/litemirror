@@ -8,12 +8,32 @@
 #include "litemirror.h"
 #include "FgAirplayServer.h"
 #include "MfH264Decoder.h"
+#include "LmVideoSink.h"
 
 struct lm_server {
-	explicit lm_server(const lm_callbacks& callbacks) : cb(callbacks), impl(NULL) {}
+	explicit lm_server(const lm_callbacks& callbacks) : cb(callbacks), impl(NULL), sink(NULL) {}
+	~lm_server() { delete sink; }
 	lm_callbacks cb;
 	FgAirplayServer* impl;   // non-NULL while running
+	LmVideoSink* sink;       // non-NULL while a window is set
 };
+
+lm_error lm_server_set_window(lm_server* s, void* hwnd)
+{
+	if (!s || (hwnd && !IsWindow((HWND)hwnd))) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	delete s->sink;
+	s->sink = NULL;
+	if (!hwnd) return LM_OK;
+	s->sink = new (std::nothrow) LmVideoSink();
+	if (!s->sink) return LM_E_NO_MEMORY;
+	if (!s->sink->open((HWND)hwnd)) {
+		delete s->sink;
+		s->sink = NULL;
+		return LM_E_INTERNAL;
+	}
+	return LM_OK;
+}
 
 lm_error lm_server_create(const lm_callbacks* cb, lm_server** out)
 {
@@ -32,7 +52,7 @@ lm_error lm_server_start(lm_server* s, const lm_config* cfg)
 
 	FgAirplayServer* impl = new (std::nothrow) FgAirplayServer();
 	if (!impl) return LM_E_NO_MEMORY;
-	lm_error err = impl->start(cfg->name, cfg->raop_port, cfg->airplay_port, &s->cb);
+	lm_error err = impl->start(cfg->name, cfg->raop_port, cfg->airplay_port, &s->cb, s->sink);
 	if (err != LM_OK) {
 		delete impl;
 		return err;

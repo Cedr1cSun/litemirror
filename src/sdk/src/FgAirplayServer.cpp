@@ -14,6 +14,7 @@ FgAirplayServer::FgAirplayServer()
 	: m_pDnsSd(NULL)
 	, m_pAirplay(NULL)
 	, m_pRaop(NULL)
+	, m_sink(NULL)
 {
 	memset(&m_cb, 0, sizeof(m_cb));
 	memset(&m_stAirplayCB, 0, sizeof(airplay_callbacks_t));
@@ -44,9 +45,10 @@ FgAirplayServer::~FgAirplayServer()
 }
 
 lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
-                                const lm_callbacks* callbacks)
+                                const lm_callbacks* callbacks, LmVideoSink* sink)
 {
 	m_cb = *callbacks;
+	m_sink = sink;
 
 	unsigned short raop_port = raopPort;
 	unsigned short airplay_port = airplayPort;
@@ -161,7 +163,7 @@ void FgAirplayServer::connected(void* cls, const char* remoteName, const char* r
 	bool bFirstStream = (pChannel == NULL);
 	if (bFirstStream)
 	{
-		pChannel = new FgAirplayChannel(&pServer->m_cb);
+		pChannel = new FgAirplayChannel(&pServer->m_cb, pServer->m_sink);
 		pServer->m_mapChannel[remoteDeviceId] = pChannel;
 	}
 	pChannel->m_nStreams++;

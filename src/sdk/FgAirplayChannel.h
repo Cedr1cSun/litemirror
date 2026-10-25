@@ -1,6 +1,7 @@
 #pragma once
 #include "litemirror.h"
 #include "MfH264Decoder.h"
+#include "LmVideoSink.h"
 
 // H264 data for decoding
 typedef struct SFgH264Data {
@@ -13,12 +14,13 @@ typedef struct SFgH264Data {
 }SFgH264Data;
 
 
-// One connected device: decodes its mirror stream and reports frames.
+// One connected device: decodes its mirror stream and reports frames, or
+// draws them straight into the window sink when the shell set one.
 class FgAirplayChannel
 {
 public:
-	// callbacks must outlive the channel; FgAirplayServer owns both
-	explicit FgAirplayChannel(const lm_callbacks* callbacks);
+	// callbacks and sink must outlive the channel; FgAirplayServer owns both
+	explicit FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink = NULL);
 	~FgAirplayChannel();
 
 public:
@@ -36,6 +38,7 @@ protected:
 	long m_nRef;
 
 	const lm_callbacks*		m_cb;
+	LmVideoSink*			m_sink;
 	MfH264Decoder			m_decoder;
 	bool					m_bDecoderOpen;
 	void*					m_mutexVideo;
