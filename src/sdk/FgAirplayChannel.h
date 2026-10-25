@@ -37,6 +37,9 @@ public:
 	long addRef();
 	long release();
 
+	// Live streams (audio, mirror) from this device; FgAirplayServer updates it under its map lock.
+	int						m_nStreams;
+
 	int initFFmpeg(const void* privatedata, int privatedatalen);
 	void unInitFFmpeg();
 	float setScale(float fRatio);

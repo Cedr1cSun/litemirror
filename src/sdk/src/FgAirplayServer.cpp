@@ -175,12 +175,16 @@ void FgAirplayServer::connected(void* cls, const char* remoteName, const char* r
 		return;
 	}
 	CAutoLock oLock(pServer->m_mutexMap, "connected");
-	if (pServer->getChannel(remoteDeviceId) == NULL)
+	FgAirplayChannel* pChannel = pServer->getChannel(remoteDeviceId);
+	bool bFirstStream = (pChannel == NULL);
+	if (bFirstStream)
 	{
-		pServer->m_mapChannel[remoteDeviceId] = new FgAirplayChannel(pServer->m_pCallback);
+		pChannel = new FgAirplayChannel(pServer->m_pCallback);
+		pServer->m_mapChannel[remoteDeviceId] = pChannel;
 	}
+	pChannel->m_nStreams++;
 
-	if (pServer->m_pCallback != NULL)
+	if (bFirstStream && pServer->m_pCallback != NULL)
 	{
 		pServer->m_pCallback->connected(remoteName, remoteDeviceId);
 	}
@@ -193,17 +197,20 @@ void FgAirplayServer::disconnected(void* cls, const char* remoteName, const char
 	{
 		return;
 	}
+	{
+		CAutoLock oLock(pServer->m_mutexMap, "disconnected");
+		FgAirplayChannelMap::iterator it = pServer->m_mapChannel.find(remoteDeviceId);
+		if (it == pServer->m_mapChannel.end() || --it->second->m_nStreams > 0)
+		{
+			return;
+		}
+		it->second->release();
+		pServer->m_mapChannel.erase(it);
+	}
+
 	if (pServer->m_pCallback != NULL)
 	{
 		pServer->m_pCallback->disconnected(remoteName, remoteDeviceId);
-	}
-
-	CAutoLock oLock(pServer->m_mutexMap, "disconnected");
-	std::string deviceId(remoteDeviceId);
-	FgAirplayChannel* pChannel = pServer->m_mapChannel[std::string(remoteDeviceId)];
-	if (pChannel) {
-		pServer->m_mapChannel.erase(deviceId);
-		pChannel->release();
 	}
 }
 

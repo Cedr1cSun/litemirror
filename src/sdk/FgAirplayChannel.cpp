@@ -3,6 +3,7 @@
 
 FgAirplayChannel::FgAirplayChannel(IAirServerCallback* pCallback)
 : m_nRef(1)
+, m_nStreams(0)
 , m_pCallback(pCallback)
 , m_pCodec(NULL)
 , m_pCodecCtx(NULL)
