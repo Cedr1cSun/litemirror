@@ -11,5 +11,7 @@
     <ClCompile Include="test_pairing.cpp" />
     <ClCompile Include="test_api.cpp" />
     <ClCompile Include="test_plist.cpp" />
+    <ClCompile Include="test_h264_decoder.cpp" />
+    <ClCompile Include="..\..\src\sdk\MfH264Decoder.cpp" />
   </ItemGroup>
 </Project>

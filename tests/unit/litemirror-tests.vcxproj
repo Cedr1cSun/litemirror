@@ -61,12 +61,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;$(SolutionDir)third_party\plist;$(SolutionDir)src\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;$(SolutionDir)third_party\plist;$(SolutionDir)src\sdk;$(SolutionDir)src\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;mfplat.lib;mfuuid.lib;mf.lib;ole32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -79,14 +79,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;$(SolutionDir)third_party\plist;$(SolutionDir)src\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\core;$(SolutionDir)src\core\include;$(SolutionDir)third_party;$(SolutionDir)third_party\doctest;$(SolutionDir)third_party\plist;$(SolutionDir)src\sdk;$(SolutionDir)src\sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ws2_32.lib;winmm.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;winmm.lib;mfplat.lib;mfuuid.lib;mf.lib;ole32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -98,6 +98,8 @@
     <ClCompile Include="test_pairing.cpp" />
     <ClCompile Include="test_api.cpp" />
     <ClCompile Include="test_plist.cpp" />
+    <ClCompile Include="test_h264_decoder.cpp" />
+    <ClCompile Include="..\..\src\sdk\MfH264Decoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\litemirror-core.vcxproj">
