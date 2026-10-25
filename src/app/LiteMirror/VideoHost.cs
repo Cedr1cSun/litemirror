@@ -3,6 +3,8 @@
 //
 // A plain Win32 child window inside the WPF tree. litemirror.dll owns its
 // swap chain and draws every frame into it; WPF only places and sizes it.
+// Mouse input lands on this window, not on WPF, so the double-click that
+// toggles full screen is picked up here.
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
@@ -14,6 +16,8 @@ namespace LiteMirror
         const string ClassName = "LiteMirrorVideo";
         static bool registered;
 
+        public event EventHandler DoubleClick;
+
         protected override HandleRef BuildWindowCore(HandleRef parent)
         {
             if (!registered)
@@ -22,6 +26,7 @@ namespace LiteMirror
                 var wc = new Native.WNDCLASSEX
                 {
                     cbSize = (uint)Marshal.SizeOf(typeof(Native.WNDCLASSEX)),
+                    style = Native.CS_DBLCLKS,
                     lpfnWndProc = Native.GetProcAddress(Native.LoadLibrary("user32.dll"), "DefWindowProcW"),
                     hInstance = Native.GetModuleHandle(null),
                     hbrBackground = Native.GetStockObject(Native.BLACK_BRUSH),
@@ -41,6 +46,16 @@ namespace LiteMirror
         protected override void DestroyWindowCore(HandleRef hwnd)
         {
             Native.DestroyWindow(hwnd.Handle);
+        }
+
+        protected override IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == Native.WM_LBUTTONDBLCLK)
+            {
+                DoubleClick?.Invoke(this, EventArgs.Empty);
+                handled = true;
+            }
+            return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
         }
     }
 }

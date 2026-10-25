@@ -31,6 +31,8 @@ namespace LiteMirror
         public delegate void DeviceCallback(IntPtr user, IntPtr deviceId, IntPtr name);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void LogCallback(IntPtr user, int level, IntPtr message);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void SizeCallback(IntPtr user, IntPtr deviceId, uint width, uint height);
 
         // Mirrors lm_callbacks: function pointers so that unused members stay NULL
         [StructLayout(LayoutKind.Sequential)]
@@ -46,6 +48,7 @@ namespace LiteMirror
             public IntPtr on_cover_art;
             public IntPtr on_play_url;
             public IntPtr on_log;
+            public IntPtr on_video_size;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -101,6 +104,8 @@ namespace LiteMirror
 
         public const int WS_CHILD = 0x40000000;
         public const int WS_VISIBLE = 0x10000000;
+        public const uint CS_DBLCLKS = 0x0008;
+        public const int WM_LBUTTONDBLCLK = 0x0203;
         public const int BLACK_BRUSH = 4;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

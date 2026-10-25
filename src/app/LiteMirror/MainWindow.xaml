@@ -15,7 +15,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar x:Name="TitleBar" Grid.Row="0" Title="LiteMirror" />
+        <ui:TitleBar x:Name="TitleBar" Grid.Row="0" Title="LiteMirror">
+            <ui:TitleBar.Header>
+                <ui:Button x:Name="SettingsButton" Appearance="Transparent" BorderThickness="0" Padding="8,4"
+                           Icon="{ui:SymbolIcon Settings24}" ToolTip="Settings" Click="OpenSettings"
+                           WindowChrome.IsHitTestVisibleInChrome="True" />
+            </ui:TitleBar.Header>
+        </ui:TitleBar>
 
         <Grid Grid.Row="1">
             <StackPanel x:Name="Hint" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24">
@@ -25,7 +31,7 @@
                            Text="On your iPhone or iPad, open Control Centre, tap Screen Mirroring and choose:" />
                 <TextBlock x:Name="ReceiverName" Margin="0,8,0,0" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
             </StackPanel>
-            <local:VideoHost x:Name="Video" Visibility="Hidden" />
+            <local:VideoHost x:Name="Video" Visibility="Hidden" DoubleClick="OnVideoDoubleClick" />
         </Grid>
     </Grid>
 </ui:FluentWindow>
