@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="mDNSShared">
+      <UniqueIdentifier>{f3df735e-b95f-5d5d-8c16-ec4172f711d5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.c" />
+    <ClCompile Include="mDNSShared\DebugServices.c">
+      <Filter>mDNSShared</Filter>
+    </ClCompile>
+    <ClCompile Include="mDNSShared\dnssd_clientlib.c">
+      <Filter>mDNSShared</Filter>
+    </ClCompile>
+    <ClCompile Include="mDNSShared\dnssd_clientstub.c">
+      <Filter>mDNSShared</Filter>
+    </ClCompile>
+    <ClCompile Include="mDNSShared\dnssd_ipc.c">
+      <Filter>mDNSShared</Filter>
+    </ClCompile>
+    <ClCompile Include="mDNSShared\GenLinkedList.c">
+      <Filter>mDNSShared</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mDNSShared\CommonServices.h">
+      <Filter>mDNSShared</Filter>
+    </ClInclude>
+    <ClInclude Include="mDNSShared\DebugServices.h">
+      <Filter>mDNSShared</Filter>
+    </ClInclude>
+    <ClInclude Include="mDNSShared\dnssd_ipc.h">
+      <Filter>mDNSShared</Filter>
+    </ClInclude>
+    <ClInclude Include="mDNSShared\dns_sd.h">
+      <Filter>mDNSShared</Filter>
+    </ClInclude>
+    <ClInclude Include="mDNSShared\GenLinkedList.h">
+      <Filter>mDNSShared</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dnssd.def" />
+  </ItemGroup>
+</Project>
