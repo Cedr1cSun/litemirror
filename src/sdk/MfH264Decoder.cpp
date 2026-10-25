@@ -3,6 +3,8 @@
 
 #include <initguid.h>   // define the codec and CLSID GUIDs in this file
 #include <windows.h>
+#include <d3d11.h>
+#include <d3d11_4.h>
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mferror.h>
@@ -16,6 +18,7 @@
 #pragma comment(lib, "mfuuid.lib")
 #pragma comment(lib, "wmcodecdspuuid.lib")   // CLSID_CMSH264DecoderMFT
 #pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "d3d11.lib")
 
 template <class T> static void release(T*& p) { if (p) { p->Release(); p = NULL; } }
 
@@ -30,7 +33,8 @@ static IMFTransform* createDecoder()
 
 MfH264Decoder::MfH264Decoder()
 	: m_mft(NULL), m_outSample(NULL), m_locked(NULL), m_locked2d(NULL),
-	  m_codedWidth(0), m_codedHeight(0), m_draining(false)
+	  m_codedWidth(0), m_codedHeight(0), m_draining(false), m_hardware(false),
+	  m_device(NULL), m_context(NULL), m_manager(NULL), m_staging(NULL), m_mapped(false)
 {
 	memset(&m_frame, 0, sizeof(m_frame));
 }
@@ -47,6 +51,33 @@ bool MfH264Decoder::available()
 	bool ok = mft != NULL;
 	release(mft);
 	return ok;
+}
+
+// A D3D11 device for the decoder. Fails without a GPU (or over some remote
+// sessions); the caller then stays on the software path.
+bool MfH264Decoder::setupD3D11()
+{
+	static const D3D_FEATURE_LEVEL levels[] = {
+		D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0
+	};
+	HRESULT hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+	                               D3D11_CREATE_DEVICE_VIDEO_SUPPORT | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+	                               levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &m_device, NULL, &m_context);
+	if (FAILED(hr)) {
+		return false;
+	}
+	// the decoder uses the device from its own threads
+	ID3D11Multithread* mt = NULL;
+	if (SUCCEEDED(m_context->QueryInterface(IID_PPV_ARGS(&mt)))) {
+		mt->SetMultithreadProtected(TRUE);
+		release(mt);
+	}
+	UINT token = 0;
+	if (FAILED(MFCreateDXGIDeviceManager(&token, &m_manager)) ||
+	    FAILED(m_manager->ResetDevice(m_device, token))) {
+		return false;
+	}
+	return true;
 }
 
 bool MfH264Decoder::open()
@@ -70,6 +101,17 @@ bool MfH264Decoder::open()
 		v.ulVal = 1;
 		api->SetValue(&CODECAPI_AVLowLatencyMode, &v);
 		release(api);
+	}
+
+	// GPU decoding when the MFT and the machine allow it
+	UINT32 aware = 0;
+	IMFAttributes* attrs = NULL;
+	if (SUCCEEDED(m_mft->GetAttributes(&attrs))) {
+		attrs->GetUINT32(MF_SA_D3D11_AWARE, &aware);
+		release(attrs);
+	}
+	if (aware && setupD3D11()) {
+		m_hardware = SUCCEEDED(m_mft->ProcessMessage(MFT_MESSAGE_SET_D3D_MANAGER, (ULONG_PTR)m_manager));
 	}
 
 	IMFMediaType* in = NULL;
@@ -120,15 +162,24 @@ void MfH264Decoder::close()
 {
 	unlockFrame();
 	release(m_outSample);
+	release(m_staging);
 	if (m_mft) {
 		release(m_mft);
 		MFShutdown();
 	}
+	release(m_manager);
+	release(m_context);
+	release(m_device);
 	m_draining = false;
+	m_hardware = false;
 }
 
 void MfH264Decoder::unlockFrame()
 {
+	if (m_mapped) {
+		m_context->Unmap(m_staging, 0);
+		m_mapped = false;
+	}
 	if (m_locked2d) {
 		m_locked2d->Unlock2D();
 	} else if (m_locked) {
@@ -187,7 +238,58 @@ bool MfH264Decoder::drain()
 	return output();
 }
 
-// One ProcessOutput call. Fills m_frame and keeps the buffer locked.
+// GPU picture -> staging texture -> mapped CPU memory. One copy, done by
+// the GPU; the map stays until the next picture.
+bool MfH264Decoder::readback(IMFSample* sample)
+{
+	IMFMediaBuffer* buffer = NULL;
+	IMFDXGIBuffer* dxgi = NULL;
+	ID3D11Texture2D* tex = NULL;
+	UINT sub = 0;
+	bool ok = SUCCEEDED(sample->GetBufferByIndex(0, &buffer)) &&
+	          SUCCEEDED(buffer->QueryInterface(IID_PPV_ARGS(&dxgi))) &&
+	          SUCCEEDED(dxgi->GetResource(IID_PPV_ARGS(&tex))) &&
+	          SUCCEEDED(dxgi->GetSubresourceIndex(&sub));
+	D3D11_TEXTURE2D_DESC desc = {0};
+	if (ok) {
+		tex->GetDesc(&desc);
+		if (m_staging) {
+			D3D11_TEXTURE2D_DESC have;
+			m_staging->GetDesc(&have);
+			if (have.Width != desc.Width || have.Height != desc.Height || have.Format != desc.Format) {
+				release(m_staging);
+			}
+		}
+		if (!m_staging) {
+			D3D11_TEXTURE2D_DESC sd = desc;
+			sd.ArraySize = 1;
+			sd.MipLevels = 1;
+			sd.Usage = D3D11_USAGE_STAGING;
+			sd.BindFlags = 0;
+			sd.MiscFlags = 0;
+			sd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			ok = SUCCEEDED(m_device->CreateTexture2D(&sd, NULL, &m_staging));
+		}
+	}
+	D3D11_MAPPED_SUBRESOURCE map = {0};
+	if (ok) {
+		m_context->CopySubresourceRegion(m_staging, 0, 0, 0, 0, tex, sub, NULL);
+		ok = SUCCEEDED(m_context->Map(m_staging, 0, D3D11_MAP_READ, 0, &map));
+	}
+	release(tex);
+	release(dxgi);
+	release(buffer);
+	if (!ok) {
+		return false;
+	}
+	m_mapped = true;
+	m_frame.plane[0] = (const uint8_t*)map.pData;
+	m_frame.plane[1] = m_frame.plane[0] + (size_t)map.RowPitch * desc.Height;
+	m_frame.pitch[0] = m_frame.pitch[1] = map.RowPitch;
+	return true;
+}
+
+// One ProcessOutput call. Fills m_frame and keeps the picture locked.
 bool MfH264Decoder::output()
 {
 	unlockFrame();
@@ -198,16 +300,14 @@ bool MfH264Decoder::output()
 	for (int attempt = 0; attempt < 2; attempt++) {
 		MFT_OUTPUT_DATA_BUFFER out = {0};
 		if (weAllocate) {
-			if (!m_outSample) {
-				IMFMediaBuffer* buf = NULL;
-				if (FAILED(MFCreateSample(&m_outSample)) ||
-				    FAILED(MFCreateAlignedMemoryBuffer(info.cbSize, info.cbAlignment ? info.cbAlignment - 1 : 15, &buf))) {
-					release(m_outSample);
-					return false;
-				}
-				m_outSample->AddBuffer(buf);
-				release(buf);
+			IMFMediaBuffer* buf = NULL;
+			if (FAILED(MFCreateSample(&m_outSample)) ||
+			    FAILED(MFCreateAlignedMemoryBuffer(info.cbSize, info.cbAlignment ? info.cbAlignment - 1 : 15, &buf))) {
+				release(m_outSample);
+				return false;
 			}
+			m_outSample->AddBuffer(buf);
+			release(buf);
 			out.pSample = m_outSample;
 		}
 		DWORD status = 0;
@@ -215,48 +315,56 @@ bool MfH264Decoder::output()
 		if (out.pEvents) out.pEvents->Release();
 
 		if (hr == MF_E_TRANSFORM_STREAM_CHANGE) {
-			// new resolution: renegotiate and retry once; our buffer may be too small now
+			// new resolution: renegotiate and retry once
 			release(m_outSample);
+			release(m_staging);
 			if (!pickOutputType()) return false;
 			m_mft->GetOutputStreamInfo(0, &info);
 			continue;
 		}
 		if (FAILED(hr)) {
+			release(m_outSample);
 			if (!weAllocate && out.pSample) out.pSample->Release();
 			return false;   // MF_E_TRANSFORM_NEED_MORE_INPUT or a real error
 		}
 
 		IMFSample* sample = out.pSample;
 		if (!sample) return false;
-		IMFMediaBuffer* buffer = NULL;
-		if (FAILED(sample->ConvertToContiguousBuffer(&buffer))) {
-			if (!weAllocate) sample->Release();
-			return false;
-		}
-		BYTE* base = NULL;
-		LONG pitch = 0;
-		if (SUCCEEDED(buffer->QueryInterface(IID_PPV_ARGS(&m_locked2d))) &&
-		    SUCCEEDED(m_locked2d->Lock2D(&base, &pitch))) {
-			// locked through the 2D interface
+		bool got;
+		if (m_hardware) {
+			got = readback(sample);
 		} else {
-			release(m_locked2d);
-			if (FAILED(buffer->Lock(&base, NULL, NULL))) {
-				release(buffer);
-				if (!weAllocate) sample->Release();
-				return false;
+			IMFMediaBuffer* buffer = NULL;
+			BYTE* base = NULL;
+			LONG pitch = 0;
+			got = SUCCEEDED(sample->ConvertToContiguousBuffer(&buffer));
+			if (got) {
+				if (SUCCEEDED(buffer->QueryInterface(IID_PPV_ARGS(&m_locked2d))) &&
+				    SUCCEEDED(m_locked2d->Lock2D(&base, &pitch))) {
+					// locked through the 2D interface
+				} else {
+					release(m_locked2d);
+					got = SUCCEEDED(buffer->Lock(&base, NULL, NULL));
+					pitch = (LONG)m_codedWidth;
+				}
 			}
-			pitch = (LONG)m_codedWidth;
+			if (got) {
+				m_locked = buffer;   // released by unlockFrame()
+				m_frame.plane[0] = base;
+				m_frame.plane[1] = base + (size_t)pitch * m_codedHeight;
+				m_frame.pitch[0] = m_frame.pitch[1] = (uint32_t)pitch;
+			} else {
+				release(buffer);
+			}
 		}
-		m_locked = buffer;   // released by unlockFrame()
-		m_frame.plane[0] = base;
-		m_frame.plane[1] = base + (size_t)pitch * m_codedHeight;
-		m_frame.pitch[0] = m_frame.pitch[1] = (uint32_t)pitch;
-		LONGLONG t = 0;
-		sample->GetSampleTime(&t);
-		m_frame.pts = (uint64_t)t / 10;
-		m_frame.key = MFGetAttributeUINT32(sample, MFSampleExtension_CleanPoint, 0) != 0;
-		if (!weAllocate) sample->Release();   // the buffer keeps the memory alive
-		return true;
+		if (got) {
+			LONGLONG t = 0;
+			sample->GetSampleTime(&t);
+			m_frame.pts = (uint64_t)t / 10;
+			m_frame.key = MFGetAttributeUINT32(sample, MFSampleExtension_CleanPoint, 0) != 0;
+		}
+		if (!weAllocate) sample->Release();   // the staging copy or locked buffer keeps the pixels
+		return got;
 	}
 	return false;
 }

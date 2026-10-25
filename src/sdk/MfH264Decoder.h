@@ -3,8 +3,9 @@
 //
 // H.264 decoder on top of Windows Media Foundation's built-in decoder MFT.
 // Takes Annex B access units (SPS/PPS in-band, as the mirror stream sends
-// them) and hands back NV12 frames. No third-party code, hardware assisted
-// when a D3D11 device is attached (see setDevice).
+// them) and hands back NV12 frames. No third-party code. When a D3D11
+// device can be created the decoding runs on the GPU and the picture is
+// read back once; otherwise the MFT decodes in software.
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
@@ -13,6 +14,10 @@ struct IMFTransform;
 struct IMFSample;
 struct IMFMediaBuffer;
 struct IMF2DBuffer;
+struct IMFDXGIDeviceManager;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ID3D11Texture2D;
 
 class MfH264Decoder
 {
@@ -45,10 +50,14 @@ public:
 	// Flush remaining pictures at end of stream; true while one came out.
 	bool drain();
 	const Frame& frame() const { return m_frame; }
+	// True when the decoder runs on the GPU through D3D11
+	bool hardware() const { return m_hardware; }
 
 private:
+	bool setupD3D11();
 	bool pickOutputType();
 	bool output();
+	bool readback(IMFSample* sample);
 	void unlockFrame();
 
 	IMFTransform* m_mft;
@@ -57,5 +66,13 @@ private:
 	IMF2DBuffer* m_locked2d;
 	uint32_t m_codedWidth, m_codedHeight;
 	bool m_draining;
+	bool m_hardware;
 	Frame m_frame;
+
+	// D3D11 path
+	ID3D11Device* m_device;
+	ID3D11DeviceContext* m_context;
+	IMFDXGIDeviceManager* m_manager;
+	ID3D11Texture2D* m_staging;   // CPU-readable copy of the current picture
+	bool m_mapped;
 };

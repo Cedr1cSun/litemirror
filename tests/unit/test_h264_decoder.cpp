@@ -5,7 +5,9 @@
 // Annex B with SPS/PPS repeated) and compares pixels with what ffmpeg decodes.
 // H.264 decoding is bit exact, so the values must match, not just be close.
 #include "doctest.h"
+#include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -73,6 +75,7 @@ TEST_CASE("decodes the test clip to NV12 with ffmpeg's pixel values")
 
 	MfH264Decoder dec;
 	REQUIRE(dec.open());
+	CHECK(dec.hardware());   // this machine has a GPU: decoding must go through D3D11
 
 	int frames = 0;
 	bool checked_first = false;
@@ -97,6 +100,50 @@ TEST_CASE("decodes the test clip to NV12 with ffmpeg's pixel values")
 	while (dec.drain()) take(dec.frame());
 	CHECK(frames == 10);
 	CHECK(checked_first);
+}
+
+// Run by hand: LITEMIRROR_BENCH_CLIP=<annex b file> litemirror-tests.exe -tc=benchmark* -no-skip
+TEST_CASE("benchmark: decode LITEMIRROR_BENCH_CLIP and report CPU time" * doctest::skip(true))
+{
+	const char* path = getenv("LITEMIRROR_BENCH_CLIP");
+	REQUIRE(path != NULL);
+	std::vector<uint8_t> clip;
+	{
+		FILE* f = fopen(path, "rb");
+		REQUIRE(f != NULL);
+		uint8_t tmp[65536];
+		size_t n;
+		while ((n = fread(tmp, 1, sizeof(tmp), f)) > 0) clip.insert(clip.end(), tmp, tmp + n);
+		fclose(f);
+	}
+	std::vector<std::vector<uint8_t>> units = access_units(clip);
+
+	MfH264Decoder dec;
+	REQUIRE(dec.open());
+
+	FILETIME c, e, k0, u0, k1, u1;
+	LARGE_INTEGER freq, t0, t1;
+	QueryPerformanceFrequency(&freq);
+	GetProcessTimes(GetCurrentProcess(), &c, &e, &k0, &u0);
+	QueryPerformanceCounter(&t0);
+	int frames = 0;
+	for (size_t i = 0; i < units.size(); i++) {
+		dec.decode(units[i].data(), units[i].size(), i * 16667);
+		while (dec.receive()) frames++;
+	}
+	while (dec.drain()) frames++;
+	QueryPerformanceCounter(&t1);
+	GetProcessTimes(GetCurrentProcess(), &c, &e, &k1, &u1);
+
+	auto ft = [](const FILETIME& a, const FILETIME& b) {
+		return (double)(((ULONGLONG)b.dwHighDateTime << 32 | b.dwLowDateTime) -
+		                ((ULONGLONG)a.dwHighDateTime << 32 | a.dwLowDateTime)) / 1e7;
+	};
+	double wall = (double)(t1.QuadPart - t0.QuadPart) / freq.QuadPart;
+	double cpu = ft(k0, k1) + ft(u0, u1);
+	MESSAGE("hardware=" << dec.hardware() << " frames=" << frames << " wall=" << wall << "s fps=" << frames / wall
+	        << " cpu=" << cpu << "s (" << 100.0 * cpu / wall << "% of one core)");
+	CHECK(frames == (int)units.size());
 }
 
 TEST_CASE("garbage input does not produce a frame or crash")
