@@ -11,6 +11,7 @@ static const char* TITLE_RUNNING = "LiteMirror - running   [s] start  [q] stop";
 CSDLPlayer::CSDLPlayer()
 	: m_window(NULL), m_renderer(NULL), m_texture(NULL), m_texW(0), m_texH(0)
 	, m_frameW(0), m_frameH(0), m_pitchY(0), m_pitchUV(0), m_framePending(0)
+	, m_reportedW(0), m_reportedH(0), m_statFrames(0), m_statStart(0)
 	, m_audio(0), m_audioRate(0), m_audioChannels(0)
 {
 	m_mutexVideo = CreateMutex(NULL, FALSE, NULL);
@@ -107,6 +108,21 @@ void CSDLPlayer::outputVideo(const lm_video_frame* f)
 {
 	if (f->width == 0 || f->height == 0) {
 		return;
+	}
+	if ((int)f->width != m_reportedW || (int)f->height != m_reportedH) {
+		m_reportedW = f->width;
+		m_reportedH = f->height;
+		printf("Video: %ux%u\n", f->width, f->height);
+	}
+	LARGE_INTEGER now, freq;
+	QueryPerformanceCounter(&now);
+	QueryPerformanceFrequency(&freq);
+	if (m_statStart == 0) m_statStart = now.QuadPart;
+	m_statFrames++;
+	if (now.QuadPart - m_statStart >= 5 * freq.QuadPart) {
+		printf("Video: %.1f fps\n", m_statFrames * (double)freq.QuadPart / (now.QuadPart - m_statStart));
+		m_statFrames = 0;
+		m_statStart = now.QuadPart;
 	}
 	{
 		CAutoLock oLock(m_mutexVideo, "outputVideo");

@@ -49,6 +49,10 @@ private:
 	std::vector<uint8_t>	m_y, m_uv;
 	int						m_frameW, m_frameH, m_pitchY, m_pitchUV;
 	LONG					m_framePending;
+	// console report of what the phone sends: size on change, fps every few seconds
+	int						m_reportedW, m_reportedH;
+	int						m_statFrames;
+	LONGLONG				m_statStart;
 
 	SDL_AudioDeviceID				m_audio;
 	unsigned						m_audioRate, m_audioChannels;
