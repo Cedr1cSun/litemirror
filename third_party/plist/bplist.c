@@ -47,7 +47,12 @@
 #define BPLIST_VERSION          ((uint8_t*)"00")
 #define BPLIST_VERSION_SIZE     2
 
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+typedef struct {
+#else
 typedef struct __attribute__((packed)) {
+#endif
     uint8_t unused[6];
     uint8_t offset_size;
     uint8_t ref_size;
@@ -55,6 +60,9 @@ typedef struct __attribute__((packed)) {
     uint64_t root_object_index;
     uint64_t offset_table_offset;
 } bplist_trailer_t;
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 enum
 {
@@ -85,6 +93,10 @@ union plist_uint_ptr
     uint64_t *u64ptr;
 };
 
+#ifdef _MSC_VER
+/* x86/x64 tolerate unaligned loads and MSVC has no typeof */
+#define get_unaligned(ptr) (*(ptr))
+#else
 #define get_unaligned(ptr)			  \
   ({                                              \
     struct __attribute__((packed)) {		  \
@@ -92,6 +104,7 @@ union plist_uint_ptr
     } *__p = (void *) (ptr);			  \
     __p->__v;					  \
   })
+#endif
 
 
 #ifndef bswap16
@@ -146,6 +159,19 @@ union plist_uint_ptr
 #define beNtoh(x,n) be64toh(x << ((8-n) << 3))
 #endif
 
+#ifdef _MSC_VER
+/* same as the statement-expression macro below, which MSVC cannot parse */
+static uint64_t UINT_TO_HOST(const char* x, uint8_t n)
+{
+	union plist_uint_ptr up;
+	up.src = (n > 8) ? x + (n - 8) : x;
+	return n >= 8 ? be64toh(get_unaligned(up.u64ptr)) :
+	       n == 4 ? be32toh(get_unaligned(up.u32ptr)) :
+	       n == 2 ? be16toh(get_unaligned(up.u16ptr)) :
+	       n == 1 ? *up.u8ptr :
+	       beNtoh(get_unaligned(up.u64ptr), n);
+}
+#else
 #define UINT_TO_HOST(x, n) \
 	({ \
 		union plist_uint_ptr __up; \
@@ -157,6 +183,7 @@ union plist_uint_ptr
 		beNtoh( get_unaligned(__up.u64ptr), n) \
 		)))); \
 	})
+#endif
 
 #define get_needed_bytes(x) \
 		( ((uint64_t)x) < (1ULL << 8) ? 1 : \

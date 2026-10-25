@@ -55,7 +55,12 @@ static void internal_plist_deinit(void)
     plist_xml_deinit();
 }
 
-#ifdef WIN32
+#if defined(_MSC_VER)
+
+/* Static library: there is no DllMain to hook, and both init routines only
+ * read debug environment variables, so nothing is lost by skipping them. */
+
+#elif defined(WIN32)
 
 typedef volatile struct {
     LONG lock;

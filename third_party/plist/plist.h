@@ -30,14 +30,20 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef _MSC_VER
+#include <winsock2.h>   /* struct timeval; MSVC has no sys/time.h */
+#else
 #include <sys/time.h>
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
 #pragma warning(disable:4244)
 #endif
 
-#ifdef WIN32
+#ifdef _MSC_VER
+  #define PLIST_API       /* built into a static library */
+#elif defined(WIN32)
   #define PLIST_API __declspec( dllexport )
 #else
   #ifdef HAVE_FVISIBILITY
