@@ -197,8 +197,8 @@ airplay_handler_play(airplay_conn_t* conn,
 	if (volume_node) plist_get_real_val(volume_node, &volume);
 	if (content_location_node) plist_get_string_val(content_location_node, &url);
 
-	auto video_play = conn->airplay->callbacks.video_play;
-	if (video_play != NULL) {
+	/* no 'auto' here: in C it means int and would truncate the pointer */
+	if (conn->airplay->callbacks.video_play != NULL) {
 		conn->airplay->callbacks.video_play(conn->airplay->callbacks.cls, url, volume, start_pos);
 	}
 
