@@ -335,19 +335,30 @@ raop_handler_setup(raop_conn_t *conn,
         char* eiv= NULL;
         uint64_t eiv_len = 0;
         plist_get_data_val(eiv_note, &eiv, &eiv_len);
-        memcpy(aesiv, eiv, 16);
         logger_log(conn->raop->logger, LOGGER_DEBUG, "eiv_len = %llu", eiv_len);
 
         plist_t ekey_note = plist_dict_get_item(root_node, "ekey");
         char* ekey= NULL;
         uint64_t ekey_len = 0;
-        plist_get_data_val(ekey_note, &ekey, &ekey_len);
+        if (ekey_note) plist_get_data_val(ekey_note, &ekey, &ekey_len);
         logger_log(conn->raop->logger, LOGGER_DEBUG, "ekey_len = %llu", ekey_len);
 
+        /* libplist getters assert on a NULL node and the key material has a
+         * fixed size, so refuse anything else instead of reading past it */
+        if (eiv_len != 16 || ekey_len != 72) {
+            logger_log(conn->raop->logger, LOGGER_ERR, "SETUP needs a 16-byte eiv and a 72-byte ekey, dropping client");
+            http_response_set_disconnect(response, 1);
+            free(eiv);
+            free(ekey);
+            plist_free(root_node);
+            return;
+        }
+        memcpy(aesiv, eiv, 16);
+
         // 时间port
-		uint64_t timing_rport;
+		uint64_t timing_rport = 0;
         plist_t time_note = plist_dict_get_item(root_node, "timingPort");
-        plist_get_uint_val(time_note, &timing_rport);
+        if (time_note) plist_get_uint_val(time_note, &timing_rport);
 		logger_log(conn->raop->logger, LOGGER_DEBUG, "timing_rport = %llu", timing_rport);
 
         // ekey是72字节
@@ -359,11 +370,11 @@ raop_handler_setup(raop_conn_t *conn,
 		// name
 		char* name = NULL;
 		plist_t name_node = plist_dict_get_item(root_node, "name");
-		plist_get_string_val(name_node, &name);
+		if (name_node) plist_get_string_val(name_node, &name);
 
 		char* deviceId = NULL;
 		plist_t device_id_node = plist_dict_get_item(root_node, "deviceID");
-		plist_get_string_val(device_id_node, &deviceId);
+		if (device_id_node) plist_get_string_val(device_id_node, &deviceId);
 
         conn->raop_rtp = raop_rtp_init(conn->raop->logger, &conn->raop->callbacks, conn->remote, conn->remotelen, 
 			name, deviceId,
@@ -671,7 +682,7 @@ raop_handler_teardown(raop_conn_t* conn,
 		plist_t stream_note = plist_array_get_item(streams_note, 0);
 		if (stream_note) {
 			plist_t type_node = plist_dict_get_item(stream_note, "type");
-			plist_get_uint_val(type_node, &type);
+			if (type_node) plist_get_uint_val(type_node, &type);
 			logger_log(conn->raop->logger, LOGGER_DEBUG, "type = %llu", type);
 		}
 	}

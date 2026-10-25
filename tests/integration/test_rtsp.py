@@ -115,5 +115,51 @@ class Session(unittest.TestCase):
         self.assertEqual(self.host.wait_for('EVENT play'), 'EVENT play http://example.com/clip.mp4')
 
 
+class Malformed(unittest.TestCase):
+    """Requests a buggy or hostile client might send. The server may refuse
+    them, but it must stay up for the next client."""
+
+    def setUp(self):
+        self.host = TestHost()
+        self.assertEqual(self.host.start(), 'OK')
+        self.client = RtspClient(self.host.raop_port)
+
+    def tearDown(self):
+        self.client.close()
+        self.host.stop()
+        self.host.close()
+
+    def assertServerStillAnswers(self):
+        self.assertIsNone(self.host.proc.poll(), 'testhost died')
+        fresh = RtspClient(self.host.raop_port)
+        try:
+            self.assertEqual(fresh.options()[0], 200)
+        finally:
+            fresh.close()
+
+    def test_setup_with_missing_keys_does_not_kill_the_server(self):
+        try:
+            self.client._plist('SETUP', self.client.SESSION_URL, {'et': 32, 'eiv': bytes(16)})
+        except (ConnectionError, OSError):
+            pass   # dropping the connection is an acceptable answer
+        self.assertServerStillAnswers()
+
+    def test_setup_with_short_keys_does_not_kill_the_server(self):
+        try:
+            self.client._plist('SETUP', self.client.SESSION_URL,
+                               {'et': 32, 'eiv': b'\x01', 'ekey': b'\x02', 'timingPort': 0,
+                                'name': DEVICE, 'deviceID': DEVICE_ID})
+        except (ConnectionError, OSError):
+            pass
+        self.assertServerStillAnswers()
+
+    def test_teardown_without_stream_type_does_not_kill_the_server(self):
+        try:
+            self.client._plist('TEARDOWN', self.client.SESSION_URL, {'streams': [{}]})
+        except (ConnectionError, OSError):
+            pass
+        self.assertServerStillAnswers()
+
+
 if __name__ == '__main__':
     unittest.main()
