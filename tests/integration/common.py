@@ -10,6 +10,14 @@ import time
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 
+def free_port():
+    """Ask the OS for a port nobody is listening on right now."""
+    import socket
+    with socket.socket() as s:
+        s.bind(('127.0.0.1', 0))
+        return s.getsockname()[1]
+
+
 def testhost_path():
     exe = os.environ.get('LITEMIRROR_TESTHOST')
     if not exe:
@@ -62,8 +70,10 @@ class TestHost:
         reply = self.wait_for(('OK', 'FAIL', 'ERR'), timeout)
         return reply
 
-    def start(self, name='LiteMirrorTest', raop_port=5200, airplay_port=7200):
-        return self.cmd(f'start {name} {raop_port} {airplay_port}')
+    def start(self, name='LiteMirrorTest', raop_port=None, airplay_port=None):
+        self.raop_port = raop_port or free_port()
+        self.airplay_port = airplay_port or free_port()
+        return self.cmd(f'start {name} {self.raop_port} {self.airplay_port}')
 
     def stop(self):
         return self.cmd('stop')

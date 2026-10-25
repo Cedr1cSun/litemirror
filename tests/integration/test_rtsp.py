@@ -6,14 +6,12 @@ import unittest
 from common import TestHost
 from rtsp_client import RtspClient
 
-RAOP, AIRPLAY = 5201, 7201
-
 
 class Rtsp(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.host = TestHost()
-        assert cls.host.start(raop_port=RAOP, airplay_port=AIRPLAY) == 'OK'
+        assert cls.host.start() == 'OK'
 
     @classmethod
     def tearDownClass(cls):
@@ -21,7 +19,7 @@ class Rtsp(unittest.TestCase):
         cls.host.close()
 
     def setUp(self):
-        self.client = RtspClient(RAOP)
+        self.client = RtspClient(self.host.raop_port)
 
     def tearDown(self):
         self.client.close()
