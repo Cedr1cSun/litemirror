@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{0b197a77-64b8-5b20-934f-27057aa26592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{f39835be-4ca4-5052-968a-6a438852b8c1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="FgAirplayChannel.cpp" />
+    <ClCompile Include="src\Airplay2Export.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CAutoLock.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FgAirplayServer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CAutoLock.h" />
+    <ClInclude Include="FgAirplayChannel.h" />
+    <ClInclude Include="FgAirplayServer.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="include\Airplay2Def.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Airplay2Head.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
