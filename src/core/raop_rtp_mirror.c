@@ -624,16 +624,18 @@ void raop_rtp_mirror_stop(raop_rtp_mirror_t *raop_rtp_mirror) {
 void raop_rtp_mirror_destroy(raop_rtp_mirror_t *raop_rtp_mirror) {
     if (raop_rtp_mirror) {
         raop_rtp_mirror_stop(raop_rtp_mirror);
-        MUTEX_DESTROY(raop_rtp_mirror->run_mutex);
-        MUTEX_DESTROY(raop_rtp_mirror->time_mutex);
-        COND_DESTROY(raop_rtp_mirror->time_cond);
-        mirror_buffer_destroy(raop_rtp_mirror->buffer);
+        /* The exit thread may still be inside raop_rtp_mirror_stop; wait for it
+         * before the mutexes it uses are destroyed. */
         if (raop_rtp_mirror->thread_exit_exception) {
             logger_log(raop_rtp_mirror->logger, LOGGER_INFO, "Exiting exception thread");
             THREAD_JOIN(raop_rtp_mirror->thread_exit_exception);
             raop_rtp_mirror->thread_exit_exception = NULL;
             logger_log(raop_rtp_mirror->logger, LOGGER_INFO, "Exception thread exit");
         }
+        MUTEX_DESTROY(raop_rtp_mirror->run_mutex);
+        MUTEX_DESTROY(raop_rtp_mirror->time_mutex);
+        COND_DESTROY(raop_rtp_mirror->time_cond);
+        mirror_buffer_destroy(raop_rtp_mirror->buffer);
 
         free(raop_rtp_mirror);
     }
