@@ -94,7 +94,10 @@ class Lifecycle(unittest.TestCase):
     def test_mdns_registers_again_after_restart(self):
         name = 'LiteMirrorAgain'
         for _ in range(2):
+            t = time.monotonic()
             self.assertEqual(self.host.start(name=name), 'OK')
+            # mDNS probing costs ~0.75 s per service; both must run at once
+            self.assertLess(time.monotonic() - t, 1.2, 'start too slow')
             with MdnsBrowser(name) as browser:
                 browser.wait_for('_raop._tcp.local.')
             self.assertEqual(self.host.stop(), 'OK')

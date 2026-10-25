@@ -34,6 +34,7 @@ typedef struct service_s {
 	DNS_SERVICE_REGISTER_REQUEST request;
 	HANDLE done;       /* set by the completion callback */
 	DWORD status;
+	int pending;       /* registration issued, callback not yet consumed */
 	int registered;
 } service_t;
 
@@ -64,10 +65,11 @@ static VOID WINAPI on_complete(DWORD status, PVOID context, PDNS_SERVICE_INSTANC
 	SetEvent(s->done);
 }
 
-/* Blocks until Windows has confirmed the registration, so the caller gets a
- * real answer. Returns 1 on success, -1 on failure, like the old code. */
-static int register_service(service_t *s, const char *instance_name, unsigned short port,
-                            const char *const *keys, const char *const *values, int count)
+/* Issues the registration; wait_service() collects the answer. Splitting the
+ * two lets both services probe at the same time (mDNS probing takes ~0.75 s
+ * each). Returns 0 when issued, -1 on failure. */
+static int issue_service(service_t *s, const char *instance_name, unsigned short port,
+                         const char *const *keys, const char *const *values, int count)
 {
 	dnssd_t *d = s->owner;
 	WCHAR *wname = to_wide(instance_name);
@@ -109,6 +111,18 @@ static int register_service(service_t *s, const char *instance_name, unsigned sh
 		s->instance = NULL;
 		return -1;
 	}
+	s->pending = 1;
+	return 0;
+}
+
+/* Returns 1 when registered, -1 when Windows refused or did not answer. */
+static int wait_service(service_t *s)
+{
+	dnssd_t *d = s->owner;
+	if (!s->pending) {
+		return s->registered ? 1 : -1;
+	}
+	s->pending = 0;
 	if (WaitForSingleObject(s->done, REGISTER_TIMEOUT_MS) != WAIT_OBJECT_0) {
 		/* still pending: the callback may yet touch the instance, leak it */
 		s->instance = NULL;
@@ -126,6 +140,9 @@ static int register_service(service_t *s, const char *instance_name, unsigned sh
 static void unregister_service(service_t *s)
 {
 	dnssd_t *d = s->owner;
+	if (s->pending) {
+		wait_service(s);   /* stop() after a failed start(): let Windows finish first */
+	}
 	if (!s->registered) {
 		return;
 	}
@@ -222,7 +239,7 @@ int dnssd_register_raop(dnssd_t *dnssd, const char *name, unsigned short port,
 	if (snprintf(servname + n, sizeof(servname) - n, "@%s._raop._tcp.local", name) >= (int)(sizeof(servname) - n)) {
 		return -2;
 	}
-	return register_service(&dnssd->raop, servname, port, keys, values, sizeof(keys) / sizeof(keys[0]));
+	return issue_service(&dnssd->raop, servname, port, keys, values, sizeof(keys) / sizeof(keys[0]));
 }
 
 int dnssd_register_airplay(dnssd_t *dnssd, const char *name, unsigned short port,
@@ -243,7 +260,16 @@ int dnssd_register_airplay(dnssd_t *dnssd, const char *name, unsigned short port
 	if (snprintf(servname, sizeof(servname), "%s._airplay._tcp.local", name) >= (int)sizeof(servname)) {
 		return -2;
 	}
-	return register_service(&dnssd->airplay, servname, port, keys, values, sizeof(keys) / sizeof(keys[0]));
+	return issue_service(&dnssd->airplay, servname, port, keys, values, sizeof(keys) / sizeof(keys[0]));
+}
+
+int dnssd_wait(dnssd_t *dnssd)
+{
+	int raop, airplay;
+	assert(dnssd);
+	raop = wait_service(&dnssd->raop);
+	airplay = wait_service(&dnssd->airplay);
+	return (raop < 0 || airplay < 0) ? -1 : 0;
 }
 
 void dnssd_unregister_raop(dnssd_t *dnssd)

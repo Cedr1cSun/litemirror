@@ -97,7 +97,8 @@ lm_error FgAirplayServer::start(const char serverName[AIRPLAY_NAME_LEN],
 			break;
 		}
 		if (dnssd_register_raop(m_pDnsSd, serverName, raop_port, hwaddr, sizeof(hwaddr), 0) < 0 ||
-		    dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr)) < 0) {
+		    dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr)) < 0 ||
+		    dnssd_wait(m_pDnsSd) < 0) {
 			err = LM_E_MDNS_REGISTER;
 			break;
 		}
