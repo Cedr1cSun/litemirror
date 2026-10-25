@@ -7,3 +7,4 @@ build/
 CLAUDE.md
 docs/
 NOTICE.md
+__pycache__/
