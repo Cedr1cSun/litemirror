@@ -12,7 +12,7 @@
  *  Lesser General Public License for more details.
  */
 
-#include "plist/include/plist.h"
+#include "plist/plist.h"
 #include <ctype.h>
 #include <stdlib.h>
 /* This file should be only included from raop.c as it defines static handler

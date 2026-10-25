@@ -61,7 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;include;$(SolutionDir)third_party;$(SolutionDir)third_party\prebuilt;$(SolutionDir)third_party\fdk-aac\libAACdec\include;$(SolutionDir)third_party\fdk-aac\libArithCoding\include;$(SolutionDir)third_party\fdk-aac\libDRCdec\include;$(SolutionDir)third_party\fdk-aac\libFDK\include;$(SolutionDir)third_party\fdk-aac\libMpegTPDec\include;$(SolutionDir)third_party\fdk-aac\libPCMutils\include;$(SolutionDir)third_party\fdk-aac\libSACdec\include;$(SolutionDir)third_party\fdk-aac\libSBRdec\include;$(SolutionDir)third_party\fdk-aac\libSYS\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;include;$(SolutionDir)third_party;$(SolutionDir)third_party\plist;$(SolutionDir)third_party\fdk-aac\libAACdec\include;$(SolutionDir)third_party\fdk-aac\libArithCoding\include;$(SolutionDir)third_party\fdk-aac\libDRCdec\include;$(SolutionDir)third_party\fdk-aac\libFDK\include;$(SolutionDir)third_party\fdk-aac\libMpegTPDec\include;$(SolutionDir)third_party\fdk-aac\libPCMutils\include;$(SolutionDir)third_party\fdk-aac\libSACdec\include;$(SolutionDir)third_party\fdk-aac\libSBRdec\include;$(SolutionDir)third_party\fdk-aac\libSYS\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -78,7 +78,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;include;$(SolutionDir)third_party;$(SolutionDir)third_party\prebuilt;$(SolutionDir)third_party\fdk-aac\libAACdec\include;$(SolutionDir)third_party\fdk-aac\libArithCoding\include;$(SolutionDir)third_party\fdk-aac\libDRCdec\include;$(SolutionDir)third_party\fdk-aac\libFDK\include;$(SolutionDir)third_party\fdk-aac\libMpegTPDec\include;$(SolutionDir)third_party\fdk-aac\libPCMutils\include;$(SolutionDir)third_party\fdk-aac\libSACdec\include;$(SolutionDir)third_party\fdk-aac\libSBRdec\include;$(SolutionDir)third_party\fdk-aac\libSYS\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;include;$(SolutionDir)third_party;$(SolutionDir)third_party\plist;$(SolutionDir)third_party\fdk-aac\libAACdec\include;$(SolutionDir)third_party\fdk-aac\libArithCoding\include;$(SolutionDir)third_party\fdk-aac\libDRCdec\include;$(SolutionDir)third_party\fdk-aac\libFDK\include;$(SolutionDir)third_party\fdk-aac\libMpegTPDec\include;$(SolutionDir)third_party\fdk-aac\libPCMutils\include;$(SolutionDir)third_party\fdk-aac\libSACdec\include;$(SolutionDir)third_party\fdk-aac\libSBRdec\include;$(SolutionDir)third_party\fdk-aac\libSYS\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,6 +92,22 @@
     <ClCompile Include="..\..\third_party\tiny-aes\aes.c">
       <ObjectFileName>$(IntDir)tiny-aes_aes.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\base64.c">
+      <ObjectFileName>$(IntDir)libplist_base64.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\bplist.c" />
+    <ClCompile Include="..\..\third_party\plist\bytearray.c" />
+    <ClCompile Include="..\..\third_party\plist\cnary.c" />
+    <ClCompile Include="..\..\third_party\plist\hashtable.c" />
+    <ClCompile Include="..\..\third_party\plist\list.c" />
+    <ClCompile Include="..\..\third_party\plist\node.c" />
+    <ClCompile Include="..\..\third_party\plist\node_list.c" />
+    <ClCompile Include="..\..\third_party\plist\plist.c">
+      <ObjectFileName>$(IntDir)libplist_plist.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\ptrarray.c" />
+    <ClCompile Include="..\..\third_party\plist\time64.c" />
+    <ClCompile Include="..\..\third_party\plist\xplist.c" />
     <ClCompile Include="aes_ctr.c" />
     <ClCompile Include="airplay.c" />
     <ClCompile Include="base64.c" />

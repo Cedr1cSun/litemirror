@@ -109,11 +109,50 @@
     <Filter Include="third_party\tiny-aes">
       <UniqueIdentifier>{7172bf4a-c8f1-5491-9f1c-3a541e244b06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="third_party\plist">
+      <UniqueIdentifier>{3661456a-a9e1-5830-ba3f-ae557f08520c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compat.c" />
     <ClCompile Include="..\..\third_party\tiny-aes\aes.c">
       <Filter>third_party\tiny-aes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\base64.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\bplist.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\bytearray.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\cnary.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\hashtable.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\list.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\node.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\node_list.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\plist.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\ptrarray.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\time64.c">
+      <Filter>third_party\plist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\third_party\plist\xplist.c">
+      <Filter>third_party\plist</Filter>
     </ClCompile>
     <ClCompile Include="aes_ctr.c" />
     <ClCompile Include="airplay.c" />

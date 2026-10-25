@@ -69,8 +69,7 @@
       <AdditionalDependencies>ws2_32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\ffmpeg\lib\$(PlatformTarget)\*.dll" "$(OutDir)"
-xcopy /y "$(SolutionDir)third_party\prebuilt\plist\lib\$(PlatformTarget)\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\ffmpeg\lib\$(PlatformTarget)\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -93,8 +92,7 @@ xcopy /y "$(SolutionDir)third_party\prebuilt\plist\lib\$(PlatformTarget)\*.dll" 
       <AdditionalDependencies>ws2_32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\ffmpeg\lib\$(PlatformTarget)\*.dll" "$(OutDir)"
-xcopy /y "$(SolutionDir)third_party\prebuilt\plist\lib\$(PlatformTarget)\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(SolutionDir)third_party\prebuilt\ffmpeg\lib\$(PlatformTarget)\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
