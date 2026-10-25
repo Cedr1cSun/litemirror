@@ -39,6 +39,15 @@ public:
 		memcpy(f.pitch, d->pitch, sizeof(f.pitch));
 		m_cb.on_video(m_cb.user, id, &f);
 	}
+	void audioSetVolume(float volume, const char*, const char* id) {
+		if (m_cb.on_volume) m_cb.on_volume(m_cb.user, id, volume);
+	}
+	void audioSetMetadata(const void* buffer, int buflen, const char*, const char* id) {
+		if (m_cb.on_metadata) m_cb.on_metadata(m_cb.user, id, buffer, (size_t)buflen);
+	}
+	void audioSetCoverArt(const void* buffer, int buflen, const char*, const char* id) {
+		if (m_cb.on_cover_art) m_cb.on_cover_art(m_cb.user, id, buffer, (size_t)buflen);
+	}
 	void videoPlay(char* url, double volume, double startPos) {
 		if (m_cb.on_play_url) m_cb.on_play_url(m_cb.user, url, (float)volume, startPos);
 	}

@@ -10,7 +10,9 @@
 //   quit
 //
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
-// EVENT video <w>x<h>, EVENT audio <bytes>, EVENT play <url>, LOG <level> <msg>
+// EVENT video <w>x<h>, EVENT audio <bytes>, EVENT volume <id> <db>,
+// EVENT metadata <id> <bytes>, EVENT coverart <id> <bytes>, EVENT play <url>,
+// LOG <level> <msg>
 
 #include <crtdbg.h>
 #include <stdio.h>
@@ -37,6 +39,18 @@ static void on_video(void*, const char*, const lm_video_frame* f)
 {
 	if (g_video++ % 60 == 0) printf("EVENT video %ux%u\n", f->width, f->height);
 }
+static void on_volume(void*, const char* id, float db)
+{
+	printf("EVENT volume %s %.1f\n", id, db);
+}
+static void on_metadata(void*, const char* id, const void*, size_t size)
+{
+	printf("EVENT metadata %s %zu\n", id, size);
+}
+static void on_cover_art(void*, const char* id, const void*, size_t size)
+{
+	printf("EVENT coverart %s %zu\n", id, size);
+}
 static void on_play_url(void*, const char* url, float, double)
 {
 	printf("EVENT play %s\n", url);
@@ -62,6 +76,9 @@ int main()
 	cb.on_disconnected = on_disconnected;
 	cb.on_audio = on_audio;
 	cb.on_video = on_video;
+	cb.on_volume = on_volume;
+	cb.on_metadata = on_metadata;
+	cb.on_cover_art = on_cover_art;
 	cb.on_play_url = on_play_url;
 	cb.on_log = on_log;
 

@@ -17,6 +17,9 @@ public:
 	virtual void disconnected(const char* remoteName, const char* remoteDeviceId);
 	virtual void outputAudio(SFgAudioFrame* data, const char* remoteName, const char* remoteDeviceId);
 	virtual void outputVideo(SFgVideoFrame* data, const char* remoteName, const char* remoteDeviceId);
+	virtual void audioSetVolume(float volume, const char* remoteName, const char* remoteDeviceId);
+	virtual void audioSetMetadata(const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId);
+	virtual void audioSetCoverArt(const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId);
 
 	virtual void videoPlay(char* url, double volume, double startPos);
 	virtual void videoGetPlayInfo(double* duration, double* position, double* rate);

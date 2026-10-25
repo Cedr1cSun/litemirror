@@ -65,5 +65,55 @@ class Rtsp(unittest.TestCase):
         self.assertEqual(body, b'')
 
 
+DEVICE = 'TestPhone'
+DEVICE_ID = 'AA:BB:CC:DD:EE:FF'
+
+
+class Session(unittest.TestCase):
+    """What a paired phone does after fp-setup, as far as we can go without
+    FairPlay: open the session, start audio, send SET_PARAMETER updates."""
+
+    def setUp(self):
+        self.host = TestHost()
+        self.assertEqual(self.host.start(), 'OK')
+        self.client = RtspClient(self.host.raop_port)
+        self.client.pair_setup()
+        self.assertEqual(self.client.pair_verify(), (200, 200))
+        self.assertEqual(self.client.setup_session(DEVICE, DEVICE_ID)[0], 200)
+        self.assertEqual(self.client.setup_audio()[0], 200)
+
+    def tearDown(self):
+        self.client.close()
+        self.host.stop()
+        self.host.close()
+
+    def test_audio_stream_reports_the_device_connected(self):
+        self.assertEqual(self.host.wait_for('EVENT connected'), f'EVENT connected {DEVICE} {DEVICE_ID}')
+        self.client.close()
+        self.assertEqual(self.host.wait_for('EVENT disconnected'), f'EVENT disconnected {DEVICE} {DEVICE_ID}')
+
+    def test_volume_is_forwarded(self):
+        self.assertEqual(self.client.set_volume(-20.0)[0], 200)
+        self.assertEqual(self.host.wait_for('EVENT volume'), f'EVENT volume {DEVICE_ID} -20.0')
+
+    def test_metadata_is_forwarded(self):
+        dmap = b'mlit' + (36).to_bytes(4, 'big') + b'minm' + (5).to_bytes(4, 'big') + b'Track'
+        self.assertEqual(self.client.set_metadata(dmap)[0], 200)
+        self.assertEqual(self.host.wait_for('EVENT metadata'), f'EVENT metadata {DEVICE_ID} {len(dmap)}')
+
+    def test_cover_art_is_forwarded(self):
+        jpeg = b'\xff\xd8\xff\xe0' + bytes(300) + b'\xff\xd9'
+        self.assertEqual(self.client.set_cover_art(jpeg)[0], 200)
+        self.assertEqual(self.host.wait_for('EVENT coverart'), f'EVENT coverart {DEVICE_ID} {len(jpeg)}')
+
+    def test_play_url_is_forwarded(self):
+        http = RtspClient(self.host.airplay_port, proto='HTTP/1.1')
+        try:
+            self.assertEqual(http.play('http://example.com/clip.mp4', 0.25)[0], 200)
+        finally:
+            http.close()
+        self.assertEqual(self.host.wait_for('EVENT play'), 'EVENT play http://example.com/clip.mp4')
+
+
 if __name__ == '__main__':
     unittest.main()

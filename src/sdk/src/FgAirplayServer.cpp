@@ -214,14 +214,29 @@ void FgAirplayServer::disconnected(void* cls, const char* remoteName, const char
 
 void FgAirplayServer::audio_set_volume(void* cls, void* session, float volume, const char* remoteName, const char* remoteDeviceId)
 {
+	FgAirplayServer* pServer = (FgAirplayServer*)cls;
+	if (pServer && pServer->m_pCallback)
+	{
+		pServer->m_pCallback->audioSetVolume(volume, remoteName, remoteDeviceId);
+	}
 }
 
 void FgAirplayServer::audio_set_metadata(void* cls, void* session, const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId)
 {
+	FgAirplayServer* pServer = (FgAirplayServer*)cls;
+	if (pServer && pServer->m_pCallback)
+	{
+		pServer->m_pCallback->audioSetMetadata(buffer, buflen, remoteName, remoteDeviceId);
+	}
 }
 
 void FgAirplayServer::audio_set_coverart(void* cls, void* session, const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId)
 {
+	FgAirplayServer* pServer = (FgAirplayServer*)cls;
+	if (pServer && pServer->m_pCallback)
+	{
+		pServer->m_pCallback->audioSetCoverArt(buffer, buflen, remoteName, remoteDeviceId);
+	}
 }
 
 void FgAirplayServer::audio_process(void* cls, pcm_data_struct* data, const char* remoteName, const char* remoteDeviceId)

@@ -66,6 +66,18 @@ void CAirServerCallback::outputVideo(SFgVideoFrame* data, const char* remoteName
 	}
 }
 
+void CAirServerCallback::audioSetVolume(float volume, const char* remoteName, const char* remoteDeviceId)
+{
+}
+
+void CAirServerCallback::audioSetMetadata(const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId)
+{
+}
+
+void CAirServerCallback::audioSetCoverArt(const void* buffer, int buflen, const char* remoteName, const char* remoteDeviceId)
+{
+}
+
 void CAirServerCallback::videoPlay(char* url, double volume, double startPos)
 {
 	printf("Play: %s", url);
