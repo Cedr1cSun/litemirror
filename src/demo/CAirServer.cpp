@@ -37,6 +37,7 @@ bool getHostName(char hostName[512])
 			}
 		}
 	}
+	return hostName[0] != '\0';
 }
 
 void CAirServer::start(CSDLPlayer* pPlayer)
