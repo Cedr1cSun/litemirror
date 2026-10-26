@@ -34,6 +34,7 @@ namespace LiteMirror
         public bool LowLatency = true;
         public bool FollowRotation = true;
         public int Scaler;                // 0 video processor, 1 bicubic shader when enlarging
+        public int SuperResolution;       // 0 off, 1 AMD FSR 1.0, 2 NVIDIA RTX VSR, 3 Intel VSR; overrides Scaler
         public int FullscreenMonitor = -1; // -1 = the monitor the window is on
         public int Matrix;                // 0 auto, 1 BT.601, 2 BT.709
         public int Range;                 // 0 auto, 1 limited, 2 full

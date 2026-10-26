@@ -122,6 +122,14 @@
                     </DockPanel>
                     <Border Style="{StaticResource RowLine}" />
                     <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="SuperBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnSuper" />
+                        <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
+                            <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_Super}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{local:S H_Super}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
                         <ToggleButton x:Name="RotateSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnRotate" />
                         <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
                             <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_Rotate}" />

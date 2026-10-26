@@ -45,6 +45,7 @@ namespace LiteMirror
             Fill(QualityBox, "1080p", "720p", "540p");
             Fill(FpsBox, "60 fps", "30 fps");
             Fill(ScalerBox, "Scaler_Std", "Scaler_Sharp");
+            FillSuper();
             FillMonitors();
             Fill(MatrixBox, "Matrix_Auto", "Matrix_601", "Matrix_709");
             Fill(RangeBox, "Range_Auto", "Range_Limited", "Range_Full");
@@ -71,6 +72,8 @@ namespace LiteMirror
         static readonly int[] Rates = { 60, 30 };
         static readonly int[] Seconds = { 2, 0, 1 };   // ask, refuse, replace: the order of SecondBox
         static readonly int[] LogLevels = { 3, 4, 6, 7 };
+        static readonly string[] SuperKeys = { "Super_Off", "Super_Fsr", "Super_Nvidia", "Super_Intel" };
+        int[] supers;   // the modes SuperBox offers, in its order
 
         void Fill(ComboBox box, params string[] keys)
         {
@@ -93,6 +96,17 @@ namespace LiteMirror
                 }
             }
             if (!stored) AddressBox.Items.Add(new Choice(s.Address, s.Address + " (" + Strings.Get("Address_Gone") + ")"));
+        }
+
+        // Off and FSR for every GPU; a driver's own super resolution only where that driver is
+        void FillSuper()
+        {
+            uint vendor = Native.lm_gpu_vendor();
+            var modes = new List<int> { 0, 1 };
+            if (vendor == 0x10DE) modes.Add(2);
+            if (vendor == 0x8086) modes.Add(3);
+            supers = modes.ToArray();
+            foreach (int mode in supers) SuperBox.Items.Add(Strings.Get(SuperKeys[mode]));
         }
 
         void FillMonitors()
@@ -147,6 +161,8 @@ namespace LiteMirror
             HwSwitch.IsChecked = s.HwDecode;
             LowSwitch.IsChecked = s.LowLatency;
             ScalerBox.SelectedIndex = s.Scaler;
+            SuperBox.SelectedIndex = Math.Max(0, Array.IndexOf(supers, s.SuperResolution));
+            ScalerBox.IsEnabled = s.SuperResolution == 0;
             RotateSwitch.IsChecked = s.FollowRotation;
             InfoSwitch.IsChecked = s.ShowInfo;
             MonitorBox.SelectedIndex = s.FullscreenMonitor + 1 < MonitorBox.Items.Count ? s.FullscreenMonitor + 1 : 0;
@@ -210,6 +226,11 @@ namespace LiteMirror
         void OnHw(object sender, RoutedEventArgs e) => Set("HwDecode", () => s.HwDecode = HwSwitch.IsChecked == true);
         void OnLow(object sender, RoutedEventArgs e) => Set("LowLatency", () => s.LowLatency = LowSwitch.IsChecked == true);
         void OnScaler(object sender, SelectionChangedEventArgs e) => Set("Scaler", () => s.Scaler = Math.Max(0, ScalerBox.SelectedIndex));
+        void OnSuper(object sender, SelectionChangedEventArgs e) => Set("SuperResolution", () =>
+        {
+            s.SuperResolution = supers[Math.Max(0, SuperBox.SelectedIndex)];
+            ScalerBox.IsEnabled = s.SuperResolution == 0;
+        });
         void OnRotate(object sender, RoutedEventArgs e) => Set("FollowRotation", () => s.FollowRotation = RotateSwitch.IsChecked == true);
         void OnInfo(object sender, RoutedEventArgs e) => Set("ShowInfo", () => s.ShowInfo = InfoSwitch.IsChecked == true);
         void OnMonitor(object sender, SelectionChangedEventArgs e) => Set("FullscreenMonitor", () => s.FullscreenMonitor = MonitorBox.SelectedIndex - 1);

@@ -22,6 +22,7 @@ namespace LiteMirror.Tests
             Assert.True(s.LowLatency);
             Assert.True(s.FollowRotation);
             Assert.Equal(0, s.Scaler);             // the video processor's own filter
+            Assert.Equal(0, s.SuperResolution);    // off: the scaler decides
             Assert.True(s.AudioEnabled);
             Assert.True(s.FollowVolume);
             Assert.False(s.CloseToTray);

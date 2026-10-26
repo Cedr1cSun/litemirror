@@ -62,6 +62,11 @@
   <data name="R_Scaler" xml:space="preserve"><value>Enlarging</value></data>
   <data name="Scaler_Std" xml:space="preserve"><value>Standard (graphics driver)</value></data>
   <data name="Scaler_Sharp" xml:space="preserve"><value>Sharp (bicubic)</value></data>
+  <data name="R_Super" xml:space="preserve"><value>Super resolution</value></data>
+  <data name="Super_Off" xml:space="preserve"><value>Off</value></data>
+  <data name="Super_Fsr" xml:space="preserve"><value>AMD FSR 1.0</value></data>
+  <data name="Super_Nvidia" xml:space="preserve"><value>NVIDIA RTX Video Super Resolution</value></data>
+  <data name="Super_Intel" xml:space="preserve"><value>Intel VSR</value></data>
   <data name="R_Rotate" xml:space="preserve"><value>Turn the window when the phone rotates</value></data>
   <data name="R_Info" xml:space="preserve"><value>Show picture info over the picture</value></data>
   <data name="R_Monitor" xml:space="preserve"><value>Full-screen monitor</value></data>
@@ -136,6 +141,7 @@
   <data name="H_Hw" xml:space="preserve"><value>Decode H.264 on the GPU through Media Foundation. Off switches to software decoding at a much higher CPU cost; for isolating driver problems.</value></data>
   <data name="H_Low" xml:space="preserve"><value>Decoder in AVLowLatencyMode, Present with interval 0 and one frame in the DXGI queue instead of three; in full screen the present skips the vertical blank (tearing allowed). Off presents on vsync with the default queue: two to four frames more delay, no tearing.</value></data>
   <data name="H_Scaler" xml:space="preserve"><value>Interpolation used when the picture is smaller than the window. "Standard" is the D3D11 video processor (driver); "Sharp" is a Catmull-Rom bicubic shader with crisper edges and one extra full-screen pass.</value></data>
+  <data name="H_Super" xml:space="preserve"><value>Only matters while the picture is smaller than the window; takes the place of the enlarging method. AMD FSR 1.0: open spatial upscaler, two shader passes (EASU, RCAS), any feature level 11 GPU, under a millisecond. RTX VSR / Intel VSR: the driver's own model on the video processor, 4 to 8 ms of GPU time per frame; the driver applies it only when GPU, driver version and control panel allow, and says nothing when it does not, so the picture may equal Standard.</value></data>
   <data name="H_Rotate" xml:space="preserve"><value>When the sender switches orientation the window is re-laid out at the new aspect ratio with the same area. Off keeps the window and letterboxes.</value></data>
   <data name="H_Info" xml:space="preserve"><value>Overlay in the top-left corner with resolution, frame rate, per-frame processing time and decoder. Ctrl+I toggles it.</value></data>
   <data name="H_Monitor" xml:space="preserve"><value>The monitor used by F11 full screen on a multi-monitor setup.</value></data>
