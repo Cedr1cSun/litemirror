@@ -39,7 +39,7 @@ LmVideoSink::LmVideoSink()
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
 	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0),
 	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0),
-	  m_colourDirty(false), m_filters(false), m_lowLatency(true),
+	  m_colourDirty(false), m_filters(false), m_lowLatency(true), m_maxLatency(0),
 	  m_toTexture(false), m_scaler(0), m_vs(NULL), m_ps(NULL), m_sampler(NULL), m_constants(NULL),
 	  m_rgb(NULL), m_rgbView(NULL), m_rgbW(0), m_rgbH(0)
 {
@@ -162,7 +162,25 @@ bool LmVideoSink::open(HWND window)
 	}
 	m_clientW = sd.Width;
 	m_clientH = sd.Height;
+	m_maxLatency = 0;
+	applyLatency();
 	return true;
+}
+
+// DXGI lets three presented frames queue ahead of the display by default,
+// each one a frame of delay. One is enough for a live picture.
+void LmVideoSink::applyLatency()
+{
+	int latency = m_lowLatency ? 1 : 3;
+	if (latency == m_maxLatency) {
+		return;
+	}
+	IDXGIDevice1* dxgi = NULL;
+	if (SUCCEEDED(m_device->QueryInterface(IID_PPV_ARGS(&dxgi)))) {
+		dxgi->SetMaximumFrameLatency(latency);
+		release(dxgi);
+	}
+	m_maxLatency = latency;
 }
 
 void LmVideoSink::close()
@@ -481,6 +499,7 @@ bool LmVideoSink::draw(const uint8_t* y, uint32_t yPitch, const uint8_t* uv, uin
 void LmVideoSink::present()
 {
 	if (m_swap) {
+		applyLatency();
 		// interval 0: no vsync wait, DWM composes and the picture shows as soon as it exists
 		m_swap->Present(m_lowLatency ? 0 : 1, 0);
 	}

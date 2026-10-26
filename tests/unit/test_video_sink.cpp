@@ -299,6 +299,42 @@ TEST_CASE("sink presents with vsync when low latency is off")
 	DestroyWindow(hwnd);
 }
 
+// DXGI queues up to three presented frames ahead of the display by default,
+// which is up to three frames of delay nobody asked for. With low latency on
+// the sink allows one; off, the default is back.
+TEST_CASE("sink lets DXGI queue one frame when low latency is on")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	IDXGIDevice1* dxgi = NULL;
+	REQUIRE(SUCCEEDED(sink.device()->QueryInterface(IID_PPV_ARGS(&dxgi))));
+	UINT queued = 0;
+	dxgi->GetMaximumFrameLatency(&queued);
+	CHECK(queued == 1);
+
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+	UINT before = 0, after = 0;
+	sink.swapChain()->GetLastPresentCount(&before);
+	for (int i = 0; i < 3; i++) {
+		REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+		sink.present();
+	}
+	sink.swapChain()->GetLastPresentCount(&after);
+	CHECK(after - before == 3);   // every present went through
+
+	sink.setLowLatency(false);
+	sink.present();
+	dxgi->GetMaximumFrameLatency(&queued);
+	CHECK(queued == 3);
+	dxgi->Release();
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("high-quality scaler keeps the colours and differs from the video processor at edges")
 {
 	// a 640x480 window shows the 320x240 picture at twice its size

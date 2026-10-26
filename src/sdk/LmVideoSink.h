@@ -72,6 +72,7 @@ public:
 
 private:
 	bool fitWindow();
+	void applyLatency();
 	bool setupProcessor(uint32_t width, uint32_t height, bool toTexture);
 	void applyColour(uint32_t height);
 	static RECT letterbox(uint32_t width, uint32_t height, uint32_t outW, uint32_t outH);
@@ -108,4 +109,5 @@ private:
 	bool m_colourDirty;
 	bool m_filters;
 	bool m_lowLatency;
+	int m_maxLatency;                // frames DXGI may queue, as last told to the device
 };
