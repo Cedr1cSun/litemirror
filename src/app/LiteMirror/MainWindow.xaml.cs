@@ -224,6 +224,7 @@ namespace LiteMirror
                 case "FollowRotation":
                 case "FullscreenMonitor":
                 case "CloseToTray":
+                case "CheckUpdates":
                     break;
                 case "ShowInfo":
                     InfoButton.IsChecked = settings.ShowInfo;
