@@ -22,7 +22,7 @@ namespace LiteMirror
         public bool AutoStart;            // start receiving when LiteMirror opens
         public int PinMode;               // lm_pin_mode: 0 off, 1 new code per connection, 2 fixed
         public string Pin = "";
-        public int SecondDevice;          // 0 refuse, 1 replace
+        public int SecondDevice = 2;      // lm_second_device: 0 refuse, 1 replace, 2 ask each time
         public string Address = "";       // IPv4 to listen on, "" = all
         public int RaopPort;              // 0 = automatic
         public int AirplayPort;

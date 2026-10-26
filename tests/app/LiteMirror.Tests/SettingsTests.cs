@@ -14,7 +14,7 @@ namespace LiteMirror.Tests
             Assert.Equal("", s.Name);              // the computer name is filled in at run time
             Assert.False(s.AutoStart);
             Assert.Equal(0, s.PinMode);
-            Assert.Equal(0, s.SecondDevice);
+            Assert.Equal(2, s.SecondDevice);          // ask each time
             Assert.Equal(1080, s.Quality);
             Assert.Equal(60, s.Fps);
             Assert.True(s.HwDecode);

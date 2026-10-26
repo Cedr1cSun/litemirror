@@ -39,6 +39,12 @@
   <data name="Pin_Fixed" xml:space="preserve"><value>固定 PIN</value></data>
   <data name="R_PinCode" xml:space="preserve"><value>PIN 码</value></data>
   <data name="R_Second" xml:space="preserve"><value>第二台设备连上时</value></data>
+  <data name="Second_Ask" xml:space="preserve"><value>每次询问我</value></data>
+  <data name="Ask_Title" xml:space="preserve"><value>有另一台设备想连接</value></data>
+  <data name="Ask_Body" xml:space="preserve"><value>{0} 想投屏到这台电脑。是替换掉 {1}，还是拒绝它、保留 {1}？</value></data>
+  <data name="Ask_Replace" xml:space="preserve"><value>替换</value></data>
+  <data name="Ask_Refuse" xml:space="preserve"><value>拒绝</value></data>
+  <data name="Ask_Countdown" xml:space="preserve"><value>{0} 秒后自动拒绝</value></data>
   <data name="Second_Refuse" xml:space="preserve"><value>拒绝它</value></data>
   <data name="Second_Replace" xml:space="preserve"><value>替换第一台</value></data>
   <data name="R_Address" xml:space="preserve"><value>网卡</value></data>

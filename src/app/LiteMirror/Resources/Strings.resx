@@ -39,6 +39,12 @@
   <data name="Pin_Fixed" xml:space="preserve"><value>Fixed code</value></data>
   <data name="R_PinCode" xml:space="preserve"><value>Code</value></data>
   <data name="R_Second" xml:space="preserve"><value>When a second phone connects</value></data>
+  <data name="Second_Ask" xml:space="preserve"><value>Ask me each time</value></data>
+  <data name="Ask_Title" xml:space="preserve"><value>Another phone wants to connect</value></data>
+  <data name="Ask_Body" xml:space="preserve"><value>{0} wants to mirror to this PC. Replace {1}, or keep {1} and refuse?</value></data>
+  <data name="Ask_Replace" xml:space="preserve"><value>Replace</value></data>
+  <data name="Ask_Refuse" xml:space="preserve"><value>Refuse</value></data>
+  <data name="Ask_Countdown" xml:space="preserve"><value>Refused automatically in {0} s</value></data>
   <data name="Second_Refuse" xml:space="preserve"><value>Refuse it</value></data>
   <data name="Second_Replace" xml:space="preserve"><value>Replace the first one</value></data>
   <data name="R_Address" xml:space="preserve"><value>Network adapter</value></data>

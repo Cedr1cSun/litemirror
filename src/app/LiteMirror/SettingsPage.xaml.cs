@@ -39,7 +39,7 @@ namespace LiteMirror
             s = settings;
 
             Fill(PinModeBox, "Pin_Off", "Pin_New", "Pin_Fixed");
-            Fill(SecondBox, "Second_Refuse", "Second_Replace");
+            Fill(SecondBox, "Second_Ask", "Second_Refuse", "Second_Replace");
             FillAddresses();
             Fill(QualityBox, "1080p", "720p", "540p");
             Fill(FpsBox, "60 fps", "30 fps");
@@ -68,6 +68,7 @@ namespace LiteMirror
         static readonly string[] Languages = { "", "en", "zh-CN" };
         static readonly int[] Qualities = { 1080, 720, 540 };
         static readonly int[] Rates = { 60, 30 };
+        static readonly int[] Seconds = { 2, 0, 1 };   // ask, refuse, replace: the order of SecondBox
         static readonly int[] LogLevels = { 3, 4, 6, 7 };
 
         void Fill(ComboBox box, params string[] keys)
@@ -136,7 +137,7 @@ namespace LiteMirror
             PinModeBox.SelectedIndex = s.PinMode;
             PinBox.Text = s.Pin;
             ShowPinRow();
-            SecondBox.SelectedIndex = s.SecondDevice;
+            SecondBox.SelectedIndex = Math.Max(0, Array.IndexOf(Seconds, s.SecondDevice));
             Select(AddressBox, s.Address);
             RaopPortBox.Value = s.RaopPort;
             AirplayPortBox.Value = s.AirplayPort;
@@ -195,7 +196,7 @@ namespace LiteMirror
             Set("PinMode", () => s.PinMode = PinModeBox.SelectedIndex);
         }
         void OnPin(object sender, RoutedEventArgs e) => Set("Pin", () => s.Pin = PinBox.Text.Trim());
-        void OnSecond(object sender, SelectionChangedEventArgs e) => Set("SecondDevice", () => s.SecondDevice = SecondBox.SelectedIndex);
+        void OnSecond(object sender, SelectionChangedEventArgs e) => Set("SecondDevice", () => s.SecondDevice = Seconds[Math.Max(0, SecondBox.SelectedIndex)]);
         void OnAddress(object sender, SelectionChangedEventArgs e) => Set("Address", () => s.Address = Chosen(AddressBox));
         void OnPorts(object sender, RoutedEventArgs e) => Set("Ports", () =>
         {

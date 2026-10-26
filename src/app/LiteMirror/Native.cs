@@ -38,6 +38,8 @@ namespace LiteMirror
         public delegate void PinCallback(IntPtr user, IntPtr pin);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void StatsCallback(IntPtr user, IntPtr deviceId, ref Stats stats);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate int SecondDeviceCallback(IntPtr user, IntPtr deviceId, IntPtr name);   // 1 replace, 0 refuse
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Stats
@@ -64,6 +66,7 @@ namespace LiteMirror
             public IntPtr on_video_size;
             public IntPtr on_pin;
             public IntPtr on_stats;
+            public IntPtr on_second_device;
         }
 
         [StructLayout(LayoutKind.Sequential)]

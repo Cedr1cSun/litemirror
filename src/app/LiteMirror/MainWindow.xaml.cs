@@ -36,6 +36,7 @@ namespace LiteMirror
         readonly Native.LogCallback onLog;
         readonly Native.PinCallback onPin;
         readonly Native.StatsCallback onStats;
+        readonly Native.SecondDeviceCallback onSecondDevice;
         readonly Settings settings;
         string deviceName;      // connected phone, or null
         bool running;
@@ -69,6 +70,7 @@ namespace LiteMirror
             onLog = (user, level, msg) => Log.Write(level, Native.Utf8(msg));
             onPin = (user, pin) => { string code = pin == IntPtr.Zero ? null : Native.Utf8(pin); Dispatcher.BeginInvoke(new Action(() => ShowPin(code))); };
             onStats = (IntPtr user, IntPtr id, ref Native.Stats stats) => { Native.Stats copy = stats; Dispatcher.BeginInvoke(new Action(() => ShowStats(copy))); };
+            onSecondDevice = (user, id, name) => AskSecondDevice(Native.Utf8(name));
             Topmost = settings.AlwaysOnTop;
             PinButton.IsChecked = settings.AlwaysOnTop;
             sizeTimer.Tick += OnSizeTimer;
@@ -97,7 +99,8 @@ namespace LiteMirror
                 on_log = Marshal.GetFunctionPointerForDelegate(onLog),
                 on_video_size = Marshal.GetFunctionPointerForDelegate(onVideoSize),
                 on_pin = Marshal.GetFunctionPointerForDelegate(onPin),
-                on_stats = Marshal.GetFunctionPointerForDelegate(onStats)
+                on_stats = Marshal.GetFunctionPointerForDelegate(onStats),
+                on_second_device = Marshal.GetFunctionPointerForDelegate(onSecondDevice)
             };
             Native.Error err = Native.lm_server_create(ref cb, out server);
             if (err == Native.Error.Ok)
@@ -396,6 +399,26 @@ namespace LiteMirror
             if (!fullScreen) Rail(connected);
             UpdateStatus();
             UpdateOsd();
+        }
+
+        // Another phone wants in while one is mirroring: asked on a network thread, answered
+        // by the user in a dialog; the phone waits, so no answer within the dialog's countdown
+        // (or the UI being stuck) counts as no.
+        int AskSecondDevice(string newcomer)
+        {
+            try
+            {
+                return (int)Dispatcher.Invoke(DispatcherPriority.Normal, TimeSpan.FromSeconds(20), new Func<int>(() =>
+                {
+                    if (!IsVisible) ShowFromTray();
+                    var dialog = new SecondDeviceDialog(this, newcomer, deviceName ?? "");
+                    return dialog.ShowDialog() == true ? 1 : 0;
+                }));
+            }
+            catch (TimeoutException)
+            {
+                return 0;
+            }
         }
 
         void ShowPin(string code)
