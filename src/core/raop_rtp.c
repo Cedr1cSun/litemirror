@@ -709,6 +709,12 @@ raop_rtp_stop(raop_rtp_t *raop_rtp)
     raop_rtp->running = 0;
     MUTEX_UNLOCK(raop_rtp->run_mutex);
 
+    /* Closed before the join: a recvfrom waiting on a phone that no longer answers returns at once */
+    if (raop_rtp->csock != -1) closesocket(raop_rtp->csock);
+    if (raop_rtp->tsock != -1) closesocket(raop_rtp->tsock);
+    if (raop_rtp->dsock != -1) closesocket(raop_rtp->dsock);
+    raop_rtp->csock = raop_rtp->tsock = raop_rtp->dsock = -1;
+
     /* Join the thread */
     THREAD_JOIN(raop_rtp->thread);
 
@@ -717,10 +723,6 @@ raop_rtp_stop(raop_rtp_t *raop_rtp)
     MUTEX_UNLOCK(raop_rtp->time_mutex);
 
     THREAD_JOIN(raop_rtp->thread_time);
-    
-    if (raop_rtp->csock != -1) closesocket(raop_rtp->csock);
-    if (raop_rtp->tsock != -1) closesocket(raop_rtp->tsock);
-    if (raop_rtp->dsock != -1) closesocket(raop_rtp->dsock);
 
     /* Flush buffer into initial state */
     raop_buffer_flush(raop_rtp->buffer, -1);

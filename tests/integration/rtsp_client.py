@@ -119,7 +119,7 @@ class RtspClient:
         body = plistlib.dumps(obj, fmt=plistlib.FMT_BINARY)
         return self.request(method, url, body, 'application/x-apple-binary-plist', headers)
 
-    def setup_session(self, name, device_id, pin=None, challenge=None):
+    def setup_session(self, name, device_id, pin=None, challenge=None, timing_port=0):
         """First SETUP: announce the device. ekey is FairPlay-wrapped on a real
         phone; without fp-setup the server cannot unwrap it, so zeros do.
         With a pin, answers the server's 401 challenge the way iOS does."""
@@ -127,7 +127,7 @@ class RtspClient:
         if pin is not None:
             headers.append(('Authorization', self.digest(challenge, pin, 'SETUP', self.SESSION_URL)))
         return self._plist('SETUP', self.SESSION_URL, {
-            'et': 32, 'eiv': bytes(16), 'ekey': bytes(72), 'timingPort': 0,
+            'et': 32, 'eiv': bytes(16), 'ekey': bytes(72), 'timingPort': timing_port,
             'name': name, 'deviceID': device_id, 'model': 'iPhone10,3', 'sourceVersion': '220.68'},
             headers=headers)
 

@@ -462,5 +462,30 @@ class MirrorStream(unittest.TestCase):
         self.assertServerStopsAndAnswers()
 
 
+class AudioTiming(unittest.TestCase):
+    """The audio session asks the phone for the time over UDP. A phone that
+    stops answering must not keep the receiver from stopping."""
+
+    def test_stop_does_not_wait_for_time_answers(self):
+        import socket
+        silent = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        silent.bind(('127.0.0.1', 0))
+        host = TestHost()
+        try:
+            self.assertEqual(host.start(), 'OK')
+            client = RtspClient(host.raop_port)
+            client.pair_setup()
+            self.assertEqual(client.pair_verify(), (200, 200))
+            self.assertEqual(client.setup_session(DEVICE, DEVICE_ID, timing_port=silent.getsockname()[1])[0], 200)
+            self.assertEqual(client.setup_audio()[0], 200)
+            host.wait_for('EVENT connected')
+            import time; time.sleep(0.5)
+            self.assertEqual(host.stop(), 'OK')
+            client.close()
+        finally:
+            silent.close()
+            host.close()
+
+
 if __name__ == '__main__':
     unittest.main()
