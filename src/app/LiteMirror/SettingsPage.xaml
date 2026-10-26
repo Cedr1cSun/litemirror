@@ -58,6 +58,15 @@
                     </DockPanel>
                     <Border Style="{StaticResource RowLine}" />
                     <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="HotspotSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnHotspot" />
+                        <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
+                            <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_Hotspot}" />
+                            <TextBlock x:Name="HotspotInfo" Style="{StaticResource RowHint}" Foreground="{DynamicResource PrimaryBrush}" Visibility="Collapsed" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{local:S H_Hotspot}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                             <hc:NumericUpDown x:Name="RaopPortBox" Width="106" Minimum="0" Maximum="65535" ValueChanged="OnPorts" />
                             <hc:NumericUpDown x:Name="AirplayPortBox" Width="106" Minimum="0" Maximum="65535" Margin="8,0,0,0" ValueChanged="OnPorts" />

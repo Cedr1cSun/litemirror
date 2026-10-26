@@ -48,6 +48,10 @@
   <data name="Second_Refuse" xml:space="preserve"><value>拒绝它</value></data>
   <data name="Second_Replace" xml:space="preserve"><value>替换第一台</value></data>
   <data name="R_Address" xml:space="preserve"><value>网卡</value></data>
+  <data name="R_Hotspot" xml:space="preserve"><value>Windows 移动热点</value></data>
+  <data name="Hotspot_Info" xml:space="preserve"><value>网络 {0}，密码 {1}</value></data>
+  <data name="Hotspot_NoNet" xml:space="preserve"><value>Windows 要求电脑先有一条可共享的网络连接。</value></data>
+  <data name="Hotspot_Unavailable" xml:space="preserve"><value>此电脑不可用：没有 Wi-Fi 网卡，或被策略禁用。</value></data>
   <data name="Address_All" xml:space="preserve"><value>全部网卡</value></data>
   <data name="Address_Gone" xml:space="preserve"><value>当前不存在</value></data>
   <data name="R_Ports" xml:space="preserve"><value>端口：RTSP 和 HTTP（0 = 自动）</value></data>
@@ -126,6 +130,7 @@
   <data name="H_PinCode" xml:space="preserve"><value>固定模式使用的 PIN，1 到 63 个字符。</value></data>
   <data name="H_Second" xml:space="preserve"><value>已有会话时再收到新连接的处理：询问（15 秒无操作视为拒绝）、拒绝（返回 453），或断开当前会话接受新的。</value></data>
   <data name="H_Address" xml:space="preserve"><value>只在指定网卡的 IPv4 地址上监听并广播。多网卡、VPN 或虚拟网卡环境下用来指定出口。</value></data>
+  <data name="H_Hotspot" xml:space="preserve"><value>打开 Windows 移动热点（Wi-Fi Direct）并显示名称和密码。手机连上后直接经这条链路投屏，中间没有路由器。需要 Wi-Fi 网卡和一条可供 Windows 共享的连接；五分钟没有设备连接 Windows 会自动关掉它。用手机个人热点（Wi-Fi，或 USB 加 Apple 的 USB 网络驱动）效果相同，这里不用设置。</value></data>
   <data name="H_Ports" xml:space="preserve"><value>RTSP（RAOP）与 HTTP（AirPlay）监听端口，用于防火墙放行。0 为系统分配。</value></data>
   <data name="H_Quality" xml:space="preserve"><value>向发送端通告的目标分辨率（16:9，按高度），发送端据此编码。越低码率与解码负载越小。</value></data>
   <data name="H_Fps" xml:space="preserve"><value>向发送端通告的最高帧率。</value></data>

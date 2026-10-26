@@ -29,5 +29,21 @@
     <PackageReference Include="HandyControl" Version="3.5.1" />
   </ItemGroup>
 
+  <!-- WinRT (the mobile hotspot) through Windows.winmd of the newest installed Windows SDK; compile-time only -->
+  <PropertyGroup>
+    <WinSdkMetadata>$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata</WinSdkMetadata>
+    <WinSdkDirs Condition="Exists('$(WinSdkMetadata)')">$([System.IO.Directory]::GetDirectories('$(WinSdkMetadata)', '10.0.*'))</WinSdkDirs>
+    <WinSdkDir>$(WinSdkDirs.Substring($([MSBuild]::Add($(WinSdkDirs.LastIndexOf(';')), 1))))</WinSdkDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Windows">
+      <HintPath>$(WinSdkDir)\Windows.winmd</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="CheckWindowsSdk" BeforeTargets="BeforeBuild" Condition="!Exists('$(WinSdkDir)\Windows.winmd')">
+    <Error Text="Windows.winmd not found under $(WinSdkMetadata); install the Windows 10 or 11 SDK (part of the C++ workload)" />
+  </Target>
+
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

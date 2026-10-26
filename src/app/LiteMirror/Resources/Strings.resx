@@ -48,6 +48,10 @@
   <data name="Second_Refuse" xml:space="preserve"><value>Refuse it</value></data>
   <data name="Second_Replace" xml:space="preserve"><value>Replace the first one</value></data>
   <data name="R_Address" xml:space="preserve"><value>Network adapter</value></data>
+  <data name="R_Hotspot" xml:space="preserve"><value>Windows mobile hotspot</value></data>
+  <data name="Hotspot_Info" xml:space="preserve"><value>Network {0}, password {1}</value></data>
+  <data name="Hotspot_NoNet" xml:space="preserve"><value>Windows needs an existing network connection to share.</value></data>
+  <data name="Hotspot_Unavailable" xml:space="preserve"><value>Not available on this PC: no Wi-Fi adapter, or disabled by policy.</value></data>
   <data name="Address_All" xml:space="preserve"><value>All adapters</value></data>
   <data name="Address_Gone" xml:space="preserve"><value>not present</value></data>
   <data name="R_Ports" xml:space="preserve"><value>Ports, RTSP and HTTP (0 = automatic)</value></data>
@@ -126,6 +130,7 @@
   <data name="H_PinCode" xml:space="preserve"><value>The PIN used in fixed mode, 1 to 63 characters.</value></data>
   <data name="H_Second" xml:space="preserve"><value>What to do with a new connection while a session is active: ask (no answer within 15 s refuses), refuse (reply 453), or drop the current session and accept the new one.</value></data>
   <data name="H_Address" xml:space="preserve"><value>Listen and announce on one adapter's IPv4 address only. For choosing the interface with several adapters, a VPN or virtual adapters.</value></data>
+  <data name="H_Hotspot" xml:space="preserve"><value>Turns on the Windows mobile hotspot (Wi-Fi Direct) and shows its name and password. A phone on it mirrors over that link, with no router in between. Needs a Wi-Fi adapter and a connection Windows can share; Windows turns it off again after five minutes without a device. A phone's personal hotspot, over Wi-Fi or over USB with Apple's USB network driver, works the same way and needs nothing here.</value></data>
   <data name="H_Ports" xml:space="preserve"><value>Listening ports for RTSP (RAOP) and HTTP (AirPlay), for firewall rules. 0 lets the system assign them.</value></data>
   <data name="H_Quality" xml:space="preserve"><value>The target resolution advertised to the sender (16:9, by height), which encodes accordingly. Lower means less bitrate and decode load.</value></data>
   <data name="H_Fps" xml:space="preserve"><value>The maximum frame rate advertised to the sender.</value></data>
