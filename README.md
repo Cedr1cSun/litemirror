@@ -31,6 +31,7 @@ Open Screen Mirroring on an iPhone or iPad, pick the PC, and the phone's screen 
 - Low latency by default: the decoder runs in AVLowLatencyMode, frames are presented without waiting for vsync with one frame in the DXGI queue, and in full screen without waiting for the vertical blank at all; an optional Catmull-Rom bicubic upscaler when the window is larger than the picture
 - Super resolution when the window is larger than the picture: AMD FSR 1.0 on any GPU, or the driver's own NVIDIA RTX VSR / Intel VSR
 - The window keeps the phone's aspect ratio and turns with it; F11 goes full screen on the monitor you choose; a pin keeps it on top
+- Borderless (Ctrl+B) and picture-in-picture (Ctrl+P) modes show the picture alone; the second is small, in a corner and on top. Drag by the picture, right-click it for the menu
 - A PIN, either a fresh 4-digit code shown on the PC for every connection or a fixed one; when a second phone connects you are asked whether to replace the first or refuse it
 - Colour controls on the video processor: BT.601/BT.709 matrix, limited or full range, brightness, contrast, saturation, hue
 - Any audio output device; the phone's volume buttons set the app's volume in the Windows mixer
@@ -55,6 +56,8 @@ The About page checks GitHub for a newer release when you ask, or at every start
 | key | action |
 |---|---|
 | F11 | full screen, Esc leaves it |
+| Ctrl+B | borderless: the picture alone, drag it by the picture |
+| Ctrl+P | picture in picture: borderless, small, in the bottom-right corner, on top |
 | Ctrl+F | resize the window to fit the picture |
 | Ctrl+I | show or hide the picture information |
 | Ctrl+R | start or stop receiving |
@@ -72,6 +75,12 @@ The phone and the PC only need an IP link between them; the mDNS announcement an
 | USB | Connect the cable and turn on Personal Hotspot. The PC needs Apple's USB network driver, which iTunes or the Apple Devices app installs; a network adapter appears and AirPlay runs over it. |
 
 Windows files these links under the public profile. The installer's firewall rule allows every profile but only the local subnet, so they work out of the box. A build run from `build\bin` gets the Windows firewall prompt instead: tick public networks there.
+
+## 🎥 Recording or streaming with OBS
+
+Add a **Window Capture** source, set the capture method to **Windows 10 (1903 and up)** and pick the LiteMirror window. With LiteMirror in borderless or picture-in-picture mode the capture is the picture alone, black bars included. For the phone's sound add an **Application Audio Capture** source (OBS 28 or later) and pick LiteMirror; the stream then carries it without the rest of the PC's audio. Nothing needs to be installed in OBS.
+
+Game Capture may show a black picture. The app has two Direct3D pipelines, WPF's for the controls and the receiver's for the video, and OBS's hook captures whichever presents first; removing and adding the source again picks again.
 
 ## 🧩 How it works
 
