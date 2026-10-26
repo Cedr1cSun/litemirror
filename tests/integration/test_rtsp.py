@@ -212,6 +212,27 @@ class Pin(unittest.TestCase):
         self.assertTrue(info['statusFlags'] & 0x40, 'PasswordRequired flag missing')
         self.assertEqual(self.host.stop(), 'OK')
 
+    def test_pin_is_asked_before_a_second_phone_may_replace_the_first(self):
+        """Replace mode: a phone that has not given the PIN yet cannot push
+        the mirroring phone out."""
+        self.assertEqual(self.host.cmd('pin fixed 2580'), 'OK')
+        self.assertEqual(self.host.cmd('second replace'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        first = self.paired_client()
+        status, headers, _ = first.setup_session(DEVICE, DEVICE_ID)
+        self.assertEqual(status, 401)
+        self.assertEqual(first.setup_session(DEVICE, DEVICE_ID, '2580', headers['www-authenticate'])[0], 200)
+        self.assertEqual(first.setup_audio()[0], 200)
+        self.assertEqual(self.host.wait_for('EVENT connected'), f'EVENT connected {DEVICE} {DEVICE_ID}')
+        second = self.paired_client()
+        self.assertEqual(second.setup_session('OtherPhone', '11:22:33:44:55:66')[0], 401)
+        self.assertEqual(first.set_volume(-10.0)[0], 200)   # the first one is still there
+        self.assertEqual(self.host.wait_for('EVENT volume'), f'EVENT volume {DEVICE_ID} -10.0')
+        self.assertEqual([e for e in self.host.events() if 'disconnected' in e], [])
+        second.close()
+        first.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
     def test_pin_off_needs_no_credentials(self):
         self.assertEqual(self.host.cmd('pin off'), 'OK')
         self.assertEqual(self.host.start(), 'OK')

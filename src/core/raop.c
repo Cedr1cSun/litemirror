@@ -237,6 +237,16 @@ conn_request(void *ptr, http_request_t *request, http_response_t **response)
 		return;
 	}
 
+	if (!strcmp(method, "SETUP") && conn->raop->pin_mode && !conn->authenticated && !check_pin(conn, request)) {
+		char challenge[80];
+		snprintf(challenge, sizeof(challenge), "Digest realm=\"raop\", nonce=\"%s\"", conn->nonce);
+		*response = http_response_init("RTSP/1.0", 401, "Unauthorized");
+		http_response_add_header(*response, "CSeq", cseq);
+		http_response_add_header(*response, "Server", "AirTunes/220.68");
+		http_response_add_header(*response, "WWW-Authenticate", challenge);
+		http_response_finish(*response, NULL, 0);
+		return;
+	}
 	if (!strcmp(method, "SETUP")) {
 		raop_t *raop = conn->raop;
 		char *name = NULL, *device_id = NULL;
@@ -265,16 +275,6 @@ conn_request(void *ptr, http_request_t *request, http_response_t **response)
 		if (opens) raop->session_conn = conn;
 		free(name);
 		free(device_id);
-	}
-	if (!strcmp(method, "SETUP") && conn->raop->pin_mode && !conn->authenticated && !check_pin(conn, request)) {
-		char challenge[80];
-		snprintf(challenge, sizeof(challenge), "Digest realm=\"raop\", nonce=\"%s\"", conn->nonce);
-		*response = http_response_init("RTSP/1.0", 401, "Unauthorized");
-		http_response_add_header(*response, "CSeq", cseq);
-		http_response_add_header(*response, "Server", "AirTunes/220.68");
-		http_response_add_header(*response, "WWW-Authenticate", challenge);
-		http_response_finish(*response, NULL, 0);
-		return;
 	}
 
 	*response = http_response_init("RTSP/1.0", 200, "OK");
