@@ -20,8 +20,8 @@ class FgAirplayChannel
 {
 public:
 	// callbacks and sink must outlive the channel; FgAirplayServer owns both.
-	// hardware=false decodes on the CPU.
-	explicit FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink = NULL, bool hardware = true);
+	// hardware=false decodes on the CPU; lowLatency=false keeps the decoder's reorder queue.
+	explicit FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink = NULL, bool hardware = true, bool lowLatency = true);
 	~FgAirplayChannel();
 
 public:
@@ -42,6 +42,7 @@ protected:
 	LmVideoSink*			m_sink;
 	MfH264Decoder			m_decoder;
 	bool					m_hardware;
+	bool					m_lowLatency;
 	bool					m_bDecoderOpen;
 	uint32_t				m_reportedW, m_reportedH;   // last size given to on_video_size
 	void*					m_mutexVideo;

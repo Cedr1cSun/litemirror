@@ -49,6 +49,14 @@ lm_error lm_server_set_colour(lm_server* s, const lm_colour* c)
 	return LM_OK;
 }
 
+lm_error lm_server_set_low_latency(lm_server* s, int enable)
+{
+	if (!s) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.lowLatency = enable != 0;
+	return LM_OK;
+}
+
 lm_error lm_server_set_hw_decode(lm_server* s, int enable)
 {
 	if (!s) return LM_E_INVALID_ARG;

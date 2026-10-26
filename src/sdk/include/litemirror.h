@@ -137,6 +137,10 @@ typedef struct lm_colour {
 	float hue;
 } lm_colour;
 LM_API lm_error    lm_server_set_colour(lm_server* s, const lm_colour* colour);
+/* On (default): the decoder gives out each picture as soon as it can and
+ * the window shows it without waiting for the display's refresh. Off:
+ * smoother, a frame or two later. Set it before lm_server_start(). */
+LM_API lm_error    lm_server_set_low_latency(lm_server* s, int enable);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

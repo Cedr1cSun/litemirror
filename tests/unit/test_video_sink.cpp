@@ -277,6 +277,28 @@ TEST_CASE("colour matrix and range change the conversion")
 	DestroyWindow(hwnd);
 }
 
+TEST_CASE("sink presents with vsync when low latency is off")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	sink.setLowLatency(false);
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+	UINT before = 0, after = 0;
+	sink.swapChain()->GetLastPresentCount(&before);
+	for (int i = 0; i < 3; i++) {
+		REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+		sink.present();
+	}
+	sink.swapChain()->GetLastPresentCount(&after);
+	CHECK(after - before == 3);
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("sink refuses to open without a window")
 {
 	LmVideoSink sink;

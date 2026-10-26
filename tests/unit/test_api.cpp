@@ -220,6 +220,21 @@ TEST_CASE("set_colour checks its ranges and may be changed while running")
 	DestroyWindow(hwnd);
 }
 
+TEST_CASE("set_low_latency only works while stopped")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_low_latency(NULL, 0) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_low_latency(server, 0) == LM_OK);
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_low_latency(server, 1) == LM_E_RUNNING);
+	lm_server_stop(server);
+	CHECK(lm_server_set_low_latency(server, 1) == LM_OK);
+	lm_server_destroy(server);
+}
+
 TEST_CASE("set_window takes a real window and only while stopped")
 {
 	lm_callbacks cb = no_callbacks();

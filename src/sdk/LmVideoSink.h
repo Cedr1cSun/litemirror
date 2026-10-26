@@ -56,6 +56,9 @@ public:
 	// Whether this GPU's video processor has brightness, contrast,
 	// saturation and hue filters (valid after the first draw)
 	bool supportsFilters() const { return m_filters; }
+	// On (default): present at once. Off: wait for the next vertical
+	// blank, smoother but up to a frame later.
+	void setLowLatency(bool on) { m_lowLatency = on; }
 
 private:
 	bool fitWindow();
@@ -79,4 +82,5 @@ private:
 	LmColour m_colour;
 	bool m_colourDirty;
 	bool m_filters;
+	bool m_lowLatency;
 };

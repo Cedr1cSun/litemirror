@@ -44,8 +44,9 @@ public:
 	// With a device, pictures stay on the GPU as textures on that device
 	// (frame().texture); without one they are read back into memory.
 	// hardware=false decodes on the CPU (frame().plane[]), for machines
-	// whose GPU decoder misbehaves.
-	bool open(ID3D11Device* device = NULL, bool hardware = true);
+	// whose GPU decoder misbehaves. lowLatency=false lets the decoder keep
+	// its reorder queue, which costs a few frames of delay.
+	bool open(ID3D11Device* device = NULL, bool hardware = true, bool lowLatency = true);
 	void close();
 
 	// Feed one access unit; true when the decoder took it. Call receive()

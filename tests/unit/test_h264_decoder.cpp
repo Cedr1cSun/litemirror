@@ -137,6 +137,21 @@ TEST_CASE("decodes in software when asked, with the same pixel values")
 	CHECK(checked_first);
 }
 
+TEST_CASE("without low-latency mode every frame still comes out by the end")
+{
+	std::vector<std::vector<uint8_t>> units = access_units(read_clip());
+	REQUIRE(units.size() == 10);
+	MfH264Decoder dec;
+	REQUIRE(dec.open(NULL, true, false));
+	int frames = 0;
+	for (size_t i = 0; i < units.size(); i++) {
+		CHECK(dec.decode(units[i].data(), units[i].size(), i * 33333));
+		while (dec.receive()) frames++;
+	}
+	while (dec.drain()) frames++;
+	CHECK(frames == 10);
+}
+
 // Run by hand: LITEMIRROR_BENCH_CLIP=<annex b file> litemirror-tests.exe -tc=benchmark* -no-skip
 TEST_CASE("benchmark: decode LITEMIRROR_BENCH_CLIP and report CPU time" * doctest::skip(true))
 {

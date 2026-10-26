@@ -1,12 +1,13 @@
 #include "FgAirplayChannel.h"
 #include "CAutoLock.h"
 
-FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink, bool hardware)
+FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink, bool hardware, bool lowLatency)
 : m_nRef(1)
 , m_nStreams(0)
 , m_cb(callbacks)
 , m_sink(sink)
 , m_hardware(hardware)
+, m_lowLatency(lowLatency)
 , m_bDecoderOpen(false)
 , m_reportedW(0)
 , m_reportedH(0)
@@ -48,7 +49,7 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 		if (!data->is_key) {
 			return 0;   // cannot start mid-stream without SPS/PPS
 		}
-		m_bDecoderOpen = m_decoder.open(m_sink ? m_sink->device() : NULL, m_hardware);
+		m_bDecoderOpen = m_decoder.open(m_sink ? m_sink->device() : NULL, m_hardware, m_lowLatency);
 		if (!m_bDecoderOpen) {
 			return -1;
 		}

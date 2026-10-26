@@ -15,13 +15,14 @@ typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
 // What the shell set through the lm_server_set_* calls before starting
 struct FgServerOptions {
-	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true) {}
+	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true), lowLatency(true) {}
 	int pinMode;          // lm_pin_mode
 	std::string pin;      // LM_PIN_FIXED
 	bool replaceSecond;   // a second phone replaces the first instead of being refused
 	unsigned long address;   // IPv4 to listen and announce on, network byte order; 0 = all
 	unsigned int displayWidth, displayHeight, displayFps;   // what the phone encodes at
 	bool hardwareDecode;  // false: decode on the CPU
+	bool lowLatency;      // false: reorder queue in the decoder and vsync on present
 	LmColour colour;      // picture adjustments, kept so a later set_window gets them
 };
 

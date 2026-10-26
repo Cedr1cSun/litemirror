@@ -88,7 +88,7 @@ bool MfH264Decoder::setupD3D11(ID3D11Device* shared)
 	return true;
 }
 
-bool MfH264Decoder::open(ID3D11Device* device, bool hardware)
+bool MfH264Decoder::open(ID3D11Device* device, bool hardware, bool lowLatency)
 {
 	close();
 	m_shared = hardware && device != NULL;
@@ -103,7 +103,7 @@ bool MfH264Decoder::open(ID3D11Device* device, bool hardware)
 
 	// Output pictures as soon as they are decodable instead of holding a reorder queue
 	ICodecAPI* api = NULL;
-	if (SUCCEEDED(m_mft->QueryInterface(IID_PPV_ARGS(&api)))) {
+	if (lowLatency && SUCCEEDED(m_mft->QueryInterface(IID_PPV_ARGS(&api)))) {
 		VARIANT v;
 		VariantInit(&v);
 		v.vt = VT_UI4;

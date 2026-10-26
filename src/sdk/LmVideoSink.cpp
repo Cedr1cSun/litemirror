@@ -17,7 +17,7 @@ LmVideoSink::LmVideoSink()
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
 	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0),
 	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0),
-	  m_colourDirty(false), m_filters(false)
+	  m_colourDirty(false), m_filters(false), m_lowLatency(true)
 {
 	InitializeCriticalSection(&m_lock);
 }
@@ -323,6 +323,7 @@ bool LmVideoSink::draw(const uint8_t* y, uint32_t yPitch, const uint8_t* uv, uin
 void LmVideoSink::present()
 {
 	if (m_swap) {
-		m_swap->Present(0, 0);   // no vsync wait: DWM composes, the picture shows as soon as it exists
+		// interval 0: no vsync wait, DWM composes and the picture shows as soon as it exists
+		m_swap->Present(m_lowLatency ? 0 : 1, 0);
 	}
 }
