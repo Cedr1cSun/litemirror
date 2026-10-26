@@ -299,6 +299,59 @@ TEST_CASE("sink presents with vsync when low latency is off")
 	DestroyWindow(hwnd);
 }
 
+TEST_CASE("high-quality scaler keeps the colours and differs from the video processor at edges")
+{
+	// a 640x480 window shows the 320x240 picture at twice its size
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 640, 480, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+
+	Pixels plain, sharp;
+	sink.setScaler(0);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, plain));
+	sink.setScaler(1);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, sharp));
+	CHECK(sharp.width == 640);
+	CHECK(sharp.height == 480);
+
+	// flat colour bars, at twice the source coordinates: the conversion is the same as before
+	CHECK(sharp.diff(16, 16, 0, 0, 0) <= 3);
+	CHECK(sharp.diff(592, 16, 255, 255, 255) <= 3);
+	CHECK(sharp.diff(336, 16, 253, 253, 0) <= 3);
+	CHECK(sharp.diff(272, 16, 0, 0, 254) <= 3);
+	CHECK(sharp.diff(512, 88, 253, 0, 0) <= 3);
+	CHECK(sharp.diff(432, 32, 0, 255, 0) <= 3);
+	CHECK(sharp.diff(208, 16, 254, 0, 253) <= 3);
+	CHECK(sharp.diff(80, 400, 251, 166, 0) <= 3);
+
+	// the shader path was really taken: along a row that crosses the bar edges the two differ
+	int differing = 0;
+	for (int x = 0; x < 640; x++) {
+		const uint8_t* a = &plain.bgra[(size_t)16 * plain.pitch + (size_t)x * 4];
+		const uint8_t* b = &sharp.bgra[(size_t)16 * sharp.pitch + (size_t)x * 4];
+		if (abs(a[0] - b[0]) > 3 || abs(a[1] - b[1]) > 3 || abs(a[2] - b[2]) > 3) differing++;
+	}
+	CHECK(differing > 0);
+	CHECK(differing < 64);   // only near the edges, not everywhere
+	sink.present();
+
+	// a window smaller than the picture: no upscaling, the processor path stays and draws
+	SetWindowPos(hwnd, NULL, 0, 0, 160, 120, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, sharp));
+	CHECK(sharp.width == 160);
+	CHECK(sharp.diff(148, 4, 255, 255, 255) <= 6);
+	sink.present();
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("sink refuses to open without a window")
 {
 	LmVideoSink sink;

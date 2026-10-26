@@ -17,6 +17,11 @@ struct ID3D11VideoDevice;
 struct ID3D11VideoContext;
 struct ID3D11VideoProcessorEnumerator;
 struct ID3D11VideoProcessor;
+struct ID3D11VertexShader;
+struct ID3D11PixelShader;
+struct ID3D11SamplerState;
+struct ID3D11Buffer;
+struct ID3D11ShaderResourceView;
 
 // Picture adjustments, see lm_colour in litemirror.h
 struct LmColour {
@@ -59,11 +64,21 @@ public:
 	// On (default): present at once. Off: wait for the next vertical
 	// blank, smoother but up to a frame later.
 	void setLowLatency(bool on) { m_lowLatency = on; }
+	// 0: the video processor scales (bilinear on most drivers). 1: when the
+	// window is larger than the picture, the processor only converts to RGB
+	// and a Catmull-Rom bicubic shader does the enlarging. May be changed
+	// at any time; the next draw() uses it.
+	void setScaler(int quality) { m_scaler = quality; }
 
 private:
 	bool fitWindow();
-	bool setupProcessor(uint32_t width, uint32_t height);
+	bool setupProcessor(uint32_t width, uint32_t height, bool toTexture);
 	void applyColour(uint32_t height);
+	static RECT letterbox(uint32_t width, uint32_t height, uint32_t outW, uint32_t outH);
+	bool setupShader();
+	bool setupRgb(uint32_t width, uint32_t height);
+	bool blit(ID3D11Texture2D* picture, uint32_t subresource, ID3D11Texture2D* target);
+	void enlarge(ID3D11Texture2D* back, uint32_t width, uint32_t height);
 
 	HWND m_hwnd;
 	ID3D11Device* m_device;
@@ -75,6 +90,16 @@ private:
 	ID3D11VideoProcessor* m_processor;
 	uint32_t m_clientW, m_clientH;   // swap chain size
 	uint32_t m_srcW, m_srcH;         // picture size the processor was set up for
+	bool m_toTexture;                // ... and whether its output was the RGB texture, not the window
+	// the high-quality scaler: picture -> RGB texture -> shader -> window
+	int m_scaler;
+	ID3D11VertexShader* m_vs;
+	ID3D11PixelShader* m_ps;
+	ID3D11SamplerState* m_sampler;
+	ID3D11Buffer* m_constants;
+	ID3D11Texture2D* m_rgb;
+	ID3D11ShaderResourceView* m_rgbView;
+	uint32_t m_rgbW, m_rgbH;
 	ID3D11Texture2D* m_staging;      // CPU-written copy of a software-decoded picture
 	ID3D11Texture2D* m_upload;       // its GPU copy the processor reads
 	uint32_t m_uploadW, m_uploadH;

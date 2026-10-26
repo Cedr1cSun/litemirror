@@ -3,12 +3,34 @@
 
 #include <d3d11.h>
 #include <d3d11_4.h>
+#include <d3dcompiler.h>
 #include <dxgi1_2.h>
 #include <string.h>
 #include "LmVideoSink.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+
+// Catmull-Rom bicubic enlarging: 16 taps round the source position. The
+// vertex shader draws one triangle over the viewport from the vertex id.
+static const char SCALER_HLSL[] =
+"cbuffer C : register(b0) { float4 size; }\n"   // width, height, 1/width, 1/height
+"Texture2D tex : register(t0);\n"
+"SamplerState smp : register(s0);\n"
+"struct V { float4 pos : SV_Position; float2 uv : TEXCOORD0; };\n"
+"V vs(uint id : SV_VertexID) {\n"
+"  V o; float2 p = float2((id << 1) & 2, id & 2);\n"
+"  o.uv = p; o.pos = float4(p * float2(2, -2) + float2(-1, 1), 0, 1); return o; }\n"
+"float w(float x) { x = abs(x);\n"
+"  return x < 1 ? 1.5 * x * x * x - 2.5 * x * x + 1 : x < 2 ? -0.5 * x * x * x + 2.5 * x * x - 4 * x + 2 : 0; }\n"
+"float4 ps(V i) : SV_Target {\n"
+"  float2 p = i.uv * size.xy - 0.5; float2 f = frac(p); float2 b = floor(p);\n"
+"  float4 c = 0; float total = 0;\n"
+"  [unroll] for (int y = -1; y <= 2; y++) { float wy = w(y - f.y);\n"
+"    [unroll] for (int x = -1; x <= 2; x++) { float k = w(x - f.x) * wy;\n"
+"      c += tex.SampleLevel(smp, (b + float2(x, y) + 0.5) * size.zw, 0) * k; total += k; } }\n"
+"  return saturate(c / total); }\n";
 
 template <class T> static void release(T*& p) { if (p) { p->Release(); p = NULL; } }
 
@@ -17,7 +39,9 @@ LmVideoSink::LmVideoSink()
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
 	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0),
 	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0),
-	  m_colourDirty(false), m_filters(false), m_lowLatency(true)
+	  m_colourDirty(false), m_filters(false), m_lowLatency(true),
+	  m_toTexture(false), m_scaler(0), m_vs(NULL), m_ps(NULL), m_sampler(NULL), m_constants(NULL),
+	  m_rgb(NULL), m_rgbView(NULL), m_rgbW(0), m_rgbH(0)
 {
 	InitializeCriticalSection(&m_lock);
 }
@@ -143,6 +167,13 @@ bool LmVideoSink::open(HWND window)
 
 void LmVideoSink::close()
 {
+	release(m_rgbView);
+	release(m_rgb);
+	release(m_constants);
+	release(m_sampler);
+	release(m_ps);
+	release(m_vs);
+	m_rgbW = m_rgbH = 0;
 	release(m_staging);
 	release(m_upload);
 	m_uploadW = m_uploadH = 0;
@@ -179,19 +210,20 @@ bool LmVideoSink::fitWindow()
 // A video processor for this picture size and window size: colour space,
 // source area (the texture is coded size, 1088 rows for 1080p) and the
 // letterboxed destination.
-bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height)
+bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height, bool toTexture)
 {
-	if (m_processor && width == m_srcW && height == m_srcH) {
+	if (m_processor && width == m_srcW && height == m_srcH && toTexture == m_toTexture) {
 		return true;
 	}
 	release(m_processor);
 	release(m_enumerator);
+	uint32_t outW = toTexture ? width : m_clientW, outH = toTexture ? height : m_clientH;
 	D3D11_VIDEO_PROCESSOR_CONTENT_DESC cd = {};
 	cd.InputFrameFormat = D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE;
 	cd.InputWidth = width;
 	cd.InputHeight = height;
-	cd.OutputWidth = m_clientW;
-	cd.OutputHeight = m_clientH;
+	cd.OutputWidth = outW;
+	cd.OutputHeight = outH;
 	cd.Usage = D3D11_VIDEO_USAGE_PLAYBACK_NORMAL;
 	if (FAILED(m_videoDevice->CreateVideoProcessorEnumerator(&cd, &m_enumerator)) ||
 	    FAILED(m_videoDevice->CreateVideoProcessor(m_enumerator, 0, &m_processor))) {
@@ -205,22 +237,9 @@ bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height)
 
 	RECT src = { 0, 0, (LONG)width, (LONG)height };
 	m_videoContext->VideoProcessorSetStreamSourceRect(m_processor, 0, TRUE, &src);
-	RECT dst;
-	if ((uint64_t)m_clientW * height > (uint64_t)m_clientH * width) {
-		LONG w = (LONG)((uint64_t)m_clientH * width / height);
-		dst.left = ((LONG)m_clientW - w) / 2;
-		dst.top = 0;
-		dst.right = dst.left + w;
-		dst.bottom = m_clientH;
-	} else {
-		LONG h = (LONG)((uint64_t)m_clientW * height / width);
-		dst.left = 0;
-		dst.top = ((LONG)m_clientH - h) / 2;
-		dst.right = m_clientW;
-		dst.bottom = dst.top + h;
-	}
+	RECT dst = letterbox(width, height, outW, outH);
 	m_videoContext->VideoProcessorSetStreamDestRect(m_processor, 0, TRUE, &dst);
-	RECT all = { 0, 0, (LONG)m_clientW, (LONG)m_clientH };
+	RECT all = { 0, 0, (LONG)outW, (LONG)outH };
 	m_videoContext->VideoProcessorSetOutputTargetRect(m_processor, TRUE, &all);
 	D3D11_VIDEO_COLOR black = {};
 	black.RGBA.A = 1.0f;
@@ -228,7 +247,154 @@ bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height)
 
 	m_srcW = width;
 	m_srcH = height;
+	m_toTexture = toTexture;
 	return true;
+}
+
+// Where a width x height picture goes inside an outW x outH area, aspect kept, centred
+RECT LmVideoSink::letterbox(uint32_t width, uint32_t height, uint32_t outW, uint32_t outH)
+{
+	RECT dst;
+	if ((uint64_t)outW * height > (uint64_t)outH * width) {
+		LONG w = (LONG)((uint64_t)outH * width / height);
+		dst.left = ((LONG)outW - w) / 2;
+		dst.top = 0;
+		dst.right = dst.left + w;
+		dst.bottom = outH;
+	} else {
+		LONG h = (LONG)((uint64_t)outW * height / width);
+		dst.left = 0;
+		dst.top = ((LONG)outH - h) / 2;
+		dst.right = outW;
+		dst.bottom = dst.top + h;
+	}
+	return dst;
+}
+
+// Compile the scaler once per device
+bool LmVideoSink::setupShader()
+{
+	if (m_ps) {
+		return true;
+	}
+	ID3DBlob* vs = NULL;
+	ID3DBlob* ps = NULL;
+	bool ok = SUCCEEDED(D3DCompile(SCALER_HLSL, sizeof(SCALER_HLSL) - 1, "scaler", NULL, NULL, "vs", "vs_4_0", 0, 0, &vs, NULL)) &&
+	          SUCCEEDED(D3DCompile(SCALER_HLSL, sizeof(SCALER_HLSL) - 1, "scaler", NULL, NULL, "ps", "ps_4_0", 0, 0, &ps, NULL)) &&
+	          SUCCEEDED(m_device->CreateVertexShader(vs->GetBufferPointer(), vs->GetBufferSize(), NULL, &m_vs)) &&
+	          SUCCEEDED(m_device->CreatePixelShader(ps->GetBufferPointer(), ps->GetBufferSize(), NULL, &m_ps));
+	release(ps);
+	release(vs);
+	D3D11_SAMPLER_DESC sd = {};
+	sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	D3D11_BUFFER_DESC bd = {};
+	bd.ByteWidth = 16;
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	ok = ok && SUCCEEDED(m_device->CreateSamplerState(&sd, &m_sampler)) &&
+	     SUCCEEDED(m_device->CreateBuffer(&bd, NULL, &m_constants));
+	if (!ok) {
+		release(m_constants);
+		release(m_sampler);
+		release(m_ps);
+		release(m_vs);
+	}
+	return ok;
+}
+
+// The RGB picture at its own size, between the processor and the shader
+bool LmVideoSink::setupRgb(uint32_t width, uint32_t height)
+{
+	if (m_rgb && width == m_rgbW && height == m_rgbH) {
+		return true;
+	}
+	release(m_rgbView);
+	release(m_rgb);
+	D3D11_TEXTURE2D_DESC td = {};
+	td.Width = width;
+	td.Height = height;
+	td.MipLevels = 1;
+	td.ArraySize = 1;
+	td.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	td.SampleDesc.Count = 1;
+	td.Usage = D3D11_USAGE_DEFAULT;
+	td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	if (FAILED(m_device->CreateTexture2D(&td, NULL, &m_rgb)) ||
+	    FAILED(m_device->CreateShaderResourceView(m_rgb, NULL, &m_rgbView))) {
+		release(m_rgbView);
+		release(m_rgb);
+		return false;
+	}
+	m_rgbW = width;
+	m_rgbH = height;
+	return true;
+}
+
+// One VideoProcessorBlt of the picture into target
+bool LmVideoSink::blit(ID3D11Texture2D* picture, uint32_t subresource, ID3D11Texture2D* target)
+{
+	D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC od = {};
+	od.ViewDimension = D3D11_VPOV_DIMENSION_TEXTURE2D;
+	D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC id = {};
+	id.ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D;
+	id.Texture2D.ArraySlice = subresource;
+	ID3D11VideoProcessorOutputView* out = NULL;
+	ID3D11VideoProcessorInputView* in = NULL;
+	bool ok = SUCCEEDED(m_videoDevice->CreateVideoProcessorOutputView(target, m_enumerator, &od, &out)) &&
+	          SUCCEEDED(m_videoDevice->CreateVideoProcessorInputView(picture, m_enumerator, &id, &in));
+	if (ok) {
+		D3D11_VIDEO_PROCESSOR_STREAM stream = {};
+		stream.Enable = TRUE;
+		stream.pInputSurface = in;
+		ok = SUCCEEDED(m_videoContext->VideoProcessorBlt(m_processor, out, 0, 1, &stream));
+	}
+	release(in);
+	release(out);
+	return ok;
+}
+
+// The shader pass: the RGB picture enlarged into the letterbox area of the back buffer
+void LmVideoSink::enlarge(ID3D11Texture2D* back, uint32_t width, uint32_t height)
+{
+	ID3D11RenderTargetView* rtv = NULL;
+	if (FAILED(m_device->CreateRenderTargetView(back, NULL, &rtv))) {
+		return;
+	}
+	D3D11_MAPPED_SUBRESOURCE map = {};
+	if (SUCCEEDED(m_context->Map(m_constants, 0, D3D11_MAP_WRITE_DISCARD, 0, &map))) {
+		float* size = (float*)map.pData;
+		size[0] = (float)width;
+		size[1] = (float)height;
+		size[2] = 1.0f / width;
+		size[3] = 1.0f / height;
+		m_context->Unmap(m_constants, 0);
+	}
+	const float black[4] = { 0, 0, 0, 1 };
+	m_context->ClearRenderTargetView(rtv, black);
+	RECT dst = letterbox(width, height, m_clientW, m_clientH);
+	D3D11_VIEWPORT vp = {};
+	vp.TopLeftX = (float)dst.left;
+	vp.TopLeftY = (float)dst.top;
+	vp.Width = (float)(dst.right - dst.left);
+	vp.Height = (float)(dst.bottom - dst.top);
+	vp.MaxDepth = 1.0f;
+	m_context->OMSetRenderTargets(1, &rtv, NULL);
+	m_context->RSSetViewports(1, &vp);
+	m_context->IASetInputLayout(NULL);
+	m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_context->VSSetShader(m_vs, NULL, 0);
+	m_context->PSSetShader(m_ps, NULL, 0);
+	m_context->PSSetConstantBuffers(0, 1, &m_constants);
+	m_context->PSSetShaderResources(0, 1, &m_rgbView);
+	m_context->PSSetSamplers(0, 1, &m_sampler);
+	m_context->Draw(3, 0);
+	ID3D11ShaderResourceView* none = NULL;
+	m_context->PSSetShaderResources(0, 1, &none);
+	ID3D11RenderTargetView* noTarget = NULL;
+	m_context->OMSetRenderTargets(1, &noTarget, NULL);
+	release(rtv);
 }
 
 bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t width, uint32_t height)
@@ -236,7 +402,12 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	if (!m_swap || !picture || width == 0 || height == 0) {
 		return false;
 	}
-	if (!fitWindow() || !setupProcessor(width, height)) {
+	if (!fitWindow()) {
+		return false;
+	}
+	// the shader only enlarges; a picture bigger than the window is left to the processor
+	bool sharp = m_scaler == 1 && (m_clientW > width || m_clientH > height) && setupShader() && setupRgb(width, height);
+	if (!setupProcessor(width, height, sharp)) {
 		return false;
 	}
 	if (m_colourDirty) {
@@ -247,23 +418,10 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	if (FAILED(m_swap->GetBuffer(0, IID_PPV_ARGS(&back)))) {
 		return false;
 	}
-	D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC od = {};
-	od.ViewDimension = D3D11_VPOV_DIMENSION_TEXTURE2D;
-	D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC id = {};
-	id.ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D;
-	id.Texture2D.ArraySlice = subresource;
-	ID3D11VideoProcessorOutputView* target = NULL;
-	ID3D11VideoProcessorInputView* source = NULL;
-	bool ok = SUCCEEDED(m_videoDevice->CreateVideoProcessorOutputView(back, m_enumerator, &od, &target)) &&
-	          SUCCEEDED(m_videoDevice->CreateVideoProcessorInputView(picture, m_enumerator, &id, &source));
-	if (ok) {
-		D3D11_VIDEO_PROCESSOR_STREAM stream = {};
-		stream.Enable = TRUE;
-		stream.pInputSurface = source;
-		ok = SUCCEEDED(m_videoContext->VideoProcessorBlt(m_processor, target, 0, 1, &stream));
+	bool ok = blit(picture, subresource, sharp ? m_rgb : back);
+	if (ok && sharp) {
+		enlarge(back, width, height);
 	}
-	release(source);
-	release(target);
 	release(back);
 	return ok;
 }

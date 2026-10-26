@@ -51,6 +51,14 @@ lm_error lm_server_set_colour(lm_server* s, const lm_colour* c)
 	return LM_OK;
 }
 
+lm_error lm_server_set_scaler(lm_server* s, int quality)
+{
+	if (!s || quality < 0 || quality > 1) return LM_E_INVALID_ARG;
+	s->options.scaler = quality;
+	if (s->sink) s->sink->setScaler(quality);
+	return LM_OK;
+}
+
 lm_error lm_server_set_low_latency(lm_server* s, int enable)
 {
 	if (!s) return LM_E_INVALID_ARG;
@@ -166,6 +174,7 @@ lm_error lm_server_set_window(lm_server* s, void* hwnd)
 		return LM_E_INTERNAL;
 	}
 	s->sink->setColour(s->options.colour);
+	s->sink->setScaler(s->options.scaler);
 	return LM_OK;
 }
 

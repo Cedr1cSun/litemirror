@@ -167,6 +167,11 @@ LM_API lm_error    lm_server_set_colour(lm_server* s, const lm_colour* colour);
  * the window shows it without waiting for the display's refresh. Off:
  * smoother, a frame or two later. Set it before lm_server_start(). */
 LM_API lm_error    lm_server_set_low_latency(lm_server* s, int enable);
+/* How the picture is enlarged to fill the window: 0 the GPU's video
+ * processor (bilinear on most drivers), 1 a bicubic shader, sharper. May
+ * be changed at any time. A picture larger than the window is always
+ * reduced by the processor. */
+LM_API lm_error    lm_server_set_scaler(lm_server* s, int quality);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */
