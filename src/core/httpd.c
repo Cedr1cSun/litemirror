@@ -84,6 +84,7 @@ httpd_init(logger_t *logger, httpd_callbacks_t *callbacks, int max_connections)
 	/* Initial status joined */
 	httpd->running = 0;
 	httpd->joined = 1;
+	MUTEX_CREATE(httpd->run_mutex);
 
 	return httpd;
 }
@@ -94,6 +95,7 @@ httpd_destroy(httpd_t *httpd)
 	if (httpd) {
 		httpd_stop(httpd);
 
+		MUTEX_DESTROY(httpd->run_mutex);
 		free(httpd->connections);
 		free(httpd);
 	}
@@ -156,8 +158,8 @@ httpd_accept_connection(httpd_t *httpd, int server_fd, int is_ipv6)
 	remote_saddrlen = sizeof(remote_saddr);
 	fd = accept(server_fd, (struct sockaddr *)&remote_saddr, &remote_saddrlen);
 	if (fd == -1) {
-		/* FIXME: Error happened */
-		return -1;
+		/* a client that went away before we got to it: keep serving */
+		return 0;
 	}
 
 	local_saddrlen = sizeof(local_saddr);
@@ -301,7 +303,7 @@ httpd_thread(void *arg)
 
 			logger_log(httpd->logger, LOGGER_DEBUG, "Receiving on socket %d", connection->socket_fd);
 			ret = recv(connection->socket_fd, buffer, sizeof(buffer), 0);
-			if (ret == 0) {
+			if (ret <= 0) {
 				logger_log(httpd->logger, LOGGER_INFO, "Connection closed for socket %d", connection->socket_fd);
 				httpd_remove_connection(httpd, connection);
 				continue;
@@ -376,18 +378,8 @@ httpd_thread(void *arg)
 		httpd_remove_connection(httpd, connection);
 	}
 
-	/* Close server sockets since they are not used any more */
-	if (httpd->server_fd4 != -1) {
-		shutdown(httpd->server_fd4, SHUT_RDWR);
-		closesocket(httpd->server_fd4);
-		httpd->server_fd4 = -1;
-	}
-	if (httpd->server_fd6 != -1) {
-		shutdown(httpd->server_fd6, SHUT_RDWR);
-		closesocket(httpd->server_fd6);
-		httpd->server_fd6 = -1;
-	}
-
+	/* The server sockets are httpd_stop's to close: closing them here as well
+	 * raced with it, and a closed handle number is reused by the next socket */
 	logger_log(httpd->logger, LOGGER_INFO, "Exiting HTTP thread: %d", httpd->thread);
 
 	return 0;
