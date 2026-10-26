@@ -56,7 +56,9 @@ Name: "{group}\LiteMirror"; Filename: "{app}\LiteMirror.exe"
 Name: "{autodesktop}\LiteMirror"; Filename: "{app}\LiteMirror.exe"; Tasks: desktopicon
 
 [Run]
-; inbound rule on private networks, so the first phone is not stopped by the firewall prompt
+; inbound rule for every profile but only the local subnet: hotspot and USB adapters count as public.
+; The old rule goes first so an upgrade does not stack a second one.
+Filename: "netsh"; Parameters: "advfirewall firewall delete rule name=""LiteMirror"""; Flags: runhidden
 Filename: "netsh"; Parameters: "advfirewall firewall add rule name=""LiteMirror"" dir=in action=allow program=""{app}\LiteMirror.exe"" enable=yes profile=any remoteip=localsubnet"; Flags: runhidden
 Filename: "{app}\LiteMirror.exe"; Description: "{cm:LaunchProgram,LiteMirror}"; Flags: nowait postinstall skipifsilent
 
