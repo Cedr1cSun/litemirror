@@ -78,6 +78,12 @@
                 <Setter Property="TextTrimming" Value="CharacterEllipsis" />
                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
             </Style>
+            <Style x:Key="RowHint" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="Margin" Value="0,3,0,0" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            </Style>
             <Style x:Key="RowLine" TargetType="Border">
                 <Setter Property="Height" Value="1" />
                 <Setter Property="Margin" Value="16,0" />

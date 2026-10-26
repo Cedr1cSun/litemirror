@@ -119,6 +119,38 @@
   <data name="Log_Debug" xml:space="preserve"><value>Everything</value></data>
   <data name="OpenLogs" xml:space="preserve"><value>Open log folder</value></data>
 
+
+  <data name="H_Name" xml:space="preserve"><value>What your iPhone lists under Screen Mirroring. Empty means this computer's name.</value></data>
+  <data name="H_AutoStart" xml:space="preserve"><value>Otherwise press Start receiving (or Ctrl+R) when you want to be found.</value></data>
+  <data name="H_Pin" xml:space="preserve"><value>Makes the phone ask for a code before it may connect. "New code" shows a fresh 4-digit code on this screen each time, like an Apple TV.</value></data>
+  <data name="H_PinCode" xml:space="preserve"><value>The code the phone has to enter; 1 to 63 characters.</value></data>
+  <data name="H_Second" xml:space="preserve"><value>What happens when a phone tries to connect while another one is already mirroring.</value></data>
+  <data name="H_Address" xml:space="preserve"><value>Receive on one adapter only. Useful with a VPN, virtual adapters or a phone hotspot; "All adapters" is right for most people.</value></data>
+  <data name="H_Ports" xml:space="preserve"><value>Fixed port numbers for firewalls. 0 lets Windows pick free ones each time.</value></data>
+  <data name="H_Quality" xml:space="preserve"><value>The picture size the phone is asked to send. Lower means less Wi-Fi traffic and CPU.</value></data>
+  <data name="H_Fps" xml:space="preserve"><value>The most frames per second the phone sends. 30 is easier on slow machines and networks.</value></data>
+  <data name="H_Hw" xml:space="preserve"><value>Decode the video on the graphics card. Turn off only if the picture is broken or black.</value></data>
+  <data name="H_Low" xml:space="preserve"><value>Show each frame as soon as it arrives. Off trades a frame or two of delay for a steadier picture.</value></data>
+  <data name="H_Scaler" xml:space="preserve"><value>How the picture is enlarged when the window is bigger than it. Sharp costs a little GPU.</value></data>
+  <data name="H_Rotate" xml:space="preserve"><value>The window turns round its centre when the phone rotates; off keeps the window as it is and adds bars.</value></data>
+  <data name="H_Info" xml:space="preserve"><value>Picture size, frame rate, processing time and decoder, in the top-left corner of the picture (Ctrl+I).</value></data>
+  <data name="H_Monitor" xml:space="preserve"><value>Where F11 full screen goes on a computer with several monitors.</value></data>
+  <data name="H_Matrix" xml:space="preserve"><value>How the phone's video colours are converted. Auto picks BT.709 for HD and BT.601 below; change it only if colours look off.</value></data>
+  <data name="H_Range" xml:space="preserve"><value>Whether black is at 16 or 0. Auto (limited) is right for AirPlay; full makes a washed-out picture punchier, or crushes it.</value></data>
+  <data name="H_Brightness" xml:space="preserve"><value>Lifts or lowers the whole picture. 0 is as sent.</value></data>
+  <data name="H_Contrast" xml:space="preserve"><value>Spread between dark and light. 0 is as sent.</value></data>
+  <data name="H_Saturation" xml:space="preserve"><value>Colour strength; -100 is black and white. 0 is as sent.</value></data>
+  <data name="H_Hue" xml:space="preserve"><value>Shifts all colours round the colour wheel. 0 is as sent.</value></data>
+  <data name="H_Audio" xml:space="preserve"><value>Off keeps the sound on the phone.</value></data>
+  <data name="H_AudioDevice" xml:space="preserve"><value>Speakers or headphones to play on. "Default device" follows Windows' sound settings.</value></data>
+  <data name="H_Volume" xml:space="preserve"><value>The phone's volume buttons set this app's volume in the Windows mixer.</value></data>
+  <data name="H_Language" xml:space="preserve"><value>Text of this app.</value></data>
+  <data name="H_Theme" xml:space="preserve"><value>Light or dark look; "Same as Windows" follows the Windows setting.</value></data>
+  <data name="H_Colour" xml:space="preserve"><value>Accent used for buttons and the chosen page.</value></data>
+  <data name="H_Startup" xml:space="preserve"><value>Starts in the tray when you sign in; receiving still follows the setting above.</value></data>
+  <data name="H_Close" xml:space="preserve"><value>Quit, or keep receiving in the background with an icon in the tray.</value></data>
+  <data name="H_Log" xml:space="preserve"><value>What is written to the log files; "Everything" is for reporting a problem.</value></data>
+
   <data name="Version" xml:space="preserve"><value>Version {0}</value></data>
   <data name="About_Desc" xml:space="preserve"><value>A small AirPlay receiver for Windows: mirror your iPhone or iPad screen, with sound, to this PC.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Free software under the GNU General Public License, version 3.</value></data>
