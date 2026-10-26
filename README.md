@@ -43,6 +43,8 @@ Download `LiteMirror-<version>-setup.exe` from the [releases page](https://githu
 
 The installer is not code signed yet, so SmartScreen shows an unknown publisher warning the first time.
 
+The About page checks GitHub for a newer release when you ask, or at every start if you switch that on in the settings. It only reads the latest release tag; you download and run the new installer yourself, and it upgrades in place.
+
 ## 🚀 Quick start
 
 1. Start LiteMirror and press **Start receiving** (Ctrl+R), or switch on automatic start in the settings.
