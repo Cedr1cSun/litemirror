@@ -28,7 +28,7 @@ Open Screen Mirroring on an iPhone or iPad, pick the PC, and the phone's screen 
 
 - Screen mirroring with audio from any iPhone or iPad on the same network
 - H.264 decoded on the GPU through Media Foundation and D3D11, with a software fallback for broken drivers
-- Low latency by default: the decoder runs in AVLowLatencyMode and frames are presented without waiting for vsync; an optional Catmull-Rom bicubic upscaler when the window is larger than the picture
+- Low latency by default: the decoder runs in AVLowLatencyMode, frames are presented without waiting for vsync with one frame in the DXGI queue, and in full screen without waiting for the vertical blank at all; an optional Catmull-Rom bicubic upscaler when the window is larger than the picture
 - The window keeps the phone's aspect ratio and turns with it; F11 goes full screen on the monitor you choose; a pin keeps it on top
 - A PIN, either a fresh 4-digit code shown on the PC for every connection or a fixed one; when a second phone connects you are asked whether to replace the first or refuse it
 - Colour controls on the video processor: BT.601/BT.709 matrix, limited or full range, brightness, contrast, saturation, hue
