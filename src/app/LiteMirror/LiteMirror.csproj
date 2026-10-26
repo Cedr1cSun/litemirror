@@ -16,6 +16,7 @@
     <RootNamespace>LiteMirror</RootNamespace>
     <AssemblyName>LiteMirror</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <!-- same folder as litemirror.dll -->
     <OutputPath>..\..\..\build\bin\$(Configuration)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
