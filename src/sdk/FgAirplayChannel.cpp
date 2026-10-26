@@ -1,11 +1,12 @@
 #include "FgAirplayChannel.h"
 #include "CAutoLock.h"
 
-FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink)
+FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink, bool hardware)
 : m_nRef(1)
 , m_nStreams(0)
 , m_cb(callbacks)
 , m_sink(sink)
+, m_hardware(hardware)
 , m_bDecoderOpen(false)
 , m_reportedW(0)
 , m_reportedH(0)
@@ -47,7 +48,7 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 		if (!data->is_key) {
 			return 0;   // cannot start mid-stream without SPS/PPS
 		}
-		m_bDecoderOpen = m_decoder.open(m_sink ? m_sink->device() : NULL);
+		m_bDecoderOpen = m_decoder.open(m_sink ? m_sink->device() : NULL, m_hardware);
 		if (!m_bDecoderOpen) {
 			return -1;
 		}
@@ -64,9 +65,10 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 			m_cb->on_video_size(m_cb->user, remoteDeviceId, f.width, f.height);
 		}
 		if (m_sink) {
-			// shortcut: nothing is drawn if the MFT declined the sink's device
-			// and decoded in software; add an NV12 upload path if that shows up
-			if (m_sink->draw(f.texture, f.subresource, f.width, f.height)) m_sink->present();
+			// a GPU picture is drawn in place; a CPU one (software decoding) is uploaded first
+			bool drawn = f.texture ? m_sink->draw(f.texture, f.subresource, f.width, f.height)
+			                       : m_sink->draw(f.plane[0], f.pitch[0], f.plane[1], f.pitch[1], f.width, f.height);
+			if (drawn) m_sink->present();
 			continue;
 		}
 		if (m_cb->on_video == NULL) {

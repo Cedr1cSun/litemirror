@@ -78,6 +78,7 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
                                 const FgServerOptions& options)
 {
 	m_cb = *callbacks;
+	m_options = options;
 	m_sink = video;
 	m_audioSink = audio;
 
@@ -205,7 +206,7 @@ void FgAirplayServer::connected(void* cls, const char* remoteName, const char* r
 	bool bFirstStream = (pChannel == NULL);
 	if (bFirstStream)
 	{
-		pChannel = new FgAirplayChannel(&pServer->m_cb, pServer->m_sink);
+		pChannel = new FgAirplayChannel(&pServer->m_cb, pServer->m_sink, pServer->m_options.hardwareDecode);
 		pServer->m_mapChannel[remoteDeviceId] = pChannel;
 	}
 	pChannel->m_nStreams++;

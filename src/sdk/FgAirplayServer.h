@@ -14,12 +14,13 @@ typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
 // What the shell set through the lm_server_set_* calls before starting
 struct FgServerOptions {
-	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60) {}
+	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true) {}
 	int pinMode;          // lm_pin_mode
 	std::string pin;      // LM_PIN_FIXED
 	bool replaceSecond;   // a second phone replaces the first instead of being refused
 	unsigned long address;   // IPv4 to listen and announce on, network byte order; 0 = all
 	unsigned int displayWidth, displayHeight, displayFps;   // what the phone encodes at
+	bool hardwareDecode;  // false: decode on the CPU
 };
 
 // Owns the protocol core (RTSP, HTTP, mDNS) and one FgAirplayChannel per
@@ -58,6 +59,7 @@ protected:
 
 protected:
 	lm_callbacks			m_cb;
+	FgServerOptions			m_options;
 	LmVideoSink*			m_sink;        // NULL: frames go to m_cb.on_video
 	LmAudioSink*			m_audioSink;   // NULL: PCM goes to m_cb.on_audio
 

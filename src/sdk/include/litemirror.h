@@ -123,6 +123,9 @@ LM_API lm_error    lm_server_set_address(lm_server* s, const char* ipv4);
  * size or frame rate costs less bandwidth and CPU. Default 1920x1080 at
  * 60. Set it before lm_server_start(); all three must be non-zero. */
 LM_API lm_error    lm_server_set_display(lm_server* s, uint32_t width, uint32_t height, uint32_t max_fps);
+/* Decode on the GPU (default, 1) or on the CPU (0), for machines whose GPU
+ * decoder misbehaves. Set it before lm_server_start(). */
+LM_API lm_error    lm_server_set_hw_decode(lm_server* s, int enable);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

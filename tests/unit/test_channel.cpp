@@ -94,6 +94,73 @@ static SFgH264Data packet(std::vector<uint8_t>& bytes, int is_key, int pts)
 	return d;
 }
 
+// Feed the clip the way the mirror stream arrives: SPS+PPS as one key packet, then one packet per frame
+static void feed_clip(FgAirplayChannel* channel)
+{
+	std::vector<std::vector<uint8_t>> nals = nal_units(read_clip());
+	REQUIRE(nals.size() > 10);
+	int pts = 0;
+	std::vector<uint8_t> params, frame;
+	for (size_t i = 0; i < nals.size(); i++) {
+		int t = nal_type(nals[i]);
+		if (t == 7 || t == 8) {
+			params.insert(params.end(), nals[i].begin(), nals[i].end());
+			if (t == 8) {
+				SFgH264Data key = packet(params, 1, pts);
+				channel->decodeH264Data(&key, "TestPhone", "AA:BB:CC:DD:EE:FF");
+				params.clear();
+			}
+			continue;
+		}
+		frame.assign(nals[i].begin(), nals[i].end());
+		if (t == 6) {
+			frame.insert(frame.end(), nals[i + 1].begin(), nals[i + 1].end());
+			i++;
+		}
+		SFgH264Data d = packet(frame, 0, pts);
+		channel->decodeH264Data(&d, "TestPhone", "AA:BB:CC:DD:EE:FF");
+		pts += 33333;
+	}
+}
+
+TEST_CASE("channel with hardware decoding off still reports frames with the right pixels")
+{
+	Recording cb;
+	lm_callbacks callbacks = cb.callbacks();
+	FgAirplayChannel* channel = new FgAirplayChannel(&callbacks, NULL, false);
+	feed_clip(channel);
+	channel->release();
+	CHECK(cb.frames == 10);
+	CHECK(cb.width == 320);
+	CHECK(cb.y00 == 16);
+	CHECK(cb.y160_120 == 210);
+	CHECK(cb.u160_120 == 16);
+	CHECK(cb.v160_120 == 146);
+}
+
+TEST_CASE("channel with hardware decoding off still draws into the window sink")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	UINT before = 0;
+	sink.swapChain()->GetLastPresentCount(&before);
+
+	Recording cb;
+	lm_callbacks callbacks = cb.callbacks();
+	FgAirplayChannel* channel = new FgAirplayChannel(&callbacks, &sink, false);
+	feed_clip(channel);
+	channel->release();
+
+	UINT after = 0;
+	sink.swapChain()->GetLastPresentCount(&after);
+	CHECK(after - before == 10);   // every software frame was uploaded and shown
+	CHECK(cb.frames == 0);
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("channel decodes mirror packets and reports NV12 frames")
 {
 	std::vector<std::vector<uint8_t>> nals = nal_units(read_clip());

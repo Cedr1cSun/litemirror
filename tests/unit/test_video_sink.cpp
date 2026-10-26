@@ -147,6 +147,43 @@ TEST_CASE("sink draws the decoded picture letterboxed with ffmpeg's colours")
 	DestroyWindow(hwnd);
 }
 
+TEST_CASE("sink draws a picture handed over in memory with the same colours")
+{
+	std::vector<uint8_t> au = first_access_unit(read_clip());
+	REQUIRE(au.size() > 100);
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 640, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	MfH264Decoder dec;
+	REQUIRE(dec.open(NULL, false));   // software: the picture arrives as NV12 planes in memory
+	REQUIRE(dec.decode(au.data(), au.size(), 0));
+	REQUIRE(dec.receive());
+	const MfH264Decoder::Frame& f = dec.frame();
+	REQUIRE(f.plane[0] != NULL);
+	CHECK(f.texture == NULL);
+
+	REQUIRE(sink.draw(f.plane[0], f.pitch[0], f.plane[1], f.pitch[1], f.width, f.height));
+	Pixels px;
+	REQUIRE(read_back(sink, px));
+	CHECK(px.diff(10, 120, 0, 0, 0) == 0);
+	CHECK(px.diff(630, 120, 0, 0, 0) == 0);
+	CHECK(px.diff(160 + 8, 8, 0, 0, 0) <= 3);
+	CHECK(px.diff(160 + 296, 8, 255, 255, 255) <= 3);
+	CHECK(px.diff(160 + 168, 8, 253, 253, 0) <= 3);
+	CHECK(px.diff(160 + 136, 8, 0, 0, 254) <= 3);
+	CHECK(px.diff(160 + 256, 44, 253, 0, 0) <= 3);
+	CHECK(px.diff(160 + 216, 16, 0, 255, 0) <= 3);
+	CHECK(px.diff(160 + 104, 8, 254, 0, 253) <= 3);
+	CHECK(px.diff(160 + 40, 200, 251, 166, 0) <= 3);
+	sink.present();
+
+	dec.close();
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("sink refuses to open without a window")
 {
 	LmVideoSink sink;

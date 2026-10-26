@@ -37,6 +37,9 @@ public:
 	// between black bars so the aspect ratio holds. Follows window resizes.
 	// False while the window has no client area (minimised).
 	bool draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t width, uint32_t height);
+	// The same for an NV12 picture in memory (software decoding): the
+	// planes are copied into a texture first.
+	bool draw(const uint8_t* y, uint32_t yPitch, const uint8_t* uv, uint32_t uvPitch, uint32_t width, uint32_t height);
 	void present();
 
 private:
@@ -53,4 +56,7 @@ private:
 	ID3D11VideoProcessor* m_processor;
 	uint32_t m_clientW, m_clientH;   // swap chain size
 	uint32_t m_srcW, m_srcH;         // picture size the processor was set up for
+	ID3D11Texture2D* m_staging;      // CPU-written copy of a software-decoded picture
+	ID3D11Texture2D* m_upload;       // its GPU copy the processor reads
+	uint32_t m_uploadW, m_uploadH;
 };

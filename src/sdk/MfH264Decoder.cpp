@@ -88,10 +88,10 @@ bool MfH264Decoder::setupD3D11(ID3D11Device* shared)
 	return true;
 }
 
-bool MfH264Decoder::open(ID3D11Device* device)
+bool MfH264Decoder::open(ID3D11Device* device, bool hardware)
 {
 	close();
-	m_shared = device != NULL;
+	m_shared = hardware && device != NULL;
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);   // RPC_E_CHANGED_MODE is fine: COM is up
 	if (FAILED(MFStartup(MF_VERSION, MFSTARTUP_LITE))) {
 		return false;
@@ -119,7 +119,7 @@ bool MfH264Decoder::open(ID3D11Device* device)
 		attrs->GetUINT32(MF_SA_D3D11_AWARE, &aware);
 		release(attrs);
 	}
-	if (aware && setupD3D11(device)) {
+	if (hardware && aware && setupD3D11(device)) {
 		m_hardware = SUCCEEDED(m_mft->ProcessMessage(MFT_MESSAGE_SET_D3D_MANAGER, (ULONG_PTR)m_manager));
 	}
 

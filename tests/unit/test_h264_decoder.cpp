@@ -102,6 +102,41 @@ TEST_CASE("decodes the test clip to NV12 with ffmpeg's pixel values")
 	CHECK(checked_first);
 }
 
+TEST_CASE("decodes in software when asked, with the same pixel values")
+{
+	std::vector<std::vector<uint8_t>> units = access_units(read_clip());
+	REQUIRE(units.size() == 10);
+
+	MfH264Decoder dec;
+	REQUIRE(dec.open(NULL, false));
+	CHECK_FALSE(dec.hardware());
+
+	int frames = 0;
+	bool checked_first = false;
+	auto take = [&](const MfH264Decoder::Frame& f) {
+		if (!checked_first) {
+			checked_first = true;
+			CHECK(f.texture == NULL);
+			REQUIRE(f.plane[0] != NULL);
+			CHECK(f.width == 320);
+			CHECK(f.height == 240);
+			CHECK(Y(f, 0, 0) == 16);
+			CHECK(Y(f, 160, 120) == 210);
+			CHECK(Y(f, 319, 239) == 235);
+			CHECK(U(f, 160, 120) == 16);
+			CHECK(V(f, 160, 120) == 146);
+		}
+		frames++;
+	};
+	for (size_t i = 0; i < units.size(); i++) {
+		CHECK(dec.decode(units[i].data(), units[i].size(), i * 33333));
+		while (dec.receive()) take(dec.frame());
+	}
+	while (dec.drain()) take(dec.frame());
+	CHECK(frames == 10);
+	CHECK(checked_first);
+}
+
 // Run by hand: LITEMIRROR_BENCH_CLIP=<annex b file> litemirror-tests.exe -tc=benchmark* -no-skip
 TEST_CASE("benchmark: decode LITEMIRROR_BENCH_CLIP and report CPU time" * doctest::skip(true))
 {

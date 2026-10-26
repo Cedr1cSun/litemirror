@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <d3d11_4.h>
 #include <dxgi1_2.h>
+#include <string.h>
 #include "LmVideoSink.h"
 
 #pragma comment(lib, "d3d11.lib")
@@ -14,7 +15,8 @@ template <class T> static void release(T*& p) { if (p) { p->Release(); p = NULL;
 LmVideoSink::LmVideoSink()
 	: m_hwnd(NULL), m_device(NULL), m_context(NULL), m_swap(NULL),
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
-	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0)
+	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0),
+	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0)
 {
 }
 
@@ -87,6 +89,9 @@ bool LmVideoSink::open(HWND window)
 
 void LmVideoSink::close()
 {
+	release(m_staging);
+	release(m_upload);
+	m_uploadW = m_uploadH = 0;
 	release(m_processor);
 	release(m_enumerator);
 	release(m_videoContext);
@@ -212,6 +217,58 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	release(target);
 	release(back);
 	return ok;
+}
+
+// Software-decoded picture: copy the planes into a staging texture, let the
+// GPU move it into a decoder-style texture, then draw that as usual.
+bool LmVideoSink::draw(const uint8_t* y, uint32_t yPitch, const uint8_t* uv, uint32_t uvPitch, uint32_t width, uint32_t height)
+{
+	if (!m_device || !y || !uv || width == 0 || height == 0) {
+		return false;
+	}
+	uint32_t w = (width + 1) & ~1u, h = (height + 1) & ~1u;   // NV12 textures have even sizes
+	if (m_upload && (w != m_uploadW || h != m_uploadH)) {
+		release(m_staging);
+		release(m_upload);
+	}
+	if (!m_upload) {
+		D3D11_TEXTURE2D_DESC td = {};
+		td.Width = w;
+		td.Height = h;
+		td.MipLevels = 1;
+		td.ArraySize = 1;
+		td.Format = DXGI_FORMAT_NV12;
+		td.SampleDesc.Count = 1;
+		td.Usage = D3D11_USAGE_DEFAULT;
+		td.BindFlags = D3D11_BIND_DECODER | D3D11_BIND_SHADER_RESOURCE;
+		D3D11_TEXTURE2D_DESC sd = td;
+		sd.Usage = D3D11_USAGE_STAGING;
+		sd.BindFlags = 0;
+		sd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		if (FAILED(m_device->CreateTexture2D(&td, NULL, &m_upload)) ||
+		    FAILED(m_device->CreateTexture2D(&sd, NULL, &m_staging))) {
+			release(m_staging);
+			release(m_upload);
+			return false;
+		}
+		m_uploadW = w;
+		m_uploadH = h;
+	}
+	D3D11_MAPPED_SUBRESOURCE map = {};
+	if (FAILED(m_context->Map(m_staging, 0, D3D11_MAP_WRITE, 0, &map))) {
+		return false;
+	}
+	uint8_t* dst = (uint8_t*)map.pData;
+	for (uint32_t r = 0; r < height; r++) {
+		memcpy(dst + (size_t)r * map.RowPitch, y + (size_t)r * yPitch, width);
+	}
+	dst += (size_t)map.RowPitch * h;
+	for (uint32_t r = 0; r < (height + 1) / 2; r++) {
+		memcpy(dst + (size_t)r * map.RowPitch, uv + (size_t)r * uvPitch, width);
+	}
+	m_context->Unmap(m_staging, 0);
+	m_context->CopyResource(m_upload, m_staging);
+	return draw(m_upload, 0, width, height);
 }
 
 void LmVideoSink::present()

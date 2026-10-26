@@ -31,6 +31,14 @@ lm_error lm_server_set_address(lm_server* s, const char* ipv4)
 	return LM_OK;
 }
 
+lm_error lm_server_set_hw_decode(lm_server* s, int enable)
+{
+	if (!s) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.hardwareDecode = enable != 0;
+	return LM_OK;
+}
+
 lm_error lm_server_set_display(lm_server* s, uint32_t width, uint32_t height, uint32_t max_fps)
 {
 	if (!s || !width || !height || !max_fps) return LM_E_INVALID_ARG;
