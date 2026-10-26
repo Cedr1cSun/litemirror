@@ -14,6 +14,7 @@
   <data name="ReceiverNameLabel" xml:space="preserve"><value>Receiver name (shown on your iPhone)</value></data>
   <data name="RunAtStartup" xml:space="preserve"><value>Run when I sign in to Windows</value></data>
   <data name="AlwaysOnTop" xml:space="preserve"><value>Keep the window on top</value></data>
+  <data name="FollowRotation" xml:space="preserve"><value>Turn the window when the phone rotates</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
   <data name="LanguageAuto" xml:space="preserve"><value>Same as Windows</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>

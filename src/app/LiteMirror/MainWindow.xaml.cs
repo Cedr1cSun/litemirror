@@ -6,6 +6,9 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 
 namespace LiteMirror
@@ -26,6 +29,13 @@ namespace LiteMirror
         bool fullScreen;
         Rect savedBounds;
         WindowState savedState;
+        // "the window is the phone": the phone's screen sets the shape, the user sets the area
+        Size screen;            // the phone's screen, learnt from the first picture after connect
+        Size picture;           // the last picture size
+        bool shaped;            // the window has taken the phone's shape once this connection
+        bool turning;           // the turn animation is running
+        double dragAspect;      // video-area aspect to hold while the user drags an edge
+        readonly DispatcherTimer sizeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
 
         public MainWindow(Settings settings)
         {
@@ -33,8 +43,10 @@ namespace LiteMirror
             this.settings = settings;
             onConnected = (user, id, name) => Dispatcher.BeginInvoke(new Action(() => ShowDevice(Native.Utf8(name))));
             onDisconnected = (user, id, name) => Dispatcher.BeginInvoke(new Action(() => ShowDevice(null)));
-            onVideoSize = (user, id, w, h) => Dispatcher.BeginInvoke(new Action(() => FitToPicture(w, h)));
+            onVideoSize = (user, id, w, h) => Dispatcher.BeginInvoke(new Action(() => OnPictureSize(w, h)));
             Topmost = settings.AlwaysOnTop;
+            sizeTimer.Tick += OnSizeTimer;
+            SourceInitialized += (s, e) => HwndSource.FromHwnd(new WindowInteropHelper(this).Handle).AddHook(Hook);
             Loaded += OnLoaded;
             Closing += OnClosing;
             Closed += OnClosed;
@@ -108,6 +120,7 @@ namespace LiteMirror
             Show();
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
+            if (!picture.IsEmpty) sizeTimer.Start();   // pictures that arrived while hidden
         }
 
         // Closing the window keeps receiving in the tray; Quit in the tray menu really exits
@@ -131,27 +144,100 @@ namespace LiteMirror
         {
             deviceName = name;
             bool connected = name != null;
+            if (!connected)
+            {
+                screen = picture = Size.Empty;
+                shaped = false;
+                sizeTimer.Stop();
+            }
             Video.Visibility = connected ? Visibility.Visible : Visibility.Hidden;
             Hint.Visibility = connected ? Visibility.Collapsed : Visibility.Visible;
             ApplyStrings();
         }
 
-        // Resize the window so the video area has the picture's aspect ratio: the
-        // height stays, the width follows, both shrink if the work area is too small
-        void FitToPicture(uint width, uint height)
+        // iOS sends a few sizes in a row when an app goes full screen: act on the last one
+        void OnPictureSize(uint width, uint height)
         {
-            if (fullScreen || WindowState != WindowState.Normal || width == 0 || height == 0 || !IsVisible) return;
-            double areaW = Video.ActualWidth, areaH = Video.ActualHeight;
-            if (areaW <= 0 || areaH <= 0) return;
-            Rect work = SystemParameters.WorkArea;
-            double chromeW = ActualWidth - areaW, chromeH = ActualHeight - areaH;
-            double newH = areaH, newW = areaH * width / height;
-            if (newW + chromeW > work.Width) { newW = work.Width - chromeW; newH = newW * height / width; }
-            if (newH + chromeH > work.Height) { newH = work.Height - chromeH; newW = newH * width / height; }
-            Width = newW + chromeW;
-            Height = newH + chromeH;
-            Left = Math.Max(work.Left, Math.Min(Left, work.Right - Width));
-            Top = Math.Max(work.Top, Math.Min(Top, work.Bottom - Height));
+            if (width == 0 || height == 0) return;
+            picture = new Size(width, height);
+            // shortcut: a phone that connects while playing a video is learnt at the video's shape, until it reconnects
+            if (screen.IsEmpty) screen = picture;
+            sizeTimer.Stop();
+            sizeTimer.Start();
+        }
+
+        void OnSizeTimer(object sender, EventArgs e)
+        {
+            if (turning) return;   // tick again once the turn has finished
+            sizeTimer.Stop();
+            if (!CanPlace() || picture.IsEmpty) return;
+            // the first picture always shapes the window; later ones only if the user wants it to turn
+            if (shaped && !settings.FollowRotation) return;
+            Rect? to = WindowShape.ForPicture(Bounds, Chrome, SystemParameters.WorkArea, screen, picture);
+            shaped = true;
+            if (to.HasValue) MoveTo(to.Value);
+        }
+
+        // Ctrl+F: the picture at its own pixel size
+        void FitToPicture()
+        {
+            if (!CanPlace() || picture.IsEmpty || turning) return;
+            double dpi = VisualTreeHelper.GetDpi(this).DpiScaleX;
+            MoveTo(WindowShape.Fit(Bounds, Chrome, SystemParameters.WorkArea, new Size(picture.Width / dpi, picture.Height / dpi)));
+        }
+
+        bool CanPlace() => !fullScreen && WindowState == WindowState.Normal && IsVisible && Video.ActualWidth > 0;
+        Rect Bounds => new Rect(Left, Top, ActualWidth, ActualHeight);
+        Size Chrome => new Size(ActualWidth - Video.ActualWidth, ActualHeight - Video.ActualHeight);
+
+        // Turn the window over 200 ms. The base values are set first and the animations
+        // stop at the end, so the properties stay free for the user to drag afterwards.
+        void MoveTo(Rect to)
+        {
+            turning = true;
+            Rect from = Bounds;
+            Left = to.Left; Top = to.Top; Width = to.Width; Height = to.Height;
+            Animate(LeftProperty, from.Left, to.Left);
+            Animate(TopProperty, from.Top, to.Top);
+            Animate(WidthProperty, from.Width, to.Width);
+            Animate(HeightProperty, from.Height, to.Height, (s, e) => turning = false);
+        }
+
+        void Animate(DependencyProperty property, double from, double to, EventHandler done = null)
+        {
+            var a = new DoubleAnimation(from, to, TimeSpan.FromMilliseconds(200))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+                FillBehavior = FillBehavior.Stop
+            };
+            if (done != null) a.Completed += done;
+            BeginAnimation(property, a);
+        }
+
+        // While a phone is connected, dragging an edge keeps the window's shape
+        IntPtr Hook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == Native.WM_ENTERSIZEMOVE)
+            {
+                dragAspect = shaped ? Video.ActualWidth / Video.ActualHeight : 0;
+            }
+            else if (msg == Native.WM_SIZING && dragAspect > 0)
+            {
+                // the rect is in device pixels; the chrome is measured in DIPs
+                var rc = (Native.RECT)Marshal.PtrToStructure(lParam, typeof(Native.RECT));
+                double dpi = VisualTreeHelper.GetDpi(this).DpiScaleX;
+                Size chrome = Chrome;
+                Rect r = WindowShape.KeepAspect(new Rect(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top),
+                    (int)wParam, new Size(chrome.Width * dpi, chrome.Height * dpi), dragAspect);
+                rc.left = (int)Math.Round(r.Left);
+                rc.top = (int)Math.Round(r.Top);
+                rc.right = (int)Math.Round(r.Right);
+                rc.bottom = (int)Math.Round(r.Bottom);
+                Marshal.StructureToPtr(rc, lParam, false);
+                handled = true;
+                return (IntPtr)1;
+            }
+            return IntPtr.Zero;
         }
 
         void OnVideoDoubleClick(object sender, EventArgs e) => ToggleFullScreen();
@@ -161,6 +247,11 @@ namespace LiteMirror
             if (e.Key == Key.F11 || (e.Key == Key.Escape && fullScreen))
             {
                 ToggleFullScreen();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                FitToPicture();
                 e.Handled = true;
             }
         }

@@ -17,6 +17,7 @@ namespace LiteMirror
 
         public string Name = "";        // "" until the first run picks a default in the UI language
         public bool AlwaysOnTop;
+        public bool FollowRotation = true;   // turn the window when the phone rotates
         public string Language = "";    // "" = same as Windows, else "en" or "zh-CN"
 
         static string File_ => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LiteMirror", "settings.txt");
@@ -33,6 +34,7 @@ namespace LiteMirror
                     string key = line.Substring(0, eq), value = line.Substring(eq + 1);
                     if (key == "Name") s.Name = value;
                     if (key == "AlwaysOnTop") s.AlwaysOnTop = value == "1";
+                    if (key == "FollowRotation") s.FollowRotation = value == "1";
                     if (key == "Language") s.Language = value;
                 }
             }
@@ -43,12 +45,12 @@ namespace LiteMirror
         public void Save()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(File_));
-            File.WriteAllLines(File_, new[] { "Name=" + Name, "AlwaysOnTop=" + (AlwaysOnTop ? "1" : "0"), "Language=" + Language }, Encoding.UTF8);
+            File.WriteAllLines(File_, new[] { "Name=" + Name, "AlwaysOnTop=" + (AlwaysOnTop ? "1" : "0"), "FollowRotation=" + (FollowRotation ? "1" : "0"), "Language=" + Language }, Encoding.UTF8);
         }
 
         public Settings Copy()
         {
-            return new Settings { Name = Name, AlwaysOnTop = AlwaysOnTop, Language = Language };
+            return new Settings { Name = Name, AlwaysOnTop = AlwaysOnTop, FollowRotation = FollowRotation, Language = Language };
         }
 
         public static bool RunAtStartup
@@ -82,6 +84,7 @@ namespace LiteMirror
             NameLabel.Text = Strings.Get("ReceiverNameLabel");
             StartupSwitch.Content = Strings.Get("RunAtStartup");
             TopmostSwitch.Content = Strings.Get("AlwaysOnTop");
+            RotationSwitch.Content = Strings.Get("FollowRotation");
             LanguageLabel.Text = Strings.Get("Language");
             CancelButton.Content = Strings.Get("Cancel");
             SaveButton.Content = Strings.Get("Save");
@@ -93,6 +96,7 @@ namespace LiteMirror
 
             NameBox.Text = current.Name;
             TopmostSwitch.IsChecked = current.AlwaysOnTop;
+            RotationSwitch.IsChecked = current.FollowRotation;
             StartupSwitch.IsChecked = Settings.RunAtStartup;
         }
 
@@ -106,6 +110,7 @@ namespace LiteMirror
             }
             Result.Name = name;
             Result.AlwaysOnTop = TopmostSwitch.IsChecked == true;
+            Result.FollowRotation = RotationSwitch.IsChecked == true;
             Result.Language = Languages[Math.Max(0, LanguageBox.SelectedIndex)];
             Result.Save();
             try { Settings.RunAtStartup = StartupSwitch.IsChecked == true; }

@@ -40,6 +40,8 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Test) {
     & "$PSScriptRoot\build\bin\$Config\litemirror-tests.exe"
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & $dotnet test "$PSScriptRoot\tests\app\LiteMirror.Tests\LiteMirror.Tests.csproj" -c $Config -nologo -v:q
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     & python "$PSScriptRoot\tests\integration\run.py" --config $Config
     exit $LASTEXITCODE
 }

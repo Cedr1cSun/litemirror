@@ -20,6 +20,7 @@
 
             <ui:ToggleSwitch x:Name="StartupSwitch" Margin="0,20,0,0" />
             <ui:ToggleSwitch x:Name="TopmostSwitch" Margin="0,12,0,0" />
+            <ui:ToggleSwitch x:Name="RotationSwitch" Margin="0,12,0,0" />
 
             <TextBlock x:Name="LanguageLabel" Margin="0,20,0,0" />
             <ComboBox x:Name="LanguageBox" Margin="0,6,0,0" HorizontalAlignment="Left" MinWidth="200" />

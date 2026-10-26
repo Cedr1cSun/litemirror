@@ -106,7 +106,12 @@ namespace LiteMirror
         public const int WS_VISIBLE = 0x10000000;
         public const uint CS_DBLCLKS = 0x0008;
         public const int WM_LBUTTONDBLCLK = 0x0203;
+        public const int WM_SIZING = 0x0214;
+        public const int WM_ENTERSIZEMOVE = 0x0231;
         public const int BLACK_BRUSH = 4;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT { public int left, top, right, bottom; }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct WNDCLASSEX
