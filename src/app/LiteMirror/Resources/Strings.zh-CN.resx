@@ -31,7 +31,7 @@
   <data name="Tray_Quit" xml:space="preserve"><value>退出</value></data>
 
   <data name="G_Receive" xml:space="preserve"><value>接收</value></data>
-  <data name="R_Name" xml:space="preserve"><value>接收端名称（显示在 iPhone 上）</value></data>
+  <data name="R_Name" xml:space="preserve"><value>接收端名称</value></data>
   <data name="R_AutoStart" xml:space="preserve"><value>打开 LiteMirror 时自动开始接收</value></data>
   <data name="R_Pin" xml:space="preserve"><value>PIN</value></data>
   <data name="Pin_Off" xml:space="preserve"><value>关闭</value></data>
@@ -120,7 +120,7 @@
   <data name="OpenLogs" xml:space="preserve"><value>打开日志文件夹</value></data>
 
 
-  <data name="H_Name" xml:space="preserve"><value>iPhone"屏幕镜像"列表里显示的名字。留空就用这台电脑的名字。</value></data>
+  <data name="H_Name" xml:space="preserve"><value>设备"屏幕镜像"列表里显示的名字。留空就用这台电脑的名字。</value></data>
   <data name="H_AutoStart" xml:space="preserve"><value>关闭时，需要时再点"开始接收"（或按 Ctrl+R）。</value></data>
   <data name="H_Pin" xml:space="preserve"><value>让手机连接前先输入一个码。"每次连接生成新 PIN"会像 Apple TV 那样，每次在这块屏幕上显示一个新的 4 位码。</value></data>
   <data name="H_PinCode" xml:space="preserve"><value>手机需要输入的码，1 到 63 个字符。</value></data>

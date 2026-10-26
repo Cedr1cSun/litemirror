@@ -31,7 +31,7 @@
   <data name="Tray_Quit" xml:space="preserve"><value>Quit</value></data>
 
   <data name="G_Receive" xml:space="preserve"><value>RECEIVING</value></data>
-  <data name="R_Name" xml:space="preserve"><value>Receiver name (shown on your iPhone)</value></data>
+  <data name="R_Name" xml:space="preserve"><value>Receiver name</value></data>
   <data name="R_AutoStart" xml:space="preserve"><value>Start receiving when LiteMirror opens</value></data>
   <data name="R_Pin" xml:space="preserve"><value>PIN</value></data>
   <data name="Pin_Off" xml:space="preserve"><value>Off</value></data>
@@ -120,7 +120,7 @@
   <data name="OpenLogs" xml:space="preserve"><value>Open log folder</value></data>
 
 
-  <data name="H_Name" xml:space="preserve"><value>What your iPhone lists under Screen Mirroring. Empty means this computer's name.</value></data>
+  <data name="H_Name" xml:space="preserve"><value>What your device lists under Screen Mirroring. Empty means this computer's name.</value></data>
   <data name="H_AutoStart" xml:space="preserve"><value>Otherwise press Start receiving (or Ctrl+R) when you want to be found.</value></data>
   <data name="H_Pin" xml:space="preserve"><value>Makes the phone ask for a code before it may connect. "New code" shows a fresh 4-digit code on this screen each time, like an Apple TV.</value></data>
   <data name="H_PinCode" xml:space="preserve"><value>The code the phone has to enter; 1 to 63 characters.</value></data>
