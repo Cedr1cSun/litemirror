@@ -1,6 +1,20 @@
 #include "FgAirplayChannel.h"
 #include "CAutoLock.h"
 
+static uint64_t ticks()
+{
+	LARGE_INTEGER t;
+	QueryPerformanceCounter(&t);
+	return (uint64_t)t.QuadPart;
+}
+
+static uint64_t ticksPerSecond()
+{
+	static LARGE_INTEGER f = { 0 };
+	if (f.QuadPart == 0) QueryPerformanceFrequency(&f);
+	return (uint64_t)f.QuadPart;
+}
+
 FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* sink, bool hardware, bool lowLatency)
 : m_nRef(1)
 , m_nStreams(0)
@@ -11,6 +25,9 @@ FgAirplayChannel::FgAirplayChannel(const lm_callbacks* callbacks, LmVideoSink* s
 , m_bDecoderOpen(false)
 , m_reportedW(0)
 , m_reportedH(0)
+, m_statStart(0)
+, m_statFrames(0)
+, m_statWork(0)
 {
 	m_mutexVideo = CreateMutex(NULL, FALSE, NULL);
 }
@@ -44,6 +61,7 @@ long FgAirplayChannel::release()
 int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, const char* remoteDeviceId)
 {
 	CAutoLock oLock(m_mutexVideo, "decodeH264Data");
+	uint64_t arrived = ticks();
 
 	if (!m_bDecoderOpen) {
 		if (!data->is_key) {
@@ -70,6 +88,7 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 			bool drawn = f.texture ? m_sink->draw(f.texture, f.subresource, f.width, f.height)
 			                       : m_sink->draw(f.plane[0], f.pitch[0], f.plane[1], f.pitch[1], f.width, f.height);
 			if (drawn) m_sink->present();
+			shown(arrived, f.width, f.height, remoteDeviceId);
 			continue;
 		}
 		if (m_cb->on_video == NULL) {
@@ -86,6 +105,34 @@ int FgAirplayChannel::decodeH264Data(SFgH264Data* data, const char* remoteName, 
 		frame.pitch[0] = f.pitch[0];
 		frame.pitch[1] = f.pitch[1];
 		m_cb->on_video(m_cb->user, remoteDeviceId, &frame);
+		shown(arrived, f.width, f.height, remoteDeviceId);
 	}
 	return 0;
+}
+
+// One picture is out. Every second, tell the shell how the last one went.
+void FgAirplayChannel::shown(uint64_t arrived, uint32_t width, uint32_t height, const char* remoteDeviceId)
+{
+	uint64_t now = ticks();
+	if (m_statStart == 0) {
+		m_statStart = now;
+	}
+	m_statFrames++;
+	m_statWork += now - arrived;
+	uint64_t elapsed = now - m_statStart;
+	if (elapsed < ticksPerSecond()) {
+		return;
+	}
+	if (m_cb->on_stats) {
+		lm_stats s;
+		s.width = width;
+		s.height = height;
+		s.fps = (float)m_statFrames * ticksPerSecond() / (float)elapsed;
+		s.process_ms = (float)m_statWork * 1000.0f / (float)ticksPerSecond() / (float)m_statFrames;
+		s.hardware = m_decoder.hardware() ? 1 : 0;
+		m_cb->on_stats(m_cb->user, remoteDeviceId, &s);
+	}
+	m_statStart = now;
+	m_statFrames = 0;
+	m_statWork = 0;
 }

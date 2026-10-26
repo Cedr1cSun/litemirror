@@ -36,6 +36,8 @@ public:
 	int decodeH264Data(SFgH264Data* data, const char* remoteName, const char* remoteDeviceId);
 
 protected:
+	void shown(uint64_t arrived, uint32_t width, uint32_t height, const char* remoteDeviceId);
+
 	long m_nRef;
 
 	const lm_callbacks*		m_cb;
@@ -46,4 +48,8 @@ protected:
 	bool					m_bDecoderOpen;
 	uint32_t				m_reportedW, m_reportedH;   // last size given to on_video_size
 	void*					m_mutexVideo;
+	// on_stats bookkeeping: period start, frames shown and their total processing time, in QPC ticks
+	uint64_t				m_statStart;
+	uint32_t				m_statFrames;
+	uint64_t				m_statWork;
 };

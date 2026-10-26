@@ -16,7 +16,7 @@
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
 // EVENT video <w>x<h>, EVENT audio <bytes>, EVENT volume <id> <db>,
 // EVENT metadata <id> <bytes>, EVENT coverart <id> <bytes>, EVENT play <url>,
-// EVENT pin <code|->, LOG <level> <msg>
+// EVENT pin <code|->, EVENT stats <id> <w>x<h> <fps> <ms> <hw|sw>, LOG <level> <msg>
 
 #include <crtdbg.h>
 #include <stdio.h>
@@ -67,6 +67,10 @@ static void on_pin(void*, const char* pin)
 {
 	printf("EVENT pin %s\n", pin ? pin : "-");
 }
+static void on_stats(void*, const char* id, const lm_stats* s)
+{
+	printf("EVENT stats %s %ux%u %.1f %.1f %s\n", id, s->width, s->height, s->fps, s->process_ms, s->hardware ? "hw" : "sw");
+}
 
 static void report(lm_error err)
 {
@@ -96,6 +100,7 @@ int main()
 	cb.on_play_url = on_play_url;
 	cb.on_log = on_log;
 	cb.on_pin = on_pin;
+	cb.on_stats = on_stats;
 
 	lm_server* server = NULL;
 	lm_error err = lm_server_create(&cb, &server);

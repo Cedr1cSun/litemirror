@@ -77,6 +77,14 @@ typedef struct lm_audio_frame {
 	size_t         size;
 } lm_audio_frame;
 
+/* How the mirror is doing, for an on-screen display */
+typedef struct lm_stats {
+	uint32_t width, height;  /* picture size */
+	float    fps;            /* frames shown over the last period */
+	float    process_ms;     /* average from packet arrival to picture on screen (or to on_video) */
+	int      hardware;       /* 1 when the GPU decodes */
+} lm_stats;
+
 /* Every callback runs on an internal thread; return quickly, copy what you
  * keep. Any member may be NULL. After lm_server_stop() returns no callback
  * fires again. device_id identifies one iPhone across audio and mirror. */
@@ -95,6 +103,8 @@ typedef struct lm_callbacks {
 	void (*on_video_size)  (void* user, const char* device_id, uint32_t width, uint32_t height);
 	/* LM_PIN_RANDOM: show this code on screen; NULL once the phone got it right or gave up */
 	void (*on_pin)         (void* user, const char* pin);
+	/* about once a second while pictures arrive */
+	void (*on_stats)       (void* user, const char* device_id, const lm_stats* stats);
 } lm_callbacks;
 
 LM_API lm_error    lm_server_create (const lm_callbacks* cb, lm_server** out);

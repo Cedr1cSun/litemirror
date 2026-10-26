@@ -50,6 +50,8 @@ static int nal_type(const std::vector<uint8_t>& n) { return n[n[2] == 1 ? 3 : 4]
 struct Recording {
 	int frames = 0;
 	int sizes = 0;   // on_video_size calls
+	int stats = 0;   // on_stats calls
+	lm_stats last = {};
 	unsigned width = 0, height = 0;
 	unsigned sizeWidth = 0, sizeHeight = 0;
 	uint8_t y00 = 0, y160_120 = 0, u160_120 = 0, v160_120 = 0;
@@ -73,12 +75,18 @@ struct Recording {
 		self->sizeWidth = w;
 		self->sizeHeight = h;
 	}
+	static void onStats(void* user, const char*, const lm_stats* s) {
+		Recording* self = (Recording*)user;
+		self->stats++;
+		self->last = *s;
+	}
 	lm_callbacks callbacks() {
 		lm_callbacks cb;
 		memset(&cb, 0, sizeof(cb));
 		cb.user = this;
 		cb.on_video = onVideo;
 		cb.on_video_size = onVideoSize;
+		cb.on_stats = onStats;
 		return cb;
 	}
 };
@@ -159,6 +167,27 @@ TEST_CASE("channel with hardware decoding off still draws into the window sink")
 	CHECK(cb.frames == 0);
 	sink.close();
 	DestroyWindow(hwnd);
+}
+
+TEST_CASE("channel reports frame rate and processing time about once a second")
+{
+	Recording cb;
+	lm_callbacks callbacks = cb.callbacks();
+	FgAirplayChannel* channel = new FgAirplayChannel(&callbacks);
+	feed_clip(channel);          // ten frames, as fast as they decode
+	CHECK(cb.stats == 0);        // a second has not passed
+	Sleep(1100);
+	feed_clip(channel);          // the first frame after the second closes the period
+	channel->release();
+
+	REQUIRE(cb.stats >= 1);
+	CHECK(cb.last.width == 320);
+	CHECK(cb.last.height == 240);
+	CHECK(cb.last.hardware == 1);
+	CHECK(cb.last.fps > 5.0f);   // 10 frames over a little more than a second
+	CHECK(cb.last.fps < 12.0f);
+	CHECK(cb.last.process_ms > 0.0f);
+	CHECK(cb.last.process_ms < 500.0f);
 }
 
 TEST_CASE("channel decodes mirror packets and reports NV12 frames")
