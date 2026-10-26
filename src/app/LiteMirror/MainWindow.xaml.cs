@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using HandyControl.Controls;
+using Controls = System.Windows.Controls;
 using Forms = System.Windows.Forms;
 
 namespace LiteMirror
@@ -46,10 +47,15 @@ namespace LiteMirror
         Forms.ToolStripMenuItem trayOpen, trayStart, traySettings, trayQuit;
         bool quitting;
         OsdWindow osd;
-        // full screen: the window is sized to the monitor by hand (no WindowState games with the custom chrome)
-        bool fullScreen;
-        Rect savedBounds;
+        // the window without its chrome: borderless, picture in picture (small, on top, in a corner)
+        // or full screen (sized to the monitor by hand, no WindowState games with the custom chrome)
+        enum View { Normal, Borderless, Pip, Full }
+        View view;
+        bool fullScreen => view == View.Full;
+        Rect savedBounds;       // where the window was before it left Normal
         WindowState savedState;
+        readonly Controls.ContextMenu videoMenu = new Controls.ContextMenu();
+        Controls.MenuItem menuFull, menuBorderless, menuPip, menuFit, menuInfo;
         // "the window is the phone": the phone's screen sets the shape, the user sets the area
         Size screen;            // the phone's screen, learnt from the first picture after connect
         Size picture;           // the last picture size
@@ -83,6 +89,19 @@ namespace LiteMirror
             PreviewKeyDown += (s, e) => { if (Shortcut(e.Key, Keyboard.Modifiers.HasFlag(ModifierKeys.Control))) e.Handled = true; };
             // keys pressed while the Win32 video window has the focus
             Video.KeyPressed += vk => Shortcut(KeyInterop.KeyFromVirtualKey(vk), (Native.GetKeyState(Native.VK_CONTROL) & 0x8000) != 0);
+            // without a title bar the picture is the handle: the system move loop takes over from the click
+            Video.Drag += (s, e) =>
+            {
+                if (view == View.Borderless || view == View.Pip)
+                    Native.SendMessage(new WindowInteropHelper(this).Handle, Native.WM_NCLBUTTONDOWN, (IntPtr)Native.HTCAPTION, IntPtr.Zero);
+            };
+            Video.Menu += (s, e) => ShowVideoMenu();
+            videoMenu.PlacementTarget = Video;
+            menuFull = MenuEntry("F11", () => SetView(View.Full));
+            menuBorderless = MenuEntry("Ctrl+B", () => SetView(View.Borderless));
+            menuPip = MenuEntry("Ctrl+P", () => SetView(View.Pip));
+            menuFit = MenuEntry("Ctrl+F", FitToPicture);
+            menuInfo = MenuEntry("Ctrl+I", ToggleInfo);
             LocationChanged += (s, e) => PlaceOsd();
             SizeChanged += (s, e) => PlaceOsd();
             StateChanged += (s, e) => UpdateOsd();
@@ -281,6 +300,13 @@ namespace LiteMirror
             FitButton.ToolTip = Strings.Get("Tip_Fit");
             FullButton.ToolTip = Strings.Get("Tip_Full");
             InfoButton.ToolTip = Strings.Get("Tip_Info");
+            BorderlessButton.ToolTip = Strings.Get("Tip_Borderless");
+            PipButton.ToolTip = Strings.Get("Tip_Pip");
+            menuFull.Header = Strings.Get("Menu_Full");
+            menuBorderless.Header = Strings.Get("Menu_Borderless");
+            menuPip.Header = Strings.Get("Menu_Pip");
+            menuFit.Header = Strings.Get("Menu_Fit");
+            menuInfo.Header = Strings.Get("Menu_Info");
             PinTitle.Text = Strings.Get("Pin_Title");
             AboutVersion.Text = string.Format(Strings.Get("Version"), App.Version);
             AboutDesc.Text = Strings.Get("About_Desc");
@@ -345,7 +371,7 @@ namespace LiteMirror
         {
             if (quitting || !settings.CloseToTray) return;
             e.Cancel = true;
-            if (fullScreen) ToggleFullScreen();
+            if (view != View.Normal) SetView(View.Normal);
             Hide();
         }
 
@@ -407,7 +433,7 @@ namespace LiteMirror
                     restartTimer.Start();
                 }
             }
-            if (!fullScreen) Rail(connected);
+            if (view == View.Normal) Rail(connected);
             UpdateStatus();
             UpdateOsd();
         }
@@ -468,7 +494,10 @@ namespace LiteMirror
 
         bool Shortcut(Key key, bool ctrl)
         {
-            if (key == Key.F11 || (key == Key.Escape && fullScreen)) ToggleFullScreen();
+            if (key == Key.F11) SetView(View.Full);
+            else if (key == Key.Escape && view != View.Normal) SetView(View.Normal);
+            else if (ctrl && key == Key.B) SetView(View.Borderless);
+            else if (ctrl && key == Key.P) SetView(View.Pip);
             else if (ctrl && key == Key.F) FitToPicture();
             else if (ctrl && key == Key.I) ToggleInfo();
             else if (ctrl && key == Key.R) ToggleReceiver();
@@ -493,10 +522,30 @@ namespace LiteMirror
         }
 
         void OnFit(object sender, RoutedEventArgs e) => FitToPicture();
-        void OnFullScreen(object sender, RoutedEventArgs e) => ToggleFullScreen();
+        void OnFullScreen(object sender, RoutedEventArgs e) => SetView(View.Full);
+        void OnBorderless(object sender, RoutedEventArgs e) => SetView(View.Borderless);
+        void OnPip(object sender, RoutedEventArgs e) => SetView(View.Pip);
         void OnInfo(object sender, RoutedEventArgs e) => ToggleInfo();
         void OnStartStop(object sender, RoutedEventArgs e) => ToggleReceiver();
-        void OnVideoDoubleClick(object sender, EventArgs e) => ToggleFullScreen();
+        void OnVideoDoubleClick(object sender, EventArgs e) => SetView(View.Full);
+
+        Controls.MenuItem MenuEntry(string gesture, Action act)
+        {
+            var item = new Controls.MenuItem { InputGestureText = gesture };
+            item.Click += (s, e) => act();
+            videoMenu.Items.Add(item);
+            return item;
+        }
+
+        // Right click on the picture: the toolbar's actions, also when the chrome is gone
+        void ShowVideoMenu()
+        {
+            menuFull.IsChecked = view == View.Full;
+            menuBorderless.IsChecked = view == View.Borderless;
+            menuPip.IsChecked = view == View.Pip;
+            menuInfo.IsChecked = settings.ShowInfo;
+            videoMenu.IsOpen = true;
+        }
         void OnSite(object sender, RoutedEventArgs e) => Process.Start("https://github.com/Cedr1cSun/litemirror");
         void OnOpenLogs(object sender, RoutedEventArgs e) => Log.OpenFolder();
 
@@ -624,22 +673,25 @@ namespace LiteMirror
             return IntPtr.Zero;
         }
 
-        // ---- full screen ----
+        // ---- views ----
 
-        void ToggleFullScreen()
+        // The same mode again leaves it. Only Normal keeps the window's own size; the others
+        // restore it on the way back.
+        void SetView(View to)
         {
-            fullScreen = !fullScreen;
-            if (fullScreen)
+            if (to == view) to = View.Normal;
+            if (view == View.Normal && to != View.Normal)
             {
                 savedState = WindowState;
                 savedBounds = new Rect(Left, Top, Width, Height);
                 WindowState = WindowState.Normal;
-                ShowNonClientArea = false;
-                ResizeMode = ResizeMode.NoResize;
-                Sidebar.Visibility = Visibility.Collapsed;
-                Pages.Margin = new Thickness(0);
-                MirrorPage.CornerRadius = new CornerRadius(0);
-                MirrorPage.BorderThickness = new Thickness(0);
+            }
+            view = to;
+            SetChrome(to == View.Normal);
+            ResizeMode = to == View.Full ? ResizeMode.NoResize : ResizeMode.CanResize;
+            Topmost = settings.AlwaysOnTop || to == View.Pip;
+            if (to == View.Full)
+            {
                 // the chosen monitor, or the one the window is on, in device-independent units
                 Forms.Screen[] all = Forms.Screen.AllScreens;
                 Forms.Screen target = settings.FullscreenMonitor >= 0 && settings.FullscreenMonitor < all.Length
@@ -652,14 +704,18 @@ namespace LiteMirror
                 Width = extent.X;
                 Height = extent.Y;
             }
-            else
+            else if (to == View.Pip)
             {
-                ShowNonClientArea = true;
-                ResizeMode = ResizeMode.CanResize;
-                Sidebar.Visibility = Visibility.Visible;
-                Pages.Margin = new Thickness(12, 0, 12, 12);
-                MirrorPage.CornerRadius = new CornerRadius(8);
-                MirrorPage.BorderThickness = new Thickness(1);
+                // shortcut: the primary monitor's work area, like the rest of the placing code; the picture's shape when there is one
+                double aspect = picture.Width > 0 ? picture.Width / picture.Height : ActualWidth / ActualHeight;   // a default Size is 0x0, not Empty
+                Rect r = WindowShape.Corner(SystemParameters.WorkArea, aspect, 1.0 / 3);
+                Left = r.Left;
+                Top = r.Top;
+                Width = r.Width;
+                Height = r.Height;
+            }
+            else if (to == View.Normal)
+            {
                 Left = savedBounds.Left;
                 Top = savedBounds.Top;
                 Width = savedBounds.Width;
@@ -668,6 +724,16 @@ namespace LiteMirror
                 Rail(deviceName != null);
             }
             UpdateOsd();
+        }
+
+        // Title bar, sidebar, page margins and the frame round the picture
+        void SetChrome(bool on)
+        {
+            ShowNonClientArea = on;
+            Sidebar.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            Pages.Margin = on ? new Thickness(12, 0, 12, 12) : new Thickness(0);
+            MirrorPage.CornerRadius = new CornerRadius(on ? 8 : 0);
+            MirrorPage.BorderThickness = new Thickness(on ? 1 : 0);
         }
 
         static string Explain(Native.Error err)

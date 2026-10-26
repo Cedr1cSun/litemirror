@@ -17,6 +17,10 @@ namespace LiteMirror
         static bool registered;
 
         public event EventHandler DoubleClick;
+        // the left button went down on the picture: a window without a title bar is dragged by it
+        public event EventHandler Drag;
+        // the right button came up on the picture: its menu
+        public event EventHandler Menu;
         // a key went down while the video had the focus: the virtual-key code
         public event Action<int> KeyPressed;
 
@@ -55,6 +59,15 @@ namespace LiteMirror
             if (msg == Native.WM_LBUTTONDBLCLK)
             {
                 DoubleClick?.Invoke(this, EventArgs.Empty);
+                handled = true;
+            }
+            else if (msg == Native.WM_LBUTTONDOWN)
+            {
+                Drag?.Invoke(this, EventArgs.Empty);
+            }
+            else if (msg == Native.WM_RBUTTONUP)
+            {
+                Menu?.Invoke(this, EventArgs.Empty);
                 handled = true;
             }
             else if (msg == Native.WM_KEYDOWN || msg == Native.WM_SYSKEYDOWN)

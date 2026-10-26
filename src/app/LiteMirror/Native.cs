@@ -177,7 +177,11 @@ namespace LiteMirror
         public const uint CS_DBLCLKS = 0x0008;
         public const int WM_KEYDOWN = 0x0100;
         public const int WM_SYSKEYDOWN = 0x0104;
+        public const int WM_LBUTTONDOWN = 0x0201;
         public const int WM_LBUTTONDBLCLK = 0x0203;
+        public const int WM_RBUTTONUP = 0x0205;
+        public const int WM_NCLBUTTONDOWN = 0x00A1;
+        public const int HTCAPTION = 2;
         public const int WM_SIZING = 0x0214;
         public const int WM_ENTERSIZEMOVE = 0x0231;
         public const int BLACK_BRUSH = 4;
@@ -214,6 +218,8 @@ namespace LiteMirror
             int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
         [DllImport("user32.dll")]
         public static extern bool DestroyWindow(IntPtr hwnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
         [DllImport("user32.dll")]
         public static extern int GetWindowLong(IntPtr hwnd, int index);
         [DllImport("user32.dll")]

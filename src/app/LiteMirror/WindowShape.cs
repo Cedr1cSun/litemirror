@@ -51,6 +51,16 @@ namespace LiteMirror
             return new Rect(left, top, w, h);
         }
 
+        // Picture in picture: a window of this aspect, `fraction` of the work area's
+        // height, in the bottom-right corner behind a margin. Too wide for the work
+        // area: the width rules instead.
+        public static Rect Corner(Rect work, double aspect, double fraction, double margin = 16)
+        {
+            double h = work.Height * fraction, w = h * aspect;
+            if (w > work.Width - 2 * margin) { w = work.Width - 2 * margin; h = w / aspect; }
+            return new Rect(work.Right - margin - w, work.Bottom - margin - h, w, h);
+        }
+
         // The user drags an edge (WM_SIZING) and the video area keeps its aspect: a
         // side or a corner sets the width and the height follows; top or bottom the reverse.
         public static Rect KeepAspect(Rect proposed, int edge, Size chrome, double aspect)

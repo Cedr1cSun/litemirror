@@ -21,6 +21,10 @@
                 <TextBlock x:Name="DeviceLabel" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource SecondaryTextBrush}" />
                 <Button x:Name="FitButton" Style="{StaticResource ButtonIcon}" hc:IconElement.Geometry="{StaticResource IconFit}"
                         hc:IconElement.Width="15" hc:IconElement.Height="15" Width="34" Height="30" Click="OnFit" />
+                <Button x:Name="BorderlessButton" Style="{StaticResource ButtonIcon}" hc:IconElement.Geometry="{StaticResource IconBorderless}"
+                        hc:IconElement.Width="15" hc:IconElement.Height="15" Width="34" Height="30" Click="OnBorderless" />
+                <Button x:Name="PipButton" Style="{StaticResource ButtonIcon}" hc:IconElement.Geometry="{StaticResource IconPip}"
+                        hc:IconElement.Width="15" hc:IconElement.Height="15" Width="34" Height="30" Click="OnPip" />
                 <Button x:Name="FullButton" Style="{StaticResource ButtonIcon}" hc:IconElement.Geometry="{StaticResource IconFullscreen}"
                         hc:IconElement.Width="15" hc:IconElement.Height="15" Width="34" Height="30" Click="OnFullScreen" />
                 <ToggleButton x:Name="InfoButton" Style="{StaticResource ToggleButtonIconTransparent}" hc:IconElement.Geometry="{StaticResource IconInfo}"

@@ -70,6 +70,32 @@ namespace LiteMirror.Tests
         }
 
         [Fact]
+        public void picture_in_picture_sits_in_the_bottom_right_corner_at_a_third_of_the_height()
+        {
+            Rect r = WindowShape.Corner(Work, 16.0 / 9, 1.0 / 3);
+            Assert.Equal(1400 / 3.0, r.Height, 3);
+            Assert.Equal(1400 / 3.0 * 16 / 9, r.Width, 3);
+            Assert.Equal(2560 - 16, r.Right, 3);
+            Assert.Equal(1400 - 16, r.Bottom, 3);
+        }
+
+        [Fact]
+        public void picture_in_picture_of_a_portrait_phone_is_narrow()
+        {
+            Rect r = WindowShape.Corner(Work, 754.0 / 1080, 1.0 / 3);
+            Assert.Equal(754.0 / 1080, r.Width / r.Height, 3);
+            Assert.Equal(1400 / 3.0, r.Height, 3);
+        }
+
+        [Fact]
+        public void picture_in_picture_never_overflows_a_narrow_work_area()
+        {
+            Rect r = WindowShape.Corner(new Rect(0, 0, 800, 1400), 16.0 / 9, 1.0 / 3);
+            Assert.Equal(800 - 32, r.Width, 3);
+            Assert.Equal(16, r.Left, 3);
+        }
+
+        [Fact]
         public void dragging_the_right_edge_sets_the_height()
         {
             Rect r = WindowShape.KeepAspect(new Rect(0, 0, 1000, 600), WindowShape.EdgeRight, Chrome, 2.0);

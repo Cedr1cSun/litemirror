@@ -25,6 +25,13 @@
   <data name="Tip_Fit" xml:space="preserve"><value>窗口贴合画面（Ctrl+F）</value></data>
   <data name="Tip_Full" xml:space="preserve"><value>全屏（F11）</value></data>
   <data name="Tip_Info" xml:space="preserve"><value>画面信息（Ctrl+I）</value></data>
+  <data name="Tip_Borderless" xml:space="preserve"><value>无边框（Ctrl+B）</value></data>
+  <data name="Tip_Pip" xml:space="preserve"><value>画中画（Ctrl+P）</value></data>
+  <data name="Menu_Full" xml:space="preserve"><value>全屏</value></data>
+  <data name="Menu_Borderless" xml:space="preserve"><value>无边框</value></data>
+  <data name="Menu_Pip" xml:space="preserve"><value>画中画</value></data>
+  <data name="Menu_Fit" xml:space="preserve"><value>窗口贴合画面</value></data>
+  <data name="Menu_Info" xml:space="preserve"><value>画面信息</value></data>
 
   <data name="Tray_Open" xml:space="preserve"><value>打开 LiteMirror</value></data>
   <data name="Tray_Settings" xml:space="preserve"><value>设置…</value></data>

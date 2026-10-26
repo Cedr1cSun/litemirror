@@ -25,6 +25,13 @@
   <data name="Tip_Fit" xml:space="preserve"><value>Fit window to picture (Ctrl+F)</value></data>
   <data name="Tip_Full" xml:space="preserve"><value>Full screen (F11)</value></data>
   <data name="Tip_Info" xml:space="preserve"><value>Picture info (Ctrl+I)</value></data>
+  <data name="Tip_Borderless" xml:space="preserve"><value>Borderless (Ctrl+B)</value></data>
+  <data name="Tip_Pip" xml:space="preserve"><value>Picture in picture (Ctrl+P)</value></data>
+  <data name="Menu_Full" xml:space="preserve"><value>Full screen</value></data>
+  <data name="Menu_Borderless" xml:space="preserve"><value>Borderless</value></data>
+  <data name="Menu_Pip" xml:space="preserve"><value>Picture in picture</value></data>
+  <data name="Menu_Fit" xml:space="preserve"><value>Fit window to picture</value></data>
+  <data name="Menu_Info" xml:space="preserve"><value>Picture info</value></data>
 
   <data name="Tray_Open" xml:space="preserve"><value>Open LiteMirror</value></data>
   <data name="Tray_Settings" xml:space="preserve"><value>Settings...</value></data>
