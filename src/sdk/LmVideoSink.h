@@ -110,4 +110,5 @@ private:
 	bool m_filters;
 	bool m_lowLatency;
 	int m_maxLatency;                // frames DXGI may queue, as last told to the device
+	bool m_tearing;                  // the swap chain was created with ALLOW_TEARING
 };

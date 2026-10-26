@@ -10,7 +10,7 @@
 #include "doctest.h"
 #include <windows.h>
 #include <d3d11.h>
-#include <dxgi1_2.h>
+#include <dxgi1_5.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -324,13 +324,46 @@ TEST_CASE("sink lets DXGI queue one frame when low latency is on")
 		sink.present();
 	}
 	sink.swapChain()->GetLastPresentCount(&after);
-	CHECK(after - before == 3);   // every present went through
+	CHECK(after - before == 3);   // every present went through, tearing flag included
 
 	sink.setLowLatency(false);
 	sink.present();
 	dxgi->GetMaximumFrameLatency(&queued);
 	CHECK(queued == 3);
 	dxgi->Release();
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
+// When the window covers the screen (F11), a flip-model swap chain presents
+// straight to the display. The tearing flag lets such a present skip the
+// wait for the vertical blank; it needs to be on the chain from creation and
+// survive every resize.
+TEST_CASE("sink allows tearing when the system does, through resizes")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	IDXGIFactory5* factory = NULL;
+	BOOL supported = FALSE;
+	if (SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))) {
+		factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &supported, sizeof(supported));
+		factory->Release();
+	}
+	DXGI_SWAP_CHAIN_DESC1 desc = {};
+	sink.swapChain()->GetDesc1(&desc);
+	CHECK(((desc.Flags & DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) != 0) == (supported != FALSE));
+
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	SetWindowPos(hwnd, NULL, 0, 0, 400, 300, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));   // resizes the swap chain
+	sink.swapChain()->GetDesc1(&desc);
+	CHECK(desc.Width == 400);
+	CHECK(((desc.Flags & DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) != 0) == (supported != FALSE));
 	sink.close();
 	DestroyWindow(hwnd);
 }

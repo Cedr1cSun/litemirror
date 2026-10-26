@@ -4,7 +4,7 @@
 #include <d3d11.h>
 #include <d3d11_4.h>
 #include <d3dcompiler.h>
-#include <dxgi1_2.h>
+#include <dxgi1_5.h>
 #include <string.h>
 #include "LmVideoSink.h"
 
@@ -39,7 +39,7 @@ LmVideoSink::LmVideoSink()
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
 	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0),
 	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0),
-	  m_colourDirty(false), m_filters(false), m_lowLatency(true), m_maxLatency(0),
+	  m_colourDirty(false), m_filters(false), m_lowLatency(true), m_maxLatency(0), m_tearing(false),
 	  m_toTexture(false), m_scaler(0), m_vs(NULL), m_ps(NULL), m_sampler(NULL), m_constants(NULL),
 	  m_rgb(NULL), m_rgbView(NULL), m_rgbW(0), m_rgbH(0)
 {
@@ -145,8 +145,20 @@ bool LmVideoSink::open(HWND window)
 	IDXGIFactory2* factory = NULL;
 	bool ok = SUCCEEDED(m_device->QueryInterface(IID_PPV_ARGS(&dxgiDevice))) &&
 	          SUCCEEDED(dxgiDevice->GetAdapter(&adapter)) &&
-	          SUCCEEDED(adapter->GetParent(IID_PPV_ARGS(&factory))) &&
-	          SUCCEEDED(factory->CreateSwapChainForHwnd(m_device, window, &sd, NULL, NULL, &m_swap));
+	          SUCCEEDED(adapter->GetParent(IID_PPV_ARGS(&factory)));
+	if (ok) {
+		// Full screen, a flip-model chain presents straight to the display; with
+		// this flag an interval-0 present there does not wait for the vertical blank
+		IDXGIFactory5* factory5 = NULL;
+		BOOL tearing = FALSE;
+		if (SUCCEEDED(factory->QueryInterface(IID_PPV_ARGS(&factory5)))) {
+			factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &tearing, sizeof(tearing));
+			release(factory5);
+		}
+		m_tearing = tearing != FALSE;
+		sd.Flags = m_tearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+		ok = SUCCEEDED(factory->CreateSwapChainForHwnd(m_device, window, &sd, NULL, NULL, &m_swap));
+	}
 	if (ok) {
 		// the shell owns full-screen switching, not Alt+Enter inside DXGI
 		factory->MakeWindowAssociation(window, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES);
@@ -216,7 +228,7 @@ bool LmVideoSink::fitWindow()
 	if ((uint32_t)rc.right == m_clientW && (uint32_t)rc.bottom == m_clientH) {
 		return true;
 	}
-	if (FAILED(m_swap->ResizeBuffers(0, rc.right, rc.bottom, DXGI_FORMAT_UNKNOWN, 0))) {
+	if (FAILED(m_swap->ResizeBuffers(0, rc.right, rc.bottom, DXGI_FORMAT_UNKNOWN, m_tearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0))) {
 		return false;
 	}
 	m_clientW = rc.right;
@@ -501,6 +513,6 @@ void LmVideoSink::present()
 	if (m_swap) {
 		applyLatency();
 		// interval 0: no vsync wait, DWM composes and the picture shows as soon as it exists
-		m_swap->Present(m_lowLatency ? 0 : 1, 0);
+		m_swap->Present(m_lowLatency ? 0 : 1, m_lowLatency && m_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0);
 	}
 }
