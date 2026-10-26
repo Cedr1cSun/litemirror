@@ -12,9 +12,8 @@
   <img alt="Windows 10 1809 or later" src="https://img.shields.io/badge/Windows-10%201809%2B-0078D4?logo=windows&logoColor=white">
   <img alt=".NET Framework 4.8" src="https://img.shields.io/badge/.NET%20Framework-4.8-512BD4">
   <img alt="x64" src="https://img.shields.io/badge/arch-x64-lightgrey">
+  <a href="README.zh-CN.md"><img alt="中文说明" src="https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87-2F7CF6"></a>
 </p>
-
-[中文说明](README.zh-CN.md)
 
 Open Screen Mirroring on an iPhone or iPad, pick the PC, and the phone's screen and sound arrive in a window that takes the phone's shape. The phone needs nothing installed. The PC gets a 3 MB installer that puts down five files: no Bonjour, no VC++ redistributable, nothing running in the background that you did not start.
 

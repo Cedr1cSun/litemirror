@@ -12,9 +12,8 @@
   <img alt="Windows 10 1809 or later" src="https://img.shields.io/badge/Windows-10%201809%2B-0078D4?logo=windows&logoColor=white">
   <img alt=".NET Framework 4.8" src="https://img.shields.io/badge/.NET%20Framework-4.8-512BD4">
   <img alt="x64" src="https://img.shields.io/badge/arch-x64-lightgrey">
+  <a href="README.md"><img alt="English README" src="https://img.shields.io/badge/README-English-2F7CF6"></a>
 </p>
-
-[English](README.md)
 
 在 iPhone 或 iPad 上打开屏幕镜像，选这台电脑，手机的画面和声音就出现在一个跟手机同样形状的窗口里。手机上什么都不用装。电脑这边是一个 3 MB 的安装包，装下五个文件：不要 Bonjour，不要 VC++ 运行库，没有你没启动的后台进程。
 
