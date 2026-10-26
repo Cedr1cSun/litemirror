@@ -35,7 +35,7 @@ Open Screen Mirroring on an iPhone or iPad, pick the PC, and the phone's screen 
 - Any audio output device; the phone's volume buttons set the app's volume in the Windows mixer
 - An overlay with resolution, frame rate, per-frame processing time and decoder
 - Light and dark themes, six accent colours, English and Chinese; runs in the tray, optionally at sign-in
-- Works without a router: over the PC's own mobile hotspot, which a switch in the settings turns on, a phone's personal hotspot, or USB tethering
+- Works without a router: over the PC's own mobile hotspot, a phone's personal hotspot, or USB tethering
 
 ## 📦 Install
 
@@ -66,7 +66,7 @@ The phone and the PC only need an IP link between them; the mDNS announcement an
 
 | link | how |
 |---|---|
-| PC hotspot | Settings, **Windows mobile hotspot**. The name and password appear under the switch; join from the phone. Windows needs a Wi-Fi adapter and an existing connection it can share. |
+| PC hotspot | Turn on the mobile hotspot in Windows settings (the Hotspot row in LiteMirror's settings has a button that opens the page) and join it from the phone. Windows needs a Wi-Fi adapter and an existing connection it can share. |
 | phone hotspot | Turn on Personal Hotspot on the phone and join it from the PC. The PC's Internet goes through the phone meanwhile. |
 | USB | Connect the cable and turn on Personal Hotspot. The PC needs Apple's USB network driver, which iTunes or the Apple Devices app installs; a network adapter appears and AirPlay runs over it. |
 
@@ -82,7 +82,7 @@ Three layers, each only talking to the one below: a protocol core in C (`litemir
 
 ## 🔧 Build from source
 
-Visual Studio 2022 Build Tools with the C++ workload (v143) and the .NET SDK 8; the shell references `Windows.winmd` from the Windows SDK the workload brings, for the hotspot switch. The integration tests want Python 3 with `pip install -r tests\integration\requirements.txt`; the installer wants Inno Setup 6 (`winget install JRSoftware.InnoSetup`).
+Visual Studio 2022 Build Tools with the C++ workload (v143) and the .NET SDK 8. The integration tests want Python 3 with `pip install -r tests\integration\requirements.txt`; the installer wants Inno Setup 6 (`winget install JRSoftware.InnoSetup`).
 
 ```
 .\build.ps1                           # Debug x64 into build\bin\Debug

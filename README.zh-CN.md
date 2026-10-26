@@ -35,7 +35,7 @@
 - 任意音频输出设备；手机的音量键直接调本程序在 Windows 混音器里的音量
 - 叠加层显示分辨率、帧率、每帧处理耗时和解码方式
 - 浅色和深色主题，六种强调色，中英文；可缩到托盘，可登录时启动
-- 不靠路由器也能连：电脑自己的移动热点（设置里一个开关打开）、手机个人热点，或 USB 共享网络
+- 不靠路由器也能连：电脑自己的移动热点、手机个人热点，或 USB 共享网络
 
 ## 📦 安装
 
@@ -66,7 +66,7 @@
 
 | 链路 | 做法 |
 |---|---|
-| 电脑热点 | 设置里打开 **Windows 移动热点**，名称和密码显示在开关下面，手机连上即可。Windows 要求电脑有 Wi-Fi 网卡，并且已有一条可共享的连接。 |
+| 电脑热点 | 在 Windows 设置里打开移动热点（LiteMirror 设置里的“热点”一行有按钮直达该页），手机连上即可。Windows 要求电脑有 Wi-Fi 网卡，并且已有一条可共享的连接。 |
 | 手机热点 | 手机打开个人热点，电脑连上去。期间电脑上网走手机流量。 |
 | USB | 插上数据线，手机打开个人热点。电脑需要 Apple 的 USB 网络驱动（iTunes 或 Apple Devices 应用自带），之后多出一个网络适配器，AirPlay 走它。 |
 
@@ -82,7 +82,7 @@
 
 ## 🔧 从源码构建
 
-Visual Studio 2022 Build Tools 的 C++ 工作负载（v143）和 .NET SDK 8；界面引用了工作负载自带的 Windows SDK 里的 `Windows.winmd`，用于热点开关。集成测试需要 Python 3 并 `pip install -r tests\integration\requirements.txt`；打安装包需要 Inno Setup 6（`winget install JRSoftware.InnoSetup`）。
+Visual Studio 2022 Build Tools 的 C++ 工作负载（v143）和 .NET SDK 8。集成测试需要 Python 3 并 `pip install -r tests\integration\requirements.txt`；打安装包需要 Inno Setup 6（`winget install JRSoftware.InnoSetup`）。
 
 ```
 .\build.ps1                           # Debug x64，输出到 build\bin\Debug
