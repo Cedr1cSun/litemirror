@@ -8,6 +8,8 @@
 #pragma once
 #include <windows.h>
 #include <stdint.h>
+#include <string>
+#include <vector>
 #include "litemirror.h"
 
 struct IAudioClient;
@@ -18,6 +20,16 @@ class LmAudioSink
 public:
 	LmAudioSink();
 	~LmAudioSink();
+
+	struct Device {
+		std::wstring id;     // IMMDevice id, stable across reboots
+		std::wstring name;   // what Windows shows
+	};
+	// Active output devices on this machine
+	static std::vector<Device> devices();
+	// Play on this device instead of the default one; "" = default.
+	// Takes effect when the device is (re)opened.
+	void setDevice(const std::wstring& id);
 
 	// Queue one packet. Opens the device on first use and again after a
 	// format change or when the device goes away; silently drops audio
@@ -37,4 +49,5 @@ private:
 	uint16_t m_channels;
 	bool m_started;
 	ULONGLONG m_retryAt;   // no device: do not hammer the enumerator
+	std::wstring m_deviceId;
 };

@@ -11,6 +11,7 @@
 #include <mmdeviceapi.h>
 #include <audioclient.h>
 #include <math.h>
+#include <string>
 #include <vector>
 #include "LmAudioSink.h"
 
@@ -120,6 +121,78 @@ TEST_CASE("audio sink plays the receiver's PCM on the default output device")
 	double hz = tone_hz(listen.samples, from, to, mixRate);
 	CHECK(hz > 900);
 	CHECK(hz < 1100);
+}
+
+// The id of the default output device, as the enumerator spells it
+static std::wstring default_device_id()
+{
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	IMMDeviceEnumerator* devices = NULL;
+	IMMDevice* device = NULL;
+	LPWSTR id = NULL;
+	std::wstring out;
+	if (SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, IID_PPV_ARGS(&devices))) &&
+	    SUCCEEDED(devices->GetDefaultAudioEndpoint(eRender, eConsole, &device)) &&
+	    SUCCEEDED(device->GetId(&id))) {
+		out = id;
+		CoTaskMemFree(id);
+	}
+	release(device);
+	release(devices);
+	return out;
+}
+
+TEST_CASE("audio sink lists the output devices and plays on the one picked")
+{
+	Loopback listen;
+	if (!listen.open()) {
+		MESSAGE("no output device with a float mix format; skipped");
+		return;
+	}
+	std::vector<LmAudioSink::Device> list = LmAudioSink::devices();
+	REQUIRE(list.size() >= 1);
+	std::wstring wanted = default_device_id();
+	bool listed = false;
+	for (size_t i = 0; i < list.size(); i++) {
+		CHECK(!list[i].id.empty());
+		CHECK(!list[i].name.empty());
+		if (list[i].id == wanted) listed = true;
+	}
+	CHECK(listed);   // the default device is among them
+
+	// pick the default device by id and the loopback on it hears the tone
+	LmAudioSink sink;
+	sink.setDevice(wanted);
+	const uint32_t rate = 44100;
+	std::vector<int16_t> pcm(480 * 2);
+	double phase = 0;
+	for (int n = 0; n < 40; n++) {
+		for (int i = 0; i < 480; i++) {
+			pcm[i * 2] = pcm[i * 2 + 1] = (int16_t)(12000 * sin(phase));
+			phase += 2 * 3.14159265358979 * 1000 / rate;
+		}
+		lm_audio_frame f = { (uint64_t)n * 480, rate, 2, 16, (const uint8_t*)pcm.data(), pcm.size() * sizeof(int16_t) };
+		sink.play(&f);
+		listen.pull();
+		Sleep(480 * 1000 / rate);
+	}
+	Sleep(100);
+	listen.pull();
+	sink.close();
+	float peak = 0;
+	for (size_t i = 0; i < listen.samples.size(); i++) if (fabsf(listen.samples[i]) > peak) peak = fabsf(listen.samples[i]);
+	CHECK(peak > 0.05f);
+}
+
+TEST_CASE("audio sink stays quiet but alive on an unknown device id")
+{
+	LmAudioSink sink;
+	sink.setDevice(L"{0.0.0.00000000}.{00000000-0000-0000-0000-000000000000}");
+	std::vector<int16_t> pcm(480 * 2, 0);
+	lm_audio_frame f = { 0, 44100, 2, 16, (const uint8_t*)pcm.data(), pcm.size() * sizeof(int16_t) };
+	sink.play(&f);
+	sink.play(&f);
+	sink.close();
 }
 
 TEST_CASE("audio sink survives a format change and empty frames")

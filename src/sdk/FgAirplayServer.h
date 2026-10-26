@@ -24,6 +24,7 @@ struct FgServerOptions {
 	bool hardwareDecode;  // false: decode on the CPU
 	bool lowLatency;      // false: reorder queue in the decoder and vsync on present
 	LmColour colour;      // picture adjustments, kept so a later set_window gets them
+	std::wstring audioDevice;   // output device id, "" = default
 };
 
 // Owns the protocol core (RTSP, HTTP, mDNS) and one FgAirplayChannel per

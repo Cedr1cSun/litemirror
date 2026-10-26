@@ -5,6 +5,8 @@
 
 #include <new>
 #include <string.h>
+#include <string>
+#include <vector>
 #include "litemirror.h"
 #include "FgAirplayServer.h"
 #include "MfH264Decoder.h"
@@ -93,6 +95,39 @@ lm_error lm_server_set_pin(lm_server* s, lm_pin_mode mode, const char* pin)
 	return LM_OK;
 }
 
+static std::wstring toWide(const char* utf8)
+{
+	int n = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	std::wstring out(n > 0 ? n - 1 : 0, L'\0');
+	if (n > 1) MultiByteToWideChar(CP_UTF8, 0, utf8, -1, &out[0], n);
+	return out;
+}
+
+static void toUtf8(const std::wstring& wide, char* out, int size)
+{
+	// a name too long for the buffer comes out empty rather than cut mid-character
+	if (WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, out, size, NULL, NULL) == 0 && size > 0) out[0] = '\0';
+}
+
+int lm_audio_devices(lm_audio_device* out, int max)
+{
+	std::vector<LmAudioSink::Device> list = LmAudioSink::devices();
+	for (int i = 0; out && i < max && i < (int)list.size(); i++) {
+		toUtf8(list[i].id, out[i].id, sizeof(out[i].id));
+		toUtf8(list[i].name, out[i].name, sizeof(out[i].name));
+	}
+	return (int)list.size();
+}
+
+lm_error lm_server_set_audio_device(lm_server* s, const char* id)
+{
+	if (!s) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.audioDevice = id ? toWide(id) : L"";
+	if (s->audio) s->audio->setDevice(s->options.audioDevice);
+	return LM_OK;
+}
+
 lm_error lm_server_set_audio(lm_server* s, int enable)
 {
 	if (!s) return LM_E_INVALID_ARG;
@@ -103,6 +138,7 @@ lm_error lm_server_set_audio(lm_server* s, int enable)
 	} else if (!s->audio) {
 		s->audio = new (std::nothrow) LmAudioSink();
 		if (!s->audio) return LM_E_NO_MEMORY;
+		s->audio->setDevice(s->options.audioDevice);
 	}
 	return LM_OK;
 }

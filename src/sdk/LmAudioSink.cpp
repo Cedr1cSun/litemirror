@@ -3,6 +3,7 @@
 
 #include <mmdeviceapi.h>
 #include <audioclient.h>
+#include <functiondiscoverykeys_devpkey.h>
 #include <string.h>
 #include "LmAudioSink.h"
 
@@ -23,6 +24,46 @@ LmAudioSink::~LmAudioSink()
 	close();
 }
 
+std::vector<LmAudioSink::Device> LmAudioSink::devices()
+{
+	std::vector<Device> out;
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	IMMDeviceEnumerator* devices = NULL;
+	IMMDeviceCollection* all = NULL;
+	UINT count = 0;
+	if (SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, IID_PPV_ARGS(&devices))) &&
+	    SUCCEEDED(devices->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &all)) &&
+	    SUCCEEDED(all->GetCount(&count))) {
+		for (UINT i = 0; i < count; i++) {
+			IMMDevice* device = NULL;
+			IPropertyStore* props = NULL;
+			LPWSTR id = NULL;
+			PROPVARIANT name;
+			PropVariantInit(&name);
+			if (SUCCEEDED(all->Item(i, &device)) && SUCCEEDED(device->GetId(&id)) &&
+			    SUCCEEDED(device->OpenPropertyStore(STGM_READ, &props)) &&
+			    SUCCEEDED(props->GetValue(PKEY_Device_FriendlyName, &name)) && name.vt == VT_LPWSTR) {
+				Device d;
+				d.id = id;
+				d.name = name.pwszVal;
+				out.push_back(d);
+			}
+			PropVariantClear(&name);
+			if (id) CoTaskMemFree(id);
+			release(props);
+			release(device);
+		}
+	}
+	release(all);
+	release(devices);
+	return out;
+}
+
+void LmAudioSink::setDevice(const std::wstring& id)
+{
+	m_deviceId = id;
+}
+
 bool LmAudioSink::open(uint32_t rate, uint16_t channels)
 {
 	close();
@@ -39,7 +80,8 @@ bool LmAudioSink::open(uint32_t rate, uint16_t channels)
 	IMMDevice* device = NULL;
 	// AUTOCONVERTPCM: the engine resamples to its own mix format (Windows 10 and later)
 	bool ok = SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, IID_PPV_ARGS(&devices))) &&
-	          SUCCEEDED(devices->GetDefaultAudioEndpoint(eRender, eConsole, &device)) &&
+	          SUCCEEDED(m_deviceId.empty() ? devices->GetDefaultAudioEndpoint(eRender, eConsole, &device)
+	                                       : devices->GetDevice(m_deviceId.c_str(), &device)) &&
 	          SUCCEEDED(device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&m_client)) &&
 	          SUCCEEDED(m_client->Initialize(AUDCLNT_SHAREMODE_SHARED,
 	                                         AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,

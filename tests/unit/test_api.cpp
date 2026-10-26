@@ -5,6 +5,7 @@
 #include <string.h>
 #include <set>
 #include <string>
+#include <vector>
 #include "litemirror.h"
 
 static lm_callbacks no_callbacks()
@@ -232,6 +233,33 @@ TEST_CASE("set_low_latency only works while stopped")
 	CHECK(lm_server_set_low_latency(server, 1) == LM_E_RUNNING);
 	lm_server_stop(server);
 	CHECK(lm_server_set_low_latency(server, 1) == LM_OK);
+	lm_server_destroy(server);
+}
+
+TEST_CASE("audio devices can be listed and one chosen while stopped")
+{
+	int count = lm_audio_devices(NULL, 0);
+	CHECK(count >= 0);
+	if (count > 0) {
+		std::vector<lm_audio_device> list(count);
+		CHECK(lm_audio_devices(list.data(), count) == count);
+		CHECK(strlen(list[0].id) > 0);
+		CHECK(strlen(list[0].name) > 0);
+		lm_audio_device one;
+		CHECK(lm_audio_devices(&one, 1) == count);   // the count is the total, not what fitted
+	}
+
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_audio_device(NULL, "") == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_audio_device(server, NULL) == LM_OK);
+	CHECK(lm_server_set_audio_device(server, "{0.0.0.00000000}.{0}") == LM_OK);   // checked when it plays, not here
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_audio_device(server, "") == LM_E_RUNNING);
+	lm_server_stop(server);
+	CHECK(lm_server_set_audio_device(server, "") == LM_OK);
 	lm_server_destroy(server);
 }
 

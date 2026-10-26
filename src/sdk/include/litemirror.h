@@ -116,6 +116,18 @@ LM_API lm_error    lm_server_set_window(lm_server* s, void* hwnd);
 /* Play the audio on the default output device; on_audio is then not
  * called. Set it before lm_server_start(); LM_E_RUNNING while started. */
 LM_API lm_error    lm_server_set_audio (lm_server* s, int enable);
+/* An output device of this machine */
+typedef struct lm_audio_device {
+	char id[256];        /* for lm_server_set_audio_device */
+	char name[128];      /* what Windows shows, UTF-8 */
+} lm_audio_device;
+/* The active output devices. Returns how many there are and fills up to
+ * max of them; call with (NULL, 0) to size the buffer. */
+LM_API int         lm_audio_devices(lm_audio_device* out, int max);
+/* Play on this device instead of the default one; NULL or "" = default.
+ * Set it before lm_server_start(). A device that is gone when the sound
+ * starts leaves the receiver silent until it returns. */
+LM_API lm_error    lm_server_set_audio_device(lm_server* s, const char* id);
 /* Make the phone ask for a PIN before it may connect (HTTP Digest, as an
  * Apple TV with a password). Set it before lm_server_start(); pin is 1 to
  * LM_PIN_MAX-1 bytes for LM_PIN_FIXED and ignored otherwise. */
