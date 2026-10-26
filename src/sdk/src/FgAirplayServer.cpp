@@ -62,6 +62,7 @@ FgAirplayServer::FgAirplayServer()
 	m_stRaopCB.audio_flush = audio_flush;
 	m_stRaopCB.video_process = video_process;
 	m_stRaopCB.pin_show = pin_show;
+	m_stRaopCB.admit = admit;
 
 	m_mutexMap = CreateMutex(NULL, FALSE, NULL);
 }
@@ -121,7 +122,7 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 		raop_set_log_callback(m_pRaop, &log_callback, this);
 		raop_set_identity(m_pRaop, serverName, hwaddr, sizeof(hwaddr));
 		raop_set_pin(m_pRaop, options.pinMode, options.pin.c_str());
-		raop_set_second_device(m_pRaop, options.replaceSecond);
+		raop_set_second_device(m_pRaop, options.secondDevice);
 		raop_set_address(m_pRaop, options.address);
 		raop_set_display(m_pRaop, options.displayWidth, options.displayHeight, options.displayFps);
 		if (raop_start(m_pRaop, &raop_port) < 0) {
@@ -364,6 +365,16 @@ void FgAirplayServer::pin_show(void* cls, const char* pin)
 	{
 		pServer->m_cb.on_pin(pServer->m_cb.user, pin);
 	}
+}
+
+int FgAirplayServer::admit(void* cls, const char* remoteName, const char* remoteDeviceId)
+{
+	FgAirplayServer* pServer = (FgAirplayServer*)cls;
+	if (pServer && pServer->m_cb.on_second_device)
+	{
+		return pServer->m_cb.on_second_device(pServer->m_cb.user, remoteDeviceId, remoteName) ? 1 : 0;
+	}
+	return 0;
 }
 
 void FgAirplayServer::log_callback(void* cls, int level, const char* msg)

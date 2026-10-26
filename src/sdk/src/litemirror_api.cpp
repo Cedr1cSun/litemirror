@@ -85,11 +85,11 @@ lm_error lm_server_set_display(lm_server* s, uint32_t width, uint32_t height, ui
 	return LM_OK;
 }
 
-lm_error lm_server_set_second_device(lm_server* s, int replace)
+lm_error lm_server_set_second_device(lm_server* s, int policy)
 {
-	if (!s) return LM_E_INVALID_ARG;
+	if (!s || policy < LM_SECOND_REFUSE || policy > LM_SECOND_ASK) return LM_E_INVALID_ARG;
 	if (s->impl) return LM_E_RUNNING;
-	s->options.replaceSecond = replace != 0;
+	s->options.secondDevice = policy;
 	return LM_OK;
 }
 

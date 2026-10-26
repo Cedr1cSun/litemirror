@@ -60,7 +60,7 @@ struct raop_s {
 	struct raop_conn_s *pin_conn;   /* the connection the code was shown for */
 
 	/* One session at a time */
-	int replace_second;
+	int second_mode;
 	struct raop_conn_s *session_conn;   /* the connection that did the first SETUP */
 
 	/* Display offered in /info */
@@ -158,20 +158,24 @@ show_pin(raop_t *raop, raop_conn_t *conn, const char *pin)
 	}
 }
 
-/* The first SETUP of a client carries the session keys (eiv); later ones add streams */
+/* The first SETUP of a client carries the session keys (eiv); later ones
+ * add streams. Also hands out the client's name and id (free them). */
 static int
-setup_opens_session(http_request_t *request)
+setup_opens_session(http_request_t *request, char **name, char **device_id)
 {
 	const char *data;
 	int datalen, opens = 0;
 	plist_t root = NULL;
 
+	*name = *device_id = NULL;
 	data = http_request_get_data(request, &datalen);
 	if (data && datalen > 0) {
 		plist_from_bin(data, datalen, &root);
 	}
 	if (root) {
 		opens = plist_dict_get_item(root, "eiv") != NULL;
+		if (plist_dict_get_item(root, "name")) plist_get_string_val(plist_dict_get_item(root, "name"), name);
+		if (plist_dict_get_item(root, "deviceID")) plist_get_string_val(plist_dict_get_item(root, "deviceID"), device_id);
 		plist_free(root);
 	}
 	return opens;
@@ -233,22 +237,34 @@ conn_request(void *ptr, http_request_t *request, http_response_t **response)
 		return;
 	}
 
-	if (!strcmp(method, "SETUP") && setup_opens_session(request)) {
+	if (!strcmp(method, "SETUP")) {
 		raop_t *raop = conn->raop;
-		if (raop->session_conn && raop->session_conn != conn) {
-			if (!raop->replace_second) {
+		char *name = NULL, *device_id = NULL;
+		int opens = setup_opens_session(request, &name, &device_id);
+		int replace = 0;
+		if (opens && raop->session_conn && raop->session_conn != conn) {
+			if (raop->second_mode == RAOP_SECOND_REPLACE) {
+				replace = 1;
+			} else if (raop->second_mode == RAOP_SECOND_ASK && raop->callbacks.admit) {
+				replace = raop->callbacks.admit(raop->callbacks.cls, name ? name : "", device_id ? device_id : "");
+			}
+			if (!replace) {
 				logger_log(raop->logger, LOGGER_INFO, "Second client refused: a session is running");
 				*response = http_response_init("RTSP/1.0", 453, "Not Enough Bandwidth");
 				http_response_add_header(*response, "CSeq", cseq);
 				http_response_add_header(*response, "Server", "AirTunes/220.68");
 				http_response_set_disconnect(*response, 1);
 				http_response_finish(*response, NULL, 0);
+				free(name);
+				free(device_id);
 				return;
 			}
 			logger_log(raop->logger, LOGGER_INFO, "Second client replaces the running session");
 			httpd_close_connection(raop->httpd, raop->session_conn);
 		}
-		raop->session_conn = conn;
+		if (opens) raop->session_conn = conn;
+		free(name);
+		free(device_id);
 	}
 	if (!strcmp(method, "SETUP") && conn->raop->pin_mode && !conn->authenticated && !check_pin(conn, request)) {
 		char challenge[80];
@@ -507,10 +523,10 @@ raop_set_address(raop_t *raop, unsigned long address)
 }
 
 void
-raop_set_second_device(raop_t *raop, int replace)
+raop_set_second_device(raop_t *raop, int mode)
 {
 	assert(raop);
-	raop->replace_second = replace;
+	raop->second_mode = mode;
 }
 
 int

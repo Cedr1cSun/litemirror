@@ -105,7 +105,17 @@ typedef struct lm_callbacks {
 	void (*on_pin)         (void* user, const char* pin);
 	/* about once a second while pictures arrive */
 	void (*on_stats)       (void* user, const char* device_id, const lm_stats* stats);
+	/* LM_SECOND_ASK: another phone wants to connect while one is mirroring.
+	 * Return 1 to drop the first and let it in, 0 to refuse. Called on a
+	 * network thread while the phone waits: answer within a few seconds. */
+	int  (*on_second_device)(void* user, const char* device_id, const char* name);
 } lm_callbacks;
+
+typedef enum lm_second_device {
+	LM_SECOND_REFUSE = 0,    /* the busy answer an Apple TV gives */
+	LM_SECOND_REPLACE,       /* the first phone is dropped */
+	LM_SECOND_ASK            /* on_second_device decides; refused without it */
+} lm_second_device;
 
 LM_API lm_error    lm_server_create (const lm_callbacks* cb, lm_server** out);
 /* Draw the mirror picture into this window (an HWND), letterboxed, straight
@@ -136,10 +146,9 @@ LM_API lm_error    lm_server_set_follow_volume(lm_server* s, int enable);
  * Apple TV with a password). Set it before lm_server_start(); pin is 1 to
  * LM_PIN_MAX-1 bytes for LM_PIN_FIXED and ignored otherwise. */
 LM_API lm_error    lm_server_set_pin   (lm_server* s, lm_pin_mode mode, const char* pin);
-/* A second phone while one is connected: 0 (default) turns it away with
- * the busy answer an Apple TV gives, 1 lets it in and drops the first.
- * Set it before lm_server_start(). */
-LM_API lm_error    lm_server_set_second_device(lm_server* s, int replace);
+/* What happens when a second phone connects while one is mirroring
+ * (lm_second_device; default refuse). Set it before lm_server_start(). */
+LM_API lm_error    lm_server_set_second_device(lm_server* s, int policy);
 /* Listen and announce on one IPv4 address of this machine only (dotted,
  * e.g. the Wi-Fi adapter's), for machines with VPN or virtual adapters.
  * NULL or "" means every address. Set it before lm_server_start(), which

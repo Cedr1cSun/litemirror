@@ -51,8 +51,16 @@ struct raop_callbacks_s {
 	/* RAOP_PIN_RANDOM: show this code to the user; NULL once the client got
 	 * it right or went away */
 	void  (*pin_show)(void *cls, const char *pin);
+	/* RAOP_SECOND_ASK: a second client wants a session while one runs.
+	 * Return 1 to drop the first and let it in, 0 to refuse it. Called on
+	 * the server thread while the client waits. */
+	int   (*admit)(void *cls, const char *remoteName, const char *remoteDeviceId);
 };
 typedef struct raop_callbacks_s raop_callbacks_t;
+
+#define RAOP_SECOND_REFUSE  0
+#define RAOP_SECOND_REPLACE 1
+#define RAOP_SECOND_ASK     2   /* through the admit callback; refused without one */
 
 #define RAOP_PIN_OFF    0
 #define RAOP_PIN_RANDOM 1   /* four digits per connection, given through pin_show */
@@ -69,9 +77,10 @@ RAOP_API void raop_set_identity(raop_t *raop, const char *name, const char *hwad
 /* Clients must answer a Digest challenge on SETUP, like an Apple TV with a
  * password. Call before raop_start; pin is used with RAOP_PIN_FIXED. */
 RAOP_API void raop_set_pin(raop_t *raop, int mode, const char *pin);
-/* A second client while one has a session: replace=0 answers 453 (busy),
- * replace=1 drops the first. Call before raop_start. */
-RAOP_API void raop_set_second_device(raop_t *raop, int replace);
+/* A second client while one has a session: RAOP_SECOND_REFUSE answers 453
+ * (busy), RAOP_SECOND_REPLACE drops the first, RAOP_SECOND_ASK asks the
+ * admit callback. Call before raop_start. */
+RAOP_API void raop_set_second_device(raop_t *raop, int mode);
 /* Listen on this IPv4 address only (network byte order; 0 = every address). Call before raop_start. */
 RAOP_API void raop_set_address(raop_t *raop, unsigned long address);
 /* The display size and frame rate offered in /info; the phone encodes to

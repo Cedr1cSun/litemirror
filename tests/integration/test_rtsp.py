@@ -285,6 +285,38 @@ class SecondDevice(unittest.TestCase):
         again.close()
         self.assertEqual(self.host.stop(), 'OK')
 
+    def test_ask_policy_puts_the_question_to_the_shell(self):
+        """The shell is asked while the second phone waits; its answer decides."""
+        self.assertEqual(self.host.cmd('second ask'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        first, _ = self.connect(DEVICE, DEVICE_ID)
+        self.assertEqual(self.host.wait_for('EVENT connected'), f'EVENT connected {DEVICE} {DEVICE_ID}')
+
+        import threading
+        outcome = {}
+        def second_phone():
+            outcome['client'], outcome['status'] = self.connect('OtherPhone', '11:22:33:44:55:66')
+        t = threading.Thread(target=second_phone)
+        t.start()
+        self.assertEqual(self.host.wait_for('EVENT second'), 'EVENT second OtherPhone 11:22:33:44:55:66')
+        self.assertTrue(t.is_alive(), 'the second phone was answered before the shell decided')
+        self.assertEqual(self.host.cmd('admit no'), 'OK')
+        t.join(10)
+        self.assertEqual(outcome['status'], 453)
+        self.assertEqual(first.set_volume(-5.0)[0], 200)   # the first one is untouched
+        outcome['client'].close()
+
+        t = threading.Thread(target=second_phone)
+        t.start()
+        self.host.wait_for('EVENT second')
+        self.assertEqual(self.host.cmd('admit yes'), 'OK')
+        t.join(10)
+        self.assertEqual(outcome['status'], 200)
+        self.assertEqual(self.host.wait_for('EVENT disconnected'), f'EVENT disconnected {DEVICE} {DEVICE_ID}')
+        self.assertEqual(self.host.wait_for('EVENT connected'), 'EVENT connected OtherPhone 11:22:33:44:55:66')
+        outcome['client'].close()
+        self.assertEqual(self.host.stop(), 'OK')
+
     def test_second_device_replaces_the_first_when_asked(self):
         self.assertEqual(self.host.cmd('second replace'), 'OK')
         self.assertEqual(self.host.start(), 'OK')

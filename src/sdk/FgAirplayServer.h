@@ -15,10 +15,10 @@ typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
 // What the shell set through the lm_server_set_* calls before starting
 struct FgServerOptions {
-	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true), lowLatency(true), followVolume(true), scaler(0) {}
+	FgServerOptions() : pinMode(0), secondDevice(0), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true), lowLatency(true), followVolume(true), scaler(0) {}
 	int pinMode;          // lm_pin_mode
 	std::string pin;      // LM_PIN_FIXED
-	bool replaceSecond;   // a second phone replaces the first instead of being refused
+	int secondDevice;     // lm_second_device
 	unsigned long address;   // IPv4 to listen and announce on, network byte order; 0 = all
 	unsigned int displayWidth, displayHeight, displayFps;   // what the phone encodes at
 	bool hardwareDecode;  // false: decode on the CPU
@@ -59,6 +59,7 @@ protected:
 	static void video_process(void* cls, h264_decode_struct* data, const char* remoteName, const char* remoteDeviceId);
 	static void log_callback(void* cls, int level, const char* msg);
 	static void pin_show(void* cls, const char* pin);
+	static int admit(void* cls, const char* remoteName, const char* remoteDeviceId);
 
 	static void ap_video_play(void* cls, char* url, double volume, double start_pos);
 	static void ap_video_get_play_info(void* cls, double* duration, double* position, double* rate);

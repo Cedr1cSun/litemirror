@@ -123,6 +123,8 @@ TEST_CASE("set_second_device only works while stopped")
 	lm_server* server = NULL;
 	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
 	CHECK(lm_server_set_second_device(NULL, 1) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_second_device(server, 3) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_second_device(server, LM_SECOND_ASK) == LM_OK);
 	CHECK(lm_server_set_second_device(server, 1) == LM_OK);
 	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
 	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
