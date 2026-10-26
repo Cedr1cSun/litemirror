@@ -727,6 +727,9 @@ raop_handler_teardown(raop_conn_t* conn,
 	}
 	else {
 		logger_log(conn->raop->logger, LOGGER_DEBUG, "teardown client");
+		if (conn->raop->session_conn == conn) {
+			conn->raop->session_conn = NULL;
+		}
 		if (conn->raop_rtp) {
 			/* Destroy our RTP session */
 			raop_rtp_destroy(conn->raop_rtp);

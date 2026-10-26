@@ -221,6 +221,65 @@ class Pin(unittest.TestCase):
         self.assertEqual(self.host.stop(), 'OK')
 
 
+class SecondDevice(unittest.TestCase):
+    """A second phone while one is mirroring: turned away (the default, with
+    the 453 an Apple TV sends when busy) or let in, replacing the first."""
+
+    def setUp(self):
+        self.host = TestHost()
+
+    def tearDown(self):
+        self.host.close()
+
+    def connect(self, name, device_id):
+        client = RtspClient(self.host.raop_port)
+        client.pair_setup()
+        self.assertEqual(client.pair_verify(), (200, 200))
+        status = client.setup_session(name, device_id)[0]
+        if status == 200:
+            self.assertEqual(client.setup_audio()[0], 200)
+        return client, status
+
+    def test_second_device_is_refused_by_default(self):
+        self.assertEqual(self.host.start(), 'OK')
+        first, _ = self.connect(DEVICE, DEVICE_ID)
+        self.assertEqual(self.host.wait_for('EVENT connected'), f'EVENT connected {DEVICE} {DEVICE_ID}')
+        second, status = self.connect('OtherPhone', '11:22:33:44:55:66')
+        self.assertEqual(status, 453)
+        self.assertEqual(first.set_volume(-10.0)[0], 200)   # the first one carries on
+        self.assertEqual(self.host.wait_for('EVENT volume'), f'EVENT volume {DEVICE_ID} -10.0')
+        self.assertEqual(self.host.events(), [])   # no connected event for the second
+        second.close()
+        first.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_first_device_may_connect_again_after_it_left(self):
+        self.assertEqual(self.host.start(), 'OK')
+        first, _ = self.connect(DEVICE, DEVICE_ID)
+        self.host.wait_for('EVENT connected')
+        first.close()
+        self.host.wait_for('EVENT disconnected')
+        again, status = self.connect(DEVICE, DEVICE_ID)
+        self.assertEqual(status, 200)
+        again.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_second_device_replaces_the_first_when_asked(self):
+        self.assertEqual(self.host.cmd('second replace'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        first, _ = self.connect(DEVICE, DEVICE_ID)
+        self.assertEqual(self.host.wait_for('EVENT connected'), f'EVENT connected {DEVICE} {DEVICE_ID}')
+        second, status = self.connect('OtherPhone', '11:22:33:44:55:66')
+        self.assertEqual(status, 200)
+        self.assertEqual(self.host.wait_for('EVENT disconnected'), f'EVENT disconnected {DEVICE} {DEVICE_ID}')
+        self.assertEqual(self.host.wait_for('EVENT connected'), 'EVENT connected OtherPhone 11:22:33:44:55:66')
+        with self.assertRaises((ConnectionError, OSError)):   # the first one was cut off
+            first.options()
+            first.options()
+        second.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+
 class Malformed(unittest.TestCase):
     """Requests a buggy or hostile client might send. The server may refuse
     them, but it must stay up for the next client."""

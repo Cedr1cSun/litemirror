@@ -69,6 +69,9 @@ RAOP_API void raop_set_identity(raop_t *raop, const char *name, const char *hwad
 /* Clients must answer a Digest challenge on SETUP, like an Apple TV with a
  * password. Call before raop_start; pin is used with RAOP_PIN_FIXED. */
 RAOP_API void raop_set_pin(raop_t *raop, int mode, const char *pin);
+/* A second client while one has a session: replace=0 answers 453 (busy),
+ * replace=1 drops the first. Call before raop_start. */
+RAOP_API void raop_set_second_device(raop_t *raop, int replace);
 RAOP_API int raop_get_pin_mode(raop_t *raop);
 RAOP_API unsigned short raop_get_port(raop_t *raop);
 RAOP_API void *raop_get_callback_cls(raop_t *raop);

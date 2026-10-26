@@ -35,6 +35,12 @@ httpd_t *httpd_init(logger_t *logger, httpd_callbacks_t *callbacks, int max_conn
 int httpd_is_running(httpd_t *httpd);
 
 int httpd_start(httpd_t *httpd, unsigned short *port);
+/* Close the connection whose conn_init returned user_data, from inside a
+ * conn_request callback; it goes once the current request is answered */
+void httpd_close_connection(httpd_t *httpd, void *user_data);
+/* Close the connection whose conn_init returned user_data, from inside a
+ * conn_request callback; it goes once the current request is answered */
+void httpd_close_connection(httpd_t *httpd, void *user_data);
 void httpd_stop(httpd_t *httpd);
 
 void httpd_destroy(httpd_t *httpd);

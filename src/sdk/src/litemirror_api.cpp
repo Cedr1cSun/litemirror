@@ -21,6 +21,14 @@ struct lm_server {
 	FgServerOptions options; // everything else set before start
 };
 
+lm_error lm_server_set_second_device(lm_server* s, int replace)
+{
+	if (!s) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.replaceSecond = replace != 0;
+	return LM_OK;
+}
+
 lm_error lm_server_set_pin(lm_server* s, lm_pin_mode mode, const char* pin)
 {
 	if (!s || mode < LM_PIN_OFF || mode > LM_PIN_FIXED) return LM_E_INVALID_ARG;

@@ -8,6 +8,7 @@
 //   start <name> <raopPort> <airplayPort>   -> OK | FAIL <code> <message>
 //   stop                                    -> OK
 //   pin off | pin random | pin fixed <code> -> OK | FAIL <code> <message>   (before start)
+//   second reject | second replace          -> OK | FAIL <code> <message>   (before start)
 //   quit
 //
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
@@ -118,6 +119,10 @@ int main()
 			report(lm_server_set_pin(server, LM_PIN_RANDOM, NULL));
 		} else if (sscanf(line, "pin fixed %63s", code) == 1) {
 			report(lm_server_set_pin(server, LM_PIN_FIXED, code));
+		} else if (strncmp(line, "second reject", 13) == 0) {
+			report(lm_server_set_second_device(server, 0));
+		} else if (strncmp(line, "second replace", 14) == 0) {
+			report(lm_server_set_second_device(server, 1));
 		} else if (strncmp(line, "stop", 4) == 0) {
 			lm_server_stop(server);
 			printf("OK\n");

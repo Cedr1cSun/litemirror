@@ -87,6 +87,7 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 		raop_set_log_callback(m_pRaop, &log_callback, this);
 		raop_set_identity(m_pRaop, serverName, hwaddr, sizeof(hwaddr));
 		raop_set_pin(m_pRaop, options.pinMode, options.pin.c_str());
+		raop_set_second_device(m_pRaop, options.replaceSecond);
 		if (raop_start(m_pRaop, &raop_port) < 0) {
 			err = LM_E_RAOP_PORT;
 			break;

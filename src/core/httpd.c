@@ -25,6 +25,7 @@
 
 struct http_connection_s {
 	int connected;
+	int close_pending;
 
 	int socket_fd;
 	void *user_data;
@@ -123,8 +124,21 @@ httpd_add_connection(httpd_t *httpd, int fd, unsigned char *local, int local_len
 	httpd->open_connections++;
 	httpd->connections[i].socket_fd = fd;
 	httpd->connections[i].connected = 1;
+	httpd->connections[i].close_pending = 0;
 	httpd->connections[i].user_data = user_data;
 	return 0;
+}
+
+void
+httpd_close_connection(httpd_t *httpd, void *user_data)
+{
+	int i;
+	assert(httpd);
+	for (i=0; i<httpd->max_connections; i++) {
+		if (httpd->connections[i].connected && httpd->connections[i].user_data == user_data) {
+			httpd->connections[i].close_pending = 1;
+		}
+	}
 }
 
 static int
@@ -269,6 +283,11 @@ httpd_thread(void *arg)
 			if (!connection->connected) {
 				continue;
 			}
+			if (connection->close_pending) {
+				logger_log(httpd->logger, LOGGER_INFO, "Closing socket %d on software request", connection->socket_fd);
+				httpd_remove_connection(httpd, connection);
+				continue;
+			}
 			if (!FD_ISSET(connection->socket_fd, &rfds)) {
 				continue;
 			}
@@ -333,6 +352,14 @@ httpd_thread(void *arg)
 				http_response_destroy(response);
 			} else {
 				logger_log(httpd->logger, LOGGER_DEBUG, "Request not complete, waiting for more data...");
+			}
+		}
+		/* a handler asked for another connection to go: do not keep it until the next select */
+		for (i=0; i<httpd->max_connections; i++) {
+			http_connection_t *connection = &httpd->connections[i];
+			if (connection->connected && connection->close_pending) {
+				logger_log(httpd->logger, LOGGER_INFO, "Closing socket %d on software request", connection->socket_fd);
+				httpd_remove_connection(httpd, connection);
 			}
 		}
 	}

@@ -109,6 +109,10 @@ LM_API lm_error    lm_server_set_audio (lm_server* s, int enable);
  * Apple TV with a password). Set it before lm_server_start(); pin is 1 to
  * LM_PIN_MAX-1 bytes for LM_PIN_FIXED and ignored otherwise. */
 LM_API lm_error    lm_server_set_pin   (lm_server* s, lm_pin_mode mode, const char* pin);
+/* A second phone while one is connected: 0 (default) turns it away with
+ * the busy answer an Apple TV gives, 1 lets it in and drops the first.
+ * Set it before lm_server_start(). */
+LM_API lm_error    lm_server_set_second_device(lm_server* s, int replace);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

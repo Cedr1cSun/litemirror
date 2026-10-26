@@ -20,6 +20,7 @@
 
 #include "raop.h"
 #include "digest.h"
+#include "plist/plist.h"
 #include "raop_rtp.h"
 #include "raop_rtp.h"
 #include "pairing.h"
@@ -57,6 +58,10 @@ struct raop_s {
 	char random_pin[5];        /* current RAOP_PIN_RANDOM code, "" when none is out */
 	int pin_failures;          /* wrong answers to the current random code */
 	struct raop_conn_s *pin_conn;   /* the connection the code was shown for */
+
+	/* One session at a time */
+	int replace_second;
+	struct raop_conn_s *session_conn;   /* the connection that did the first SETUP */
 };
 
 struct raop_conn_s {
@@ -150,6 +155,25 @@ show_pin(raop_t *raop, raop_conn_t *conn, const char *pin)
 	}
 }
 
+/* The first SETUP of a client carries the session keys (eiv); later ones add streams */
+static int
+setup_opens_session(http_request_t *request)
+{
+	const char *data;
+	int datalen, opens = 0;
+	plist_t root = NULL;
+
+	data = http_request_get_data(request, &datalen);
+	if (data && datalen > 0) {
+		plist_from_bin(data, datalen, &root);
+	}
+	if (root) {
+		opens = plist_dict_get_item(root, "eiv") != NULL;
+		plist_free(root);
+	}
+	return opens;
+}
+
 /* Digest authentication on SETUP, as an Apple TV with a password does it.
  * Returns 1 when the request may go on; 0 means answer with a 401 challenge.
  * A random code is shown while the challenge stands and changed after three
@@ -206,6 +230,23 @@ conn_request(void *ptr, http_request_t *request, http_response_t **response)
 		return;
 	}
 
+	if (!strcmp(method, "SETUP") && setup_opens_session(request)) {
+		raop_t *raop = conn->raop;
+		if (raop->session_conn && raop->session_conn != conn) {
+			if (!raop->replace_second) {
+				logger_log(raop->logger, LOGGER_INFO, "Second client refused: a session is running");
+				*response = http_response_init("RTSP/1.0", 453, "Not Enough Bandwidth");
+				http_response_add_header(*response, "CSeq", cseq);
+				http_response_add_header(*response, "Server", "AirTunes/220.68");
+				http_response_set_disconnect(*response, 1);
+				http_response_finish(*response, NULL, 0);
+				return;
+			}
+			logger_log(raop->logger, LOGGER_INFO, "Second client replaces the running session");
+			httpd_close_connection(raop->httpd, raop->session_conn);
+		}
+		raop->session_conn = conn;
+	}
 	if (!strcmp(method, "SETUP") && conn->raop->pin_mode && !conn->authenticated && !check_pin(conn, request)) {
 		char challenge[80];
 		snprintf(challenge, sizeof(challenge), "Digest realm=\"raop\", nonce=\"%s\"", conn->nonce);
@@ -283,6 +324,9 @@ conn_destroy(void *ptr)
 		/* the client gave up before entering the code: take it off the screen */
 		conn->raop->random_pin[0] = '\0';
 		show_pin(conn->raop, conn, NULL);
+	}
+	if (conn->raop->session_conn == conn) {
+		conn->raop->session_conn = NULL;
 	}
 	if (conn->raop_rtp) {
 		/* This is done in case TEARDOWN was not called */
@@ -438,6 +482,13 @@ raop_set_pin(raop_t *raop, int mode, const char *pin)
 	raop->random_pin[0] = '\0';
 	raop->pin_failures = 0;
 	raop->pin_conn = NULL;
+}
+
+void
+raop_set_second_device(raop_t *raop, int replace)
+{
+	assert(raop);
+	raop->replace_second = replace;
 }
 
 int
