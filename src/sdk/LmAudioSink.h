@@ -14,6 +14,7 @@
 
 struct IAudioClient;
 struct IAudioRenderClient;
+struct ISimpleAudioVolume;
 
 class LmAudioSink
 {
@@ -30,6 +31,11 @@ public:
 	// Play on this device instead of the default one; "" = default.
 	// Takes effect when the device is (re)opened.
 	void setDevice(const std::wstring& id);
+	// The phone's volume, -30..0 dB (-144 = mute), onto this app's audio
+	// session, 0..1 in step with the phone's slider
+	void setVolume(float db);
+	// The session's volume (0..1), or what setVolume last asked for while no device is open
+	float volume() const;
 
 	// Queue one packet. Opens the device on first use and again after a
 	// format change or when the device goes away; silently drops audio
@@ -50,4 +56,7 @@ private:
 	bool m_started;
 	ULONGLONG m_retryAt;   // no device: do not hammer the enumerator
 	std::wstring m_deviceId;
+	ISimpleAudioVolume* m_volume;
+	float m_level;         // 0..1, applied to each device as it opens
+	bool m_levelSet;
 };

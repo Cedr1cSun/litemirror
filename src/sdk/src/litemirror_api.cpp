@@ -119,6 +119,14 @@ int lm_audio_devices(lm_audio_device* out, int max)
 	return (int)list.size();
 }
 
+lm_error lm_server_set_follow_volume(lm_server* s, int enable)
+{
+	if (!s) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.followVolume = enable != 0;
+	return LM_OK;
+}
+
 lm_error lm_server_set_audio_device(lm_server* s, const char* id)
 {
 	if (!s) return LM_E_INVALID_ARG;

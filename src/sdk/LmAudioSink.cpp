@@ -15,8 +15,29 @@ static const REFERENCE_TIME BUFFER_100NS = 3000000;   // 300 ms of room for netw
 static const uint32_t PREROLL_MS = 50;
 
 LmAudioSink::LmAudioSink()
-	: m_client(NULL), m_render(NULL), m_bufferFrames(0), m_rate(0), m_channels(0), m_started(false), m_retryAt(0)
+	: m_client(NULL), m_render(NULL), m_bufferFrames(0), m_rate(0), m_channels(0), m_started(false), m_retryAt(0),
+	  m_volume(NULL), m_level(1.0f), m_levelSet(false)
 {
+}
+
+void LmAudioSink::setVolume(float db)
+{
+	// the phone's slider runs -30..0 dB in equal steps; keep it linear so the two sliders agree
+	float level = db <= -144.0f ? 0.0f : (db + 30.0f) / 30.0f;
+	m_level = level < 0.0f ? 0.0f : level > 1.0f ? 1.0f : level;
+	m_levelSet = true;
+	if (m_volume) {
+		m_volume->SetMasterVolume(m_level, NULL);
+	}
+}
+
+float LmAudioSink::volume() const
+{
+	float level = m_level;
+	if (m_volume) {
+		m_volume->GetMasterVolume(&level);
+	}
+	return level;
 }
 
 LmAudioSink::~LmAudioSink()
@@ -94,6 +115,9 @@ bool LmAudioSink::open(uint32_t rate, uint16_t channels)
 		close();
 		return false;
 	}
+	if (SUCCEEDED(m_client->GetService(IID_PPV_ARGS(&m_volume))) && m_levelSet) {
+		m_volume->SetMasterVolume(m_level, NULL);
+	}
 	m_rate = rate;
 	m_channels = channels;
 	return true;
@@ -104,6 +128,7 @@ void LmAudioSink::close()
 	if (m_client) {
 		m_client->Stop();
 	}
+	release(m_volume);
 	release(m_render);
 	release(m_client);
 	m_rate = 0;

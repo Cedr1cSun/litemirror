@@ -128,6 +128,10 @@ LM_API int         lm_audio_devices(lm_audio_device* out, int max);
  * Set it before lm_server_start(). A device that is gone when the sound
  * starts leaves the receiver silent until it returns. */
 LM_API lm_error    lm_server_set_audio_device(lm_server* s, const char* id);
+/* With built-in playback, the phone's volume buttons set this app's volume
+ * in the Windows mixer (default on). on_volume is called either way. Set
+ * it before lm_server_start(). */
+LM_API lm_error    lm_server_set_follow_volume(lm_server* s, int enable);
 /* Make the phone ask for a PIN before it may connect (HTTP Digest, as an
  * Apple TV with a password). Set it before lm_server_start(); pin is 1 to
  * LM_PIN_MAX-1 bytes for LM_PIN_FIXED and ignored otherwise. */

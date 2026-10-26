@@ -15,7 +15,7 @@ typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
 // What the shell set through the lm_server_set_* calls before starting
 struct FgServerOptions {
-	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true), lowLatency(true) {}
+	FgServerOptions() : pinMode(0), replaceSecond(false), address(0), displayWidth(1920), displayHeight(1080), displayFps(60), hardwareDecode(true), lowLatency(true), followVolume(true) {}
 	int pinMode;          // lm_pin_mode
 	std::string pin;      // LM_PIN_FIXED
 	bool replaceSecond;   // a second phone replaces the first instead of being refused
@@ -25,6 +25,7 @@ struct FgServerOptions {
 	bool lowLatency;      // false: reorder queue in the decoder and vsync on present
 	LmColour colour;      // picture adjustments, kept so a later set_window gets them
 	std::wstring audioDevice;   // output device id, "" = default
+	bool followVolume;    // the phone's volume buttons set this app's session volume
 };
 
 // Owns the protocol core (RTSP, HTTP, mDNS) and one FgAirplayChannel per

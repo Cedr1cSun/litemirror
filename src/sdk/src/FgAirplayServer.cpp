@@ -245,7 +245,15 @@ void FgAirplayServer::disconnected(void* cls, const char* remoteName, const char
 void FgAirplayServer::audio_set_volume(void* cls, void* session, float volume, const char* remoteName, const char* remoteDeviceId)
 {
 	FgAirplayServer* pServer = (FgAirplayServer*)cls;
-	if (pServer && pServer->m_cb.on_volume)
+	if (!pServer)
+	{
+		return;
+	}
+	if (pServer->m_audioSink && pServer->m_options.followVolume)
+	{
+		pServer->m_audioSink->setVolume(volume);
+	}
+	if (pServer->m_cb.on_volume)
 	{
 		pServer->m_cb.on_volume(pServer->m_cb.user, remoteDeviceId, volume);
 	}

@@ -195,6 +195,24 @@ TEST_CASE("audio sink stays quiet but alive on an unknown device id")
 	sink.close();
 }
 
+TEST_CASE("audio sink volume follows the phone's dB scale")
+{
+	LmAudioSink sink;
+	sink.setVolume(-15.0f);           // half way up the phone's slider
+	CHECK(sink.volume() == doctest::Approx(0.5f).epsilon(0.02));
+	std::vector<int16_t> pcm(480 * 2, 0);
+	lm_audio_frame f = { 0, 44100, 2, 16, (const uint8_t*)pcm.data(), pcm.size() * sizeof(int16_t) };
+	sink.play(&f);                    // opens the device: the volume must land on the session
+	CHECK(sink.volume() == doctest::Approx(0.5f).epsilon(0.02));
+	sink.setVolume(0.0f);
+	CHECK(sink.volume() == doctest::Approx(1.0f).epsilon(0.02));
+	sink.setVolume(-30.0f);
+	CHECK(sink.volume() == doctest::Approx(0.0f).epsilon(0.02));
+	sink.setVolume(-144.0f);          // mute
+	CHECK(sink.volume() == doctest::Approx(0.0f).epsilon(0.02));
+	sink.close();
+}
+
 TEST_CASE("audio sink survives a format change and empty frames")
 {
 	LmAudioSink sink;
