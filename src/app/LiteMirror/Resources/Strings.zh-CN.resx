@@ -120,36 +120,36 @@
   <data name="OpenLogs" xml:space="preserve"><value>打开日志文件夹</value></data>
 
 
-  <data name="H_Name" xml:space="preserve"><value>设备"屏幕镜像"列表里显示的名字。留空就用这台电脑的名字。</value></data>
-  <data name="H_AutoStart" xml:space="preserve"><value>关闭时，需要时再点"开始接收"（或按 Ctrl+R）。</value></data>
-  <data name="H_Pin" xml:space="preserve"><value>让手机连接前先输入一个码。"每次连接生成新 PIN"会像 Apple TV 那样，每次在这块屏幕上显示一个新的 4 位码。</value></data>
-  <data name="H_PinCode" xml:space="preserve"><value>手机需要输入的码，1 到 63 个字符。</value></data>
-  <data name="H_Second" xml:space="preserve"><value>已经有手机在投屏时，又有一台来连接该怎么办。</value></data>
-  <data name="H_Address" xml:space="preserve"><value>只在一块网卡上接收。开着 VPN、有虚拟网卡或用手机热点时有用；大多数人选"全部网卡"即可。</value></data>
-  <data name="H_Ports" xml:space="preserve"><value>给防火墙用的固定端口。填 0 让 Windows 每次自动挑空闲端口。</value></data>
-  <data name="H_Quality" xml:space="preserve"><value>请手机发送的画面尺寸。越低 Wi-Fi 流量和 CPU 占用越少。</value></data>
-  <data name="H_Fps" xml:space="preserve"><value>手机最多每秒发多少帧。30 对慢电脑和差网络更友好。</value></data>
-  <data name="H_Hw" xml:space="preserve"><value>用显卡解码视频。只有画面花屏或全黑时才关掉。</value></data>
-  <data name="H_Low" xml:space="preserve"><value>每帧一到就显示。关闭会多一两帧延迟，换来更平稳的画面。</value></data>
-  <data name="H_Scaler" xml:space="preserve"><value>窗口比画面大时怎么放大。"锐利"会多用一点显卡。</value></data>
-  <data name="H_Rotate" xml:space="preserve"><value>手机旋转时窗口绕中心转过来；关闭则窗口不动，画面加黑边。</value></data>
-  <data name="H_Info" xml:space="preserve"><value>在画面左上角显示分辨率、帧率、处理耗时和解码方式（Ctrl+I）。</value></data>
-  <data name="H_Monitor" xml:space="preserve"><value>多显示器时，按 F11 全屏到哪一块。</value></data>
-  <data name="H_Matrix" xml:space="preserve"><value>手机视频颜色的换算方式。"自动"对高清用 BT.709、以下用 BT.601；颜色不对时再改。</value></data>
-  <data name="H_Range" xml:space="preserve"><value>黑色是 16 还是 0。"自动"（有限）适合 AirPlay；"完整"会让发灰的画面更鲜明，也可能压死暗部。</value></data>
-  <data name="H_Brightness" xml:space="preserve"><value>整体提亮或压暗。0 为原样。</value></data>
-  <data name="H_Contrast" xml:space="preserve"><value>明暗之间的差距。0 为原样。</value></data>
-  <data name="H_Saturation" xml:space="preserve"><value>颜色浓淡，-100 是黑白。0 为原样。</value></data>
-  <data name="H_Hue" xml:space="preserve"><value>把所有颜色沿色环转动。0 为原样。</value></data>
-  <data name="H_Audio" xml:space="preserve"><value>关闭后声音留在手机上。</value></data>
-  <data name="H_AudioDevice" xml:space="preserve"><value>用哪个扬声器或耳机播放。"默认设备"跟随 Windows 的声音设置。</value></data>
-  <data name="H_Volume" xml:space="preserve"><value>手机的音量键会调整这个程序在 Windows 混音器里的音量。</value></data>
-  <data name="H_Language" xml:space="preserve"><value>这个程序的文字。</value></data>
-  <data name="H_Theme" xml:space="preserve"><value>浅色或深色外观；"跟随系统"按 Windows 的设置来。</value></data>
-  <data name="H_Colour" xml:space="preserve"><value>按钮和当前页面用的强调色。</value></data>
-  <data name="H_Startup" xml:space="preserve"><value>登录时在托盘里启动；是否自动接收仍看上面那项。</value></data>
-  <data name="H_Close" xml:space="preserve"><value>退出，或者带着托盘图标在后台继续接收。</value></data>
-  <data name="H_Log" xml:space="preserve"><value>写进日志文件的内容；报告问题时选"全部"。</value></data>
+  <data name="H_Name" xml:space="preserve"><value>通过 mDNS 在局域网广播的 AirPlay 服务名。留空使用计算机名。</value></data>
+  <data name="H_AutoStart" xml:space="preserve"><value>程序启动时即注册 mDNS 服务并开始监听。关闭则需点"开始接收"或按 Ctrl+R。</value></data>
+  <data name="H_Pin" xml:space="preserve"><value>在 RTSP SETUP 阶段要求 Digest 认证。"每次连接生成新 PIN"每次连接随机生成 4 位码并显示在本机；"固定 PIN"使用下方的码。</value></data>
+  <data name="H_PinCode" xml:space="preserve"><value>固定模式使用的 PIN，1 到 63 个字符。</value></data>
+  <data name="H_Second" xml:space="preserve"><value>已有会话时再收到新连接的处理：询问（15 秒无操作视为拒绝）、拒绝（返回 453），或断开当前会话接受新的。</value></data>
+  <data name="H_Address" xml:space="preserve"><value>只在指定网卡的 IPv4 地址上监听并广播。多网卡、VPN 或虚拟网卡环境下用来指定出口。</value></data>
+  <data name="H_Ports" xml:space="preserve"><value>RTSP（RAOP）与 HTTP（AirPlay）监听端口，用于防火墙放行。0 为系统分配。</value></data>
+  <data name="H_Quality" xml:space="preserve"><value>向发送端通告的目标分辨率（16:9，按高度），发送端据此编码。越低码率与解码负载越小。</value></data>
+  <data name="H_Fps" xml:space="preserve"><value>向发送端通告的最高帧率。</value></data>
+  <data name="H_Hw" xml:space="preserve"><value>通过 Media Foundation 用 GPU 解码 H.264。关闭改为软件解码，CPU 占用明显上升；用于排查驱动问题。</value></data>
+  <data name="H_Low" xml:space="preserve"><value>解码器开启 AVLowLatencyMode，Present 间隔为 0，不等待垂直同步。关闭则按 vsync 呈现，多一到两帧延迟，无撕裂。</value></data>
+  <data name="H_Scaler" xml:space="preserve"><value>画面小于窗口时的放大插值。"标准"由 D3D11 视频处理器（驱动）完成；"锐利"用 Catmull-Rom 双三次着色器，边缘更清晰，多一个全屏 pass。</value></data>
+  <data name="H_Rotate" xml:space="preserve"><value>发送端横竖切换时窗口按新宽高比重排，面积不变。关闭则窗口不动，画面加黑边。</value></data>
+  <data name="H_Info" xml:space="preserve"><value>左上角叠加分辨率、帧率、每帧处理耗时和解码方式。Ctrl+I 切换。</value></data>
+  <data name="H_Monitor" xml:space="preserve"><value>多显示器时 F11 全屏使用的显示器。</value></data>
+  <data name="H_Matrix" xml:space="preserve"><value>YCbCr 到 RGB 的转换矩阵。码流不携带色彩描述，"自动"按分辨率判断：高度大于 576 用 BT.709，否则 BT.601。</value></data>
+  <data name="H_Range" xml:space="preserve"><value>YCbCr 的标称范围。"自动"按有限范围（16–235）处理，与 AirPlay 发送端一致；"完整"按 0–255 解释。</value></data>
+  <data name="H_Brightness" xml:space="preserve"><value>D3D11 视频处理器的亮度滤镜，-100 到 100 映射到驱动支持的范围。0 为不处理。</value></data>
+  <data name="H_Contrast" xml:space="preserve"><value>对比度滤镜，映射方式同上。0 为不处理。</value></data>
+  <data name="H_Saturation" xml:space="preserve"><value>饱和度滤镜，-100 为灰度。0 为不处理。</value></data>
+  <data name="H_Hue" xml:space="preserve"><value>色相滤镜，沿色环偏移。0 为不处理。</value></data>
+  <data name="H_Audio" xml:space="preserve"><value>接收并播放 AirPlay 音频流。关闭后声音保留在发送端。</value></data>
+  <data name="H_AudioDevice" xml:space="preserve"><value>WASAPI 输出设备。"默认设备"跟随 Windows 默认输出。</value></data>
+  <data name="H_Volume" xml:space="preserve"><value>发送端的音量调节（RTSP SET_PARAMETER volume）同步为本程序在 Windows 混音器中的会话音量。</value></data>
+  <data name="H_Language" xml:space="preserve"><value>界面语言。</value></data>
+  <data name="H_Theme" xml:space="preserve"><value>浅色或深色。"跟随系统"读取 Windows 的应用模式设置并随其切换。</value></data>
+  <data name="H_Colour" xml:space="preserve"><value>界面强调色。</value></data>
+  <data name="H_Startup" xml:space="preserve"><value>在 HKCU 的 Run 注册表项写入启动项，登录时自动运行并直接进入托盘。</value></data>
+  <data name="H_Close" xml:space="preserve"><value>关闭窗口时退出进程，或仅隐藏窗口、保留托盘图标继续接收。</value></data>
+  <data name="H_Log" xml:space="preserve"><value>日志级别，写入 %AppData%\LiteMirror\logs。报告问题时选"全部"。</value></data>
 
   <data name="Version" xml:space="preserve"><value>版本 {0}</value></data>
   <data name="About_Desc" xml:space="preserve"><value>一个小巧的 Windows AirPlay 接收端：把 iPhone 或 iPad 的屏幕和声音投到这台电脑上。</value></data>
