@@ -596,6 +596,9 @@ raop_handler_get_parameter(raop_conn_t *conn,
 
 	content_type = http_request_get_header(request, "Content-Type");
 	data = http_request_get_data(request, &datalen);
+	if (!content_type) {
+		return;   /* nothing to act on */
+	}
 	if (!strcmp(content_type, "text/parameters")) {
 		const char *current = data;
 
@@ -640,6 +643,9 @@ raop_handler_set_parameter(raop_conn_t *conn,
 
 	content_type = http_request_get_header(request, "Content-Type");
 	data = http_request_get_data(request, &datalen);
+	if (!content_type) {
+		return;   /* nothing to act on */
+	}
 	if (!strcmp(content_type, "text/parameters")) {
 		char *datastr;
 		datastr = calloc(1, datalen+1);
@@ -719,11 +725,11 @@ raop_handler_teardown(raop_conn_t* conn,
 	}
 	if (type == 96) {
 		logger_log(conn->raop->logger, LOGGER_DEBUG, "teardown raop");
-		raop_rtp_stop(conn->raop_rtp);
+		if (conn->raop_rtp) raop_rtp_stop(conn->raop_rtp);
 	}
 	else if (type == 110) {
 		logger_log(conn->raop->logger, LOGGER_DEBUG, "teardown mirror");
-		raop_rtp_mirror_stop(conn->raop_rtp_mirror);
+		if (conn->raop_rtp_mirror) raop_rtp_mirror_stop(conn->raop_rtp_mirror);
 	}
 	else {
 		logger_log(conn->raop->logger, LOGGER_DEBUG, "teardown client");

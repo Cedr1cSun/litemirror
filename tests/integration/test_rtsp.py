@@ -378,6 +378,22 @@ class Malformed(unittest.TestCase):
             pass
         self.assertServerStillAnswers()
 
+    def test_teardown_of_a_stream_never_set_up_does_not_kill_the_server(self):
+        for stream_type in (96, 110):
+            try:
+                self.client._plist('TEARDOWN', self.client.SESSION_URL, {'streams': [{'type': stream_type}]})
+            except (ConnectionError, OSError):
+                self.client = RtspClient(self.host.raop_port)
+            self.assertServerStillAnswers()
+
+    def test_parameter_requests_without_a_content_type_do_not_kill_the_server(self):
+        for method in ('GET_PARAMETER', 'SET_PARAMETER'):
+            try:
+                self.client.request(method, self.client.SESSION_URL)
+            except (ConnectionError, OSError):
+                self.client = RtspClient(self.host.raop_port)
+            self.assertServerStillAnswers()
+
     def test_fp_setup_answers_only_the_modes_it_knows(self):
         # the 16-byte first message: version 3 at byte 4, the mode at byte 14 (0 to 3 are known)
         for mode in (0, 3):
