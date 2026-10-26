@@ -167,6 +167,7 @@ namespace LiteMirror
             int colour = Math.Max(0, Array.IndexOf(App.Colours, s.ThemeColour));
             ((RadioButton)Swatches.Children[colour]).IsChecked = true;
             StartupSwitch.IsChecked = Settings.RunAtStartup;
+            UpdateSwitch.IsChecked = s.CheckUpdates;
             CloseBox.SelectedIndex = s.CloseToTray ? 1 : 0;
             LogLevelBox.SelectedIndex = Math.Max(0, Array.IndexOf(LogLevels, s.LogLevel));
             LoadHotspot();
@@ -306,6 +307,7 @@ namespace LiteMirror
             try { Settings.RunAtStartup = StartupSwitch.IsChecked == true; }
             catch (Exception) { StartupSwitch.IsChecked = Settings.RunAtStartup; }   // a locked-down account
         }
+        void OnUpdateCheck(object sender, RoutedEventArgs e) => Set("CheckUpdates", () => s.CheckUpdates = UpdateSwitch.IsChecked == true);
         void OnClose(object sender, SelectionChangedEventArgs e) => Set("CloseToTray", () => s.CloseToTray = CloseBox.SelectedIndex == 1);
         void OnLogLevel(object sender, SelectionChangedEventArgs e) => Set("LogLevel", () => s.LogLevel = LogLevels[Math.Max(0, LogLevelBox.SelectedIndex)]);
         void OnOpenLogs(object sender, RoutedEventArgs e) => Log.OpenFolder();

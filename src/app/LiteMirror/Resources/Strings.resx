@@ -113,6 +113,7 @@
   <data name="Colour_rose" xml:space="preserve"><value>Rose</value></data>
   <data name="Colour_green" xml:space="preserve"><value>Green</value></data>
   <data name="R_Startup" xml:space="preserve"><value>Run when I sign in to Windows</value></data>
+  <data name="R_UpdateCheck" xml:space="preserve"><value>Check for updates when LiteMirror opens</value></data>
   <data name="R_Close" xml:space="preserve"><value>When I close the window</value></data>
   <data name="Close_Quit" xml:space="preserve"><value>Quit</value></data>
   <data name="Close_Tray" xml:space="preserve"><value>Keep running in the tray</value></data>
@@ -153,6 +154,7 @@
   <data name="H_Theme" xml:space="preserve"><value>Light or dark. "Same as Windows" reads the Windows app mode setting and follows changes to it.</value></data>
   <data name="H_Colour" xml:space="preserve"><value>Interface accent colour.</value></data>
   <data name="H_Startup" xml:space="preserve"><value>Writes a Run entry under HKCU so the app starts at sign-in, straight into the tray.</value></data>
+  <data name="H_UpdateCheck" xml:space="preserve"><value>One request to api.github.com for the latest release tag at start. A newer version is announced in the corner and on the About page; nothing is downloaded or installed.</value></data>
   <data name="H_Close" xml:space="preserve"><value>Closing the window quits the process, or only hides the window and keeps receiving with a tray icon.</value></data>
   <data name="H_Log" xml:space="preserve"><value>Log level, written to %AppData%\LiteMirror\logs. Choose "Everything" when reporting a problem.</value></data>
 
@@ -160,6 +162,12 @@
   <data name="About_Desc" xml:space="preserve"><value>A small AirPlay receiver for Windows: mirror your iPhone or iPad screen, with sound, to this PC.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Free software under the GNU General Public License, version 3.</value></data>
   <data name="About_Site" xml:space="preserve"><value>Source code</value></data>
+  <data name="Update_Check" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="Update_Checking" xml:space="preserve"><value>Checking…</value></data>
+  <data name="Update_Latest" xml:space="preserve"><value>This is the latest version.</value></data>
+  <data name="Update_New" xml:space="preserve"><value>Version {0} is available.</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>Could not check: {0}</value></data>
+  <data name="Update_Download" xml:space="preserve"><value>Download</value></data>
 
   <data name="Msg_AppliesLater" xml:space="preserve"><value>This change applies after the current phone disconnects.</value></data>
   <data name="Msg_AddressFallback" xml:space="preserve"><value>The chosen network adapter is not available; receiving on all adapters.</value></data>

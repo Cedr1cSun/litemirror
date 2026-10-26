@@ -308,6 +308,14 @@
                     </DockPanel>
                     <Border Style="{StaticResource RowLine}" />
                     <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="UpdateSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnUpdateCheck" />
+                        <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
+                            <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_UpdateCheck}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{local:S H_UpdateCheck}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
                         <ComboBox x:Name="CloseBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnClose" />
                         <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
                             <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_Close}" />

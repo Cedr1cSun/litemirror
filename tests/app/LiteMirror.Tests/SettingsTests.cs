@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 LiteMirror contributors
+using System;
 using System.Linq;
 using Xunit;
 
@@ -27,6 +28,26 @@ namespace LiteMirror.Tests
             Assert.Equal(0, s.Theme);
             Assert.Equal("blue", s.ThemeColour);
             Assert.Equal(4, s.LogLevel);           // warnings and errors
+            Assert.False(s.CheckUpdates);          // no request to GitHub unless asked
+        }
+
+        [Fact]
+        public void the_release_version_comes_out_of_githubs_json()
+        {
+            Assert.Equal(new Version(0, 0, 2), Settings.ReleaseVersion("{\"url\":\"x\",\"tag_name\": \"v0.0.2\",\"name\":\"LiteMirror 0.0.2\"}"));
+            Assert.Equal(new Version(1, 4), Settings.ReleaseVersion("{\"tag_name\":\"1.4\"}"));
+            Assert.Null(Settings.ReleaseVersion("{\"message\":\"Not Found\"}"));
+            Assert.Null(Settings.ReleaseVersion(""));
+        }
+
+        [Fact]
+        public void a_release_is_newer_only_when_its_number_is_higher()
+        {
+            Assert.True(Settings.Newer(new Version(0, 0, 2), "0.0.1"));
+            Assert.False(Settings.Newer(new Version(0, 0, 1), "0.0.1"));
+            Assert.False(Settings.Newer(new Version(1, 2), "1.2.0"));
+            Assert.True(Settings.Newer(new Version(1, 2, 1), "1.2"));
+            Assert.False(Settings.Newer(new Version(0, 9, 9), "1.0.0"));
         }
 
         [Fact]

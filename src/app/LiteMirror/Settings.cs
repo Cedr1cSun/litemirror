@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace LiteMirror
@@ -52,6 +53,7 @@ namespace LiteMirror
         public bool CloseToTray;
         public int LogLevel = 4;          // lm_log_level: 3 errors, 4 warnings, 6 info, 7 debug
         public bool AlwaysOnTop;
+        public bool CheckUpdates;         // ask GitHub for the latest release when the app opens
 
         const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
         const string RunValue = "LiteMirror";
@@ -101,6 +103,18 @@ namespace LiteMirror
             Directory.CreateDirectory(Folder);
             File.WriteAllLines(File_, Lines(), Encoding.UTF8);
         }
+
+        // The version in GitHub's "latest release" answer ("tag_name": "v0.0.2"), or null
+        public static Version ReleaseVersion(string json)
+        {
+            Match m = Regex.Match(json ?? "", "\"tag_name\"\\s*:\\s*\"v?(\\d+\\.\\d+(?:\\.\\d+){0,2})\"");
+            return m.Success ? new Version(m.Groups[1].Value) : null;
+        }
+
+        // 1.2 and 1.2.0 are the same release
+        public static bool Newer(Version release, string running) => Pad(release) > Pad(new Version(running));
+
+        static Version Pad(Version v) => new Version(v.Major, v.Minor, Math.Max(0, v.Build), Math.Max(0, v.Revision));
 
         public static bool RunAtStartup
         {

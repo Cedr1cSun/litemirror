@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -117,6 +118,10 @@ namespace LiteMirror
             else if (settings.AutoStart)
             {
                 StartReceiver();
+            }
+            if (settings.CheckUpdates)
+            {
+                CheckUpdate(true);
             }
         }
 
@@ -276,6 +281,8 @@ namespace LiteMirror
             AboutDesc.Text = Strings.Get("About_Desc");
             AboutLicence.Text = Strings.Get("About_Licence");
             SiteButton.Content = Strings.Get("About_Site");
+            UpdateButton.Content = Strings.Get("Update_Check");
+            DownloadButton.Content = Strings.Get("Update_Download");
             LogsButton.Content = Strings.Get("OpenLogs");
             trayOpen.Text = Strings.Get("Tray_Open");
             traySettings.Text = Strings.Get("Tray_Settings");
@@ -492,6 +499,43 @@ namespace LiteMirror
         void OnVideoDoubleClick(object sender, EventArgs e) => ToggleFullScreen();
         void OnSite(object sender, RoutedEventArgs e) => Process.Start("https://github.com/Cedr1cSun/litemirror");
         void OnOpenLogs(object sender, RoutedEventArgs e) => Log.OpenFolder();
+
+        // ---- updates ----
+
+        static readonly HttpClient http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+
+        void OnCheckUpdate(object sender, RoutedEventArgs e) => CheckUpdate(false);
+        void OnDownload(object sender, RoutedEventArgs e) => Process.Start("https://github.com/Cedr1cSun/litemirror/releases/latest");
+
+        // One request for the latest release tag. quiet (at start): only a newer version is announced.
+        async void CheckUpdate(bool quiet)
+        {
+            UpdateButton.IsEnabled = false;
+            DownloadButton.Visibility = Visibility.Collapsed;
+            UpdateText.Text = quiet ? "" : Strings.Get("Update_Checking");
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/Cedr1cSun/litemirror/releases/latest");
+                request.Headers.UserAgent.ParseAdd("LiteMirror/" + App.Version);
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                Version release = Settings.ReleaseVersion(await response.Content.ReadAsStringAsync());
+                if (release == null) throw new FormatException("no tag_name in the answer");
+                if (Settings.Newer(release, App.Version))
+                {
+                    UpdateText.Text = string.Format(Strings.Get("Update_New"), release);
+                    DownloadButton.Visibility = Visibility.Visible;
+                    if (quiet) Growl.Info(UpdateText.Text);
+                }
+                else UpdateText.Text = Strings.Get("Update_Latest");
+            }
+            catch (Exception ex)
+            {
+                Log.Write(4, "update check: " + ex.Message);
+                if (!quiet) UpdateText.Text = string.Format(Strings.Get("Update_Failed"), ex.Message);
+            }
+            UpdateButton.IsEnabled = true;
+        }
 
         // ---- window = phone ----
 

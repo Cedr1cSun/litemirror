@@ -96,7 +96,12 @@
                         </Border>
                         <TextBlock FontSize="26" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0"><Run Text="Lite" /><Run Text="Mirror" Foreground="{DynamicResource PrimaryBrush}" /></TextBlock>
                     </StackPanel>
-                    <TextBlock x:Name="AboutVersion" Margin="0,4,0,16" Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <TextBlock x:Name="AboutVersion" Margin="0,4,0,8" Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button x:Name="UpdateButton" Click="OnCheckUpdate" />
+                        <TextBlock x:Name="UpdateText" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="{DynamicResource SecondaryTextBrush}" />
+                        <Button x:Name="DownloadButton" Margin="8,0,0,0" Visibility="Collapsed" Click="OnDownload" />
+                    </StackPanel>
                     <TextBlock x:Name="AboutDesc" TextWrapping="Wrap" />
                     <TextBlock x:Name="AboutLicence" TextWrapping="Wrap" Margin="0,8,0,20" Foreground="{DynamicResource SecondaryTextBrush}" />
                     <StackPanel Orientation="Horizontal">

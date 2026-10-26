@@ -113,6 +113,7 @@
   <data name="Colour_rose" xml:space="preserve"><value>玫红</value></data>
   <data name="Colour_green" xml:space="preserve"><value>绿</value></data>
   <data name="R_Startup" xml:space="preserve"><value>登录 Windows 时自动运行</value></data>
+  <data name="R_UpdateCheck" xml:space="preserve"><value>打开 LiteMirror 时检查更新</value></data>
   <data name="R_Close" xml:space="preserve"><value>关闭窗口时</value></data>
   <data name="Close_Quit" xml:space="preserve"><value>退出</value></data>
   <data name="Close_Tray" xml:space="preserve"><value>最小化到托盘继续运行</value></data>
@@ -153,6 +154,7 @@
   <data name="H_Theme" xml:space="preserve"><value>浅色或深色。"跟随系统"读取 Windows 的应用模式设置并随其切换。</value></data>
   <data name="H_Colour" xml:space="preserve"><value>界面强调色。</value></data>
   <data name="H_Startup" xml:space="preserve"><value>在 HKCU 的 Run 注册表项写入启动项，登录时自动运行并直接进入托盘。</value></data>
+  <data name="H_UpdateCheck" xml:space="preserve"><value>启动时向 api.github.com 请求一次最新 Release 的标签。有新版本就在角落提示并显示在关于页；不下载、不安装。</value></data>
   <data name="H_Close" xml:space="preserve"><value>关闭窗口时退出进程，或仅隐藏窗口、保留托盘图标继续接收。</value></data>
   <data name="H_Log" xml:space="preserve"><value>日志级别，写入 %AppData%\LiteMirror\logs。报告问题时选"全部"。</value></data>
 
@@ -160,6 +162,12 @@
   <data name="About_Desc" xml:space="preserve"><value>一个小巧的 Windows AirPlay 接收端：把 iPhone 或 iPad 的屏幕和声音投到这台电脑上。</value></data>
   <data name="About_Licence" xml:space="preserve"><value>自由软件，遵循 GNU 通用公共许可证第 3 版。</value></data>
   <data name="About_Site" xml:space="preserve"><value>源代码</value></data>
+  <data name="Update_Check" xml:space="preserve"><value>检查更新</value></data>
+  <data name="Update_Checking" xml:space="preserve"><value>正在检查…</value></data>
+  <data name="Update_Latest" xml:space="preserve"><value>已是最新版本。</value></data>
+  <data name="Update_New" xml:space="preserve"><value>有新版本 {0}。</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>检查失败：{0}</value></data>
+  <data name="Update_Download" xml:space="preserve"><value>下载</value></data>
 
   <data name="Msg_AppliesLater" xml:space="preserve"><value>这项改动会在当前手机断开后生效。</value></data>
   <data name="Msg_AddressFallback" xml:space="preserve"><value>选定的网卡当前不可用，已改为在全部网卡上接收。</value></data>
