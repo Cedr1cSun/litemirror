@@ -5,7 +5,9 @@
 Mirrors what an iOS device sends before fp-setup. The pairing maths follows
 src/core/pairing.c; tests/unit/test_pairing.cpp pins the same byte layout.
 """
+import hashlib
 import plistlib
+import re
 import socket
 
 from cryptography.exceptions import InvalidSignature
@@ -117,12 +119,27 @@ class RtspClient:
         body = plistlib.dumps(obj, fmt=plistlib.FMT_BINARY)
         return self.request(method, url, body, 'application/x-apple-binary-plist', headers)
 
-    def setup_session(self, name, device_id):
+    def setup_session(self, name, device_id, pin=None, challenge=None):
         """First SETUP: announce the device. ekey is FairPlay-wrapped on a real
-        phone; without fp-setup the server cannot unwrap it, so zeros do."""
+        phone; without fp-setup the server cannot unwrap it, so zeros do.
+        With a pin, answers the server's 401 challenge the way iOS does."""
+        headers = []
+        if pin is not None:
+            headers.append(('Authorization', self.digest(challenge, pin, 'SETUP', self.SESSION_URL)))
         return self._plist('SETUP', self.SESSION_URL, {
             'et': 32, 'eiv': bytes(16), 'ekey': bytes(72), 'timingPort': 0,
-            'name': name, 'deviceID': device_id, 'model': 'iPhone10,3', 'sourceVersion': '220.68'})
+            'name': name, 'deviceID': device_id, 'model': 'iPhone10,3', 'sourceVersion': '220.68'},
+            headers=headers)
+
+    @staticmethod
+    def digest(challenge, password, method, uri, username='iTunes'):
+        """HTTP Digest (RFC 2069 form, as AirPlay uses it) for a WWW-Authenticate value."""
+        realm = re.search(r'realm="([^"]*)"', challenge).group(1)
+        nonce = re.search(r'nonce="([^"]*)"', challenge).group(1)
+        md5 = lambda s: hashlib.md5(s.encode()).hexdigest()
+        response = md5(f'{md5(f"{username}:{realm}:{password}")}:{nonce}:{md5(f"{method}:{uri}")}')
+        return (f'Digest username="{username}", realm="{realm}", nonce="{nonce}", '
+                f'uri="{uri}", response="{response}"')
 
     def setup_audio(self):
         """Audio SETUP (stream type 96): the server starts its RTP threads."""

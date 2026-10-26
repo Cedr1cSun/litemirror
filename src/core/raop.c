@@ -12,12 +12,14 @@
  *  Lesser General Public License for more details.
  */
 
+#define _CRT_RAND_S
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
 #include "raop.h"
+#include "digest.h"
 #include "raop_rtp.h"
 #include "raop_rtp.h"
 #include "pairing.h"
@@ -48,6 +50,13 @@ struct raop_s {
 	char name[128];
 	char hwaddr[6];
 	int hwaddrlen;
+
+	/* PIN (Digest password) wanted on SETUP */
+	int pin_mode;
+	char pin[64];
+	char random_pin[5];        /* current RAOP_PIN_RANDOM code, "" when none is out */
+	int pin_failures;          /* wrong answers to the current random code */
+	struct raop_conn_s *pin_conn;   /* the connection the code was shown for */
 };
 
 struct raop_conn_s {
@@ -63,6 +72,8 @@ struct raop_conn_s {
 	unsigned char *remote;
 	int remotelen;
 
+	char nonce[33];            /* Digest challenge for this connection */
+	int authenticated;
 };
 typedef struct raop_conn_s raop_conn_t;
 
@@ -126,7 +137,54 @@ conn_init(void *opaque, unsigned char *local, int locallen, unsigned char *remot
 	conn->locallen = locallen;
 	conn->remotelen = remotelen;
 
+	digest_generate_nonce(conn->nonce, sizeof(conn->nonce));
 	return conn;
+}
+
+static void
+show_pin(raop_t *raop, raop_conn_t *conn, const char *pin)
+{
+	raop->pin_conn = pin ? conn : NULL;
+	if (raop->callbacks.pin_show) {
+		raop->callbacks.pin_show(raop->callbacks.cls, pin);
+	}
+}
+
+/* Digest authentication on SETUP, as an Apple TV with a password does it.
+ * Returns 1 when the request may go on; 0 means answer with a 401 challenge.
+ * A random code is shown while the challenge stands and changed after three
+ * wrong answers, so it cannot be guessed over the network. */
+static int
+check_pin(raop_conn_t *conn, http_request_t *request)
+{
+	raop_t *raop = conn->raop;
+	const char *authorization = http_request_get_header(request, "Authorization");
+	const char *password = raop->pin_mode == RAOP_PIN_FIXED ? raop->pin : raop->random_pin;
+
+	if (authorization && password[0] &&
+	    digest_is_valid("raop", password, conn->nonce, http_request_get_method(request),
+	                    http_request_get_url(request), authorization)) {
+		conn->authenticated = 1;
+		if (raop->pin_mode == RAOP_PIN_RANDOM) {
+			raop->random_pin[0] = '\0';
+			show_pin(raop, conn, NULL);
+		}
+		return 1;
+	}
+	if (authorization) {
+		raop->pin_failures++;
+		logger_log(raop->logger, LOGGER_WARNING, "Client sent a wrong PIN");
+	}
+	if (raop->pin_mode == RAOP_PIN_RANDOM) {
+		if (!raop->random_pin[0] || raop->pin_failures >= 3) {
+			unsigned int r = 0;
+			rand_s(&r);
+			snprintf(raop->random_pin, sizeof(raop->random_pin), "%04u", r % 10000);
+			raop->pin_failures = 0;
+		}
+		show_pin(raop, conn, raop->random_pin);
+	}
+	return 0;
 }
 
 static void
@@ -145,6 +203,17 @@ conn_request(void *ptr, http_request_t *request, http_response_t **response)
 	url = http_request_get_url(request);
 	cseq = http_request_get_header(request, "CSeq");
 	if (!method || !cseq) {
+		return;
+	}
+
+	if (!strcmp(method, "SETUP") && conn->raop->pin_mode && !conn->authenticated && !check_pin(conn, request)) {
+		char challenge[80];
+		snprintf(challenge, sizeof(challenge), "Digest realm=\"raop\", nonce=\"%s\"", conn->nonce);
+		*response = http_response_init("RTSP/1.0", 401, "Unauthorized");
+		http_response_add_header(*response, "CSeq", cseq);
+		http_response_add_header(*response, "Server", "AirTunes/220.68");
+		http_response_add_header(*response, "WWW-Authenticate", challenge);
+		http_response_finish(*response, NULL, 0);
 		return;
 	}
 
@@ -210,6 +279,11 @@ conn_destroy(void *ptr)
 {
 	raop_conn_t *conn = ptr;
 
+	if (conn->raop->pin_conn == conn) {
+		/* the client gave up before entering the code: take it off the screen */
+		conn->raop->random_pin[0] = '\0';
+		show_pin(conn->raop, conn, NULL);
+	}
 	if (conn->raop_rtp) {
 		/* This is done in case TEARDOWN was not called */
 		raop_rtp_destroy(conn->raop_rtp);
@@ -348,6 +422,29 @@ raop_set_identity(raop_t *raop, const char *name, const char *hwaddr, int hwaddr
 		memcpy(raop->hwaddr, hwaddr, hwaddrlen);
 		raop->hwaddrlen = hwaddrlen;
 	}
+}
+
+void
+raop_set_pin(raop_t *raop, int mode, const char *pin)
+{
+	assert(raop);
+
+	raop->pin_mode = mode;
+	raop->pin[0] = '\0';
+	if (mode == RAOP_PIN_FIXED && pin) {
+		strncpy(raop->pin, pin, sizeof(raop->pin) - 1);
+		raop->pin[sizeof(raop->pin) - 1] = '\0';
+	}
+	raop->random_pin[0] = '\0';
+	raop->pin_failures = 0;
+	raop->pin_conn = NULL;
+}
+
+int
+raop_get_pin_mode(raop_t *raop)
+{
+	assert(raop);
+	return raop->pin_mode;
 }
 
 void

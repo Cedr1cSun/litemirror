@@ -145,6 +145,82 @@ class Session(unittest.TestCase):
         self.assertEqual(self.host.wait_for('EVENT play'), 'EVENT play http://example.com/clip.mp4')
 
 
+class Pin(unittest.TestCase):
+    """With a PIN the first SETUP needs Digest credentials, as on an Apple TV
+    with a password; the rest of the connection is then trusted."""
+
+    def setUp(self):
+        self.host = TestHost()
+
+    def tearDown(self):
+        self.host.close()
+
+    def paired_client(self):
+        client = RtspClient(self.host.raop_port)
+        client.pair_setup()
+        self.assertEqual(client.pair_verify(), (200, 200))
+        return client
+
+    def test_fixed_pin_is_checked_on_the_first_setup(self):
+        self.assertEqual(self.host.cmd('pin fixed 2580'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        client = self.paired_client()
+        status, headers, _ = client.setup_session(DEVICE, DEVICE_ID)
+        self.assertEqual(status, 401)
+        challenge = headers['www-authenticate']
+        self.assertIn('Digest realm="raop"', challenge)
+        self.assertIn('nonce="', challenge)
+        self.assertEqual(client.setup_session(DEVICE, DEVICE_ID, '0000', challenge)[0], 401)
+        self.assertEqual(client.setup_session(DEVICE, DEVICE_ID, '2580', challenge)[0], 200)
+        self.assertEqual(client.setup_audio()[0], 200)   # no second challenge on the same connection
+        self.assertEqual(self.host.wait_for('EVENT connected'), f'EVENT connected {DEVICE} {DEVICE_ID}')
+        client.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_random_pin_is_shown_until_the_phone_gets_it_right(self):
+        self.assertEqual(self.host.cmd('pin random'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        client = self.paired_client()
+        status, headers, _ = client.setup_session(DEVICE, DEVICE_ID)
+        self.assertEqual(status, 401)
+        shown = self.host.wait_for('EVENT pin').split()
+        self.assertRegex(shown[2], r'^\d{4}$')
+        self.assertEqual(client.setup_session(DEVICE, DEVICE_ID, shown[2], headers['www-authenticate'])[0], 200)
+        self.assertEqual(self.host.wait_for('EVENT pin'), 'EVENT pin -')   # accepted: take it off the screen
+        client.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_random_pin_is_taken_down_when_the_phone_gives_up(self):
+        self.assertEqual(self.host.cmd('pin random'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        client = self.paired_client()
+        self.assertEqual(client.setup_session(DEVICE, DEVICE_ID)[0], 401)
+        self.host.wait_for('EVENT pin')
+        client.close()
+        self.assertEqual(self.host.wait_for('EVENT pin'), 'EVENT pin -')
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_pin_is_advertised_so_the_phone_asks_for_it(self):
+        self.assertEqual(self.host.cmd('pin fixed 1234'), 'OK')
+        self.assertEqual(self.host.start(name='LiteMirrorPin'), 'OK')
+        with MdnsBrowser('LiteMirrorPin') as browser:
+            raop = browser.wait_for('_raop._tcp.local.')
+            airplay = browser.wait_for('_airplay._tcp.local.')
+        self.assertEqual(raop.properties[b'pw'], b'true')
+        self.assertEqual(airplay.properties[b'pw'], b'true')
+        info = plistlib.loads(RtspClient(self.host.raop_port).info()[2])
+        self.assertTrue(info['statusFlags'] & 0x40, 'PasswordRequired flag missing')
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_pin_off_needs_no_credentials(self):
+        self.assertEqual(self.host.cmd('pin off'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        client = self.paired_client()
+        self.assertEqual(client.setup_session(DEVICE, DEVICE_ID)[0], 200)
+        client.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+
 class Malformed(unittest.TestCase):
     """Requests a buggy or hostile client might send. The server may refuse
     them, but it must stay up for the next client."""

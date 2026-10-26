@@ -79,7 +79,7 @@ raop_handler_info(raop_conn_t *conn,
 	plist_dict_set_item(root, "pi", plist_new_string(pi));
 	plist_dict_set_item(root, "pk", plist_new_data((const char *)pk, sizeof(pk)));
 	plist_dict_set_item(root, "features", plist_new_uint(0x1E5A7FFFF7ULL));
-	plist_dict_set_item(root, "statusFlags", plist_new_uint(4));
+	plist_dict_set_item(root, "statusFlags", plist_new_uint(raop->pin_mode ? 0x44 : 0x4));
 	plist_dict_set_item(root, "vv", plist_new_uint(2));
 	plist_dict_set_item(root, "keepAliveLowPower", plist_new_uint(1));
 	plist_dict_set_item(root, "keepAliveSendStatsAsBody", plist_new_uint(1));

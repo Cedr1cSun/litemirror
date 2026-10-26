@@ -222,7 +222,7 @@ int dnssd_register_raop(dnssd_t *dnssd, const char *name, unsigned short port,
 	const char *const values[] = {
 		RAOP_TXTVERS, RAOP_CH, RAOP_CN, RAOP_ET, RAOP_SV, RAOP_DA, RAOP_SR, RAOP_SS,
 		password ? "true" : "false", RAOP_VN,
-		RAOP_TP, RAOP_MD, GLOBAL_VERSION, RAOP_SM, RAOP_EK, RAOP_SF, GLOBAL_MODEL
+		RAOP_TP, RAOP_MD, GLOBAL_VERSION, RAOP_SM, RAOP_EK, password ? RAOP_SF_PW : RAOP_SF, GLOBAL_MODEL
 	};
 	char servname[MAX_SERVNAME];
 	int n;
@@ -243,11 +243,12 @@ int dnssd_register_raop(dnssd_t *dnssd, const char *name, unsigned short port,
 }
 
 int dnssd_register_airplay(dnssd_t *dnssd, const char *name, unsigned short port,
-                           const char *hwaddr, int hwaddrlen)
+                           const char *hwaddr, int hwaddrlen, int password)
 {
-	static const char *const keys[] = { "srcvers", "deviceid", "features", "model", "flags", "vv" };
+	static const char *const keys[] = { "srcvers", "deviceid", "features", "model", "flags", "vv", "pw" };
 	char deviceid[3 * MAX_HWADDR_LEN];
-	const char *const values[] = { GLOBAL_VERSION, deviceid, "0x5A7FFFF7,0x1E", GLOBAL_MODEL, RAOP_SF, RAOP_VV };
+	const char *const values[] = { GLOBAL_VERSION, deviceid, "0x5A7FFFF7,0x1E", GLOBAL_MODEL,
+	                               password ? RAOP_SF_PW : RAOP_SF, RAOP_VV, password ? "true" : "false" };
 	char servname[MAX_SERVNAME];
 
 	assert(dnssd);

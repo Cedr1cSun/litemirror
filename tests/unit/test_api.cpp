@@ -94,6 +94,28 @@ TEST_CASE("set_audio switches built-in playback only while stopped")
 	lm_server_destroy(server);
 }
 
+TEST_CASE("set_pin validates its arguments and only works while stopped")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_pin(NULL, LM_PIN_OFF, NULL) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_pin(server, (lm_pin_mode)7, NULL) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_pin(server, LM_PIN_FIXED, NULL) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_pin(server, LM_PIN_FIXED, "") == LM_E_INVALID_ARG);
+	std::string longPin(64, '1');
+	CHECK(lm_server_set_pin(server, LM_PIN_FIXED, longPin.c_str()) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_pin(server, LM_PIN_FIXED, "1234") == LM_OK);
+	CHECK(lm_server_set_pin(server, LM_PIN_RANDOM, NULL) == LM_OK);
+
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_pin(server, LM_PIN_OFF, NULL) == LM_E_RUNNING);
+	lm_server_stop(server);
+	CHECK(lm_server_set_pin(server, LM_PIN_OFF, NULL) == LM_OK);
+	lm_server_destroy(server);
+}
+
 TEST_CASE("set_window takes a real window and only while stopped")
 {
 	lm_callbacks cb = no_callbacks();

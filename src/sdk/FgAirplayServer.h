@@ -12,6 +12,13 @@
 
 typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
+// What the shell set through the lm_server_set_* calls before starting
+struct FgServerOptions {
+	FgServerOptions() : pinMode(0) {}
+	int pinMode;          // lm_pin_mode
+	std::string pin;      // LM_PIN_FIXED
+};
+
 // Owns the protocol core (RTSP, HTTP, mDNS) and one FgAirplayChannel per
 // connected device. Everything it reports goes out through lm_callbacks.
 class FgAirplayServer
@@ -21,7 +28,8 @@ public:
 	virtual ~FgAirplayServer();
 
 	lm_error start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
-	               const lm_callbacks* callbacks, LmVideoSink* video, LmAudioSink* audio);
+	               const lm_callbacks* callbacks, LmVideoSink* video, LmAudioSink* audio,
+	               const FgServerOptions& options);
 	void stop();
 
 protected:
@@ -37,6 +45,7 @@ protected:
 	static void audio_flush(void* cls, void* session, const char* remoteName, const char* remoteDeviceId);
 	static void video_process(void* cls, h264_decode_struct* data, const char* remoteName, const char* remoteDeviceId);
 	static void log_callback(void* cls, int level, const char* msg);
+	static void pin_show(void* cls, const char* pin);
 
 	static void ap_video_play(void* cls, char* url, double volume, double start_pos);
 	static void ap_video_get_play_info(void* cls, double* duration, double* position, double* rate);

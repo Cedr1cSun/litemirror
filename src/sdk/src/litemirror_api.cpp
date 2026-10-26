@@ -18,7 +18,18 @@ struct lm_server {
 	FgAirplayServer* impl;   // non-NULL while running
 	LmVideoSink* sink;       // non-NULL while a window is set
 	LmAudioSink* audio;      // non-NULL while built-in playback is on
+	FgServerOptions options; // everything else set before start
 };
+
+lm_error lm_server_set_pin(lm_server* s, lm_pin_mode mode, const char* pin)
+{
+	if (!s || mode < LM_PIN_OFF || mode > LM_PIN_FIXED) return LM_E_INVALID_ARG;
+	if (mode == LM_PIN_FIXED && (!pin || !pin[0] || strlen(pin) >= LM_PIN_MAX)) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.pinMode = mode;
+	s->options.pin = mode == LM_PIN_FIXED ? pin : "";
+	return LM_OK;
+}
 
 lm_error lm_server_set_audio(lm_server* s, int enable)
 {
@@ -68,7 +79,7 @@ lm_error lm_server_start(lm_server* s, const lm_config* cfg)
 
 	FgAirplayServer* impl = new (std::nothrow) FgAirplayServer();
 	if (!impl) return LM_E_NO_MEMORY;
-	lm_error err = impl->start(cfg->name, cfg->raop_port, cfg->airplay_port, &s->cb, s->sink, s->audio);
+	lm_error err = impl->start(cfg->name, cfg->raop_port, cfg->airplay_port, &s->cb, s->sink, s->audio, s->options);
 	if (err != LM_OK) {
 		delete impl;
 		return err;

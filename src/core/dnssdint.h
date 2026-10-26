@@ -15,6 +15,7 @@
 #define RAOP_SM "false"
 #define RAOP_EK "1"
 #define RAOP_SF "0x4"
+#define RAOP_SF_PW "0x44"       /* status flags with PasswordRequired (bit 6) */
 #define RAOP_VV "2"
 
 #endif

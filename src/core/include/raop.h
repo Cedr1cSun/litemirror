@@ -48,8 +48,15 @@ struct raop_callbacks_s {
 	void  (*audio_set_coverart)(void *cls, void *session, const void *buffer, int buflen, const char* remoteName, const char* remoteDeviceId);
 	void  (*audio_remote_control_id)(void *cls, const char *dacp_id, const char *active_remote_header, const char* remoteName, const char* remoteDeviceId);
 	void  (*audio_set_progress)(void *cls, void *session, unsigned int start, unsigned int curr, unsigned int end, const char* remoteName, const char* remoteDeviceId);
+	/* RAOP_PIN_RANDOM: show this code to the user; NULL once the client got
+	 * it right or went away */
+	void  (*pin_show)(void *cls, const char *pin);
 };
 typedef struct raop_callbacks_s raop_callbacks_t;
+
+#define RAOP_PIN_OFF    0
+#define RAOP_PIN_RANDOM 1   /* four digits per connection, given through pin_show */
+#define RAOP_PIN_FIXED  2   /* the pin passed to raop_set_pin */
 
 RAOP_API raop_t *raop_init(int max_clients, raop_callbacks_t *callbacks);
 
@@ -59,6 +66,10 @@ RAOP_API void raop_log(raop_t* raop, int level, const char* fmt, ...);
 RAOP_API void raop_set_port(raop_t *raop, unsigned short port);
 /* Name and MAC reported in /info; call before raop_start */
 RAOP_API void raop_set_identity(raop_t *raop, const char *name, const char *hwaddr, int hwaddrlen);
+/* Clients must answer a Digest challenge on SETUP, like an Apple TV with a
+ * password. Call before raop_start; pin is used with RAOP_PIN_FIXED. */
+RAOP_API void raop_set_pin(raop_t *raop, int mode, const char *pin);
+RAOP_API int raop_get_pin_mode(raop_t *raop);
 RAOP_API unsigned short raop_get_port(raop_t *raop);
 RAOP_API void *raop_get_callback_cls(raop_t *raop);
 RAOP_API int raop_start(raop_t *raop, unsigned short *port);

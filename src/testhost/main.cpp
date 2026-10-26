@@ -7,12 +7,13 @@
 //
 //   start <name> <raopPort> <airplayPort>   -> OK | FAIL <code> <message>
 //   stop                                    -> OK
+//   pin off | pin random | pin fixed <code> -> OK | FAIL <code> <message>   (before start)
 //   quit
 //
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
 // EVENT video <w>x<h>, EVENT audio <bytes>, EVENT volume <id> <db>,
 // EVENT metadata <id> <bytes>, EVENT coverart <id> <bytes>, EVENT play <url>,
-// LOG <level> <msg>
+// EVENT pin <code|->, LOG <level> <msg>
 
 #include <crtdbg.h>
 #include <stdio.h>
@@ -59,6 +60,16 @@ static void on_log(void*, lm_log_level level, const char* msg)
 {
 	printf("LOG %d %s\n", (int)level, msg);
 }
+static void on_pin(void*, const char* pin)
+{
+	printf("EVENT pin %s\n", pin ? pin : "-");
+}
+
+static void report(lm_error err)
+{
+	if (err == LM_OK) printf("OK\n");
+	else printf("FAIL %d %s\n", (int)err, lm_error_string(err));
+}
 
 int main()
 {
@@ -81,6 +92,7 @@ int main()
 	cb.on_cover_art = on_cover_art;
 	cb.on_play_url = on_play_url;
 	cb.on_log = on_log;
+	cb.on_pin = on_pin;
 
 	lm_server* server = NULL;
 	lm_error err = lm_server_create(&cb, &server);
@@ -93,14 +105,19 @@ int main()
 	printf("READY\n");
 	while (fgets(line, sizeof(line), stdin)) {
 		char name[128] = {0};
+		char code[64] = {0};
 		unsigned raopPort = 0, airplayPort = 0;
 
 		if (sscanf(line, "start %127s %u %u", name, &raopPort, &airplayPort) == 3) {
 			lm_server_stop(server);
 			lm_config cfg = { name, (uint16_t)raopPort, (uint16_t)airplayPort };
-			err = lm_server_start(server, &cfg);
-			if (err == LM_OK) printf("OK\n");
-			else printf("FAIL %d %s\n", (int)err, lm_error_string(err));
+			report(lm_server_start(server, &cfg));
+		} else if (strncmp(line, "pin off", 7) == 0) {
+			report(lm_server_set_pin(server, LM_PIN_OFF, NULL));
+		} else if (strncmp(line, "pin random", 10) == 0) {
+			report(lm_server_set_pin(server, LM_PIN_RANDOM, NULL));
+		} else if (sscanf(line, "pin fixed %63s", code) == 1) {
+			report(lm_server_set_pin(server, LM_PIN_FIXED, code));
 		} else if (strncmp(line, "stop", 4) == 0) {
 			lm_server_stop(server);
 			printf("OK\n");

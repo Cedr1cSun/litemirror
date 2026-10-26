@@ -34,6 +34,7 @@ FgAirplayServer::FgAirplayServer()
 	m_stRaopCB.audio_process = audio_process;
 	m_stRaopCB.audio_flush = audio_flush;
 	m_stRaopCB.video_process = video_process;
+	m_stRaopCB.pin_show = pin_show;
 
 	m_mutexMap = CreateMutex(NULL, FALSE, NULL);
 }
@@ -46,7 +47,8 @@ FgAirplayServer::~FgAirplayServer()
 }
 
 lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, unsigned int airplayPort,
-                                const lm_callbacks* callbacks, LmVideoSink* video, LmAudioSink* audio)
+                                const lm_callbacks* callbacks, LmVideoSink* video, LmAudioSink* audio,
+                                const FgServerOptions& options)
 {
 	m_cb = *callbacks;
 	m_sink = video;
@@ -84,6 +86,7 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 		raop_set_log_level(m_pRaop, RAOP_LOG_DEBUG);
 		raop_set_log_callback(m_pRaop, &log_callback, this);
 		raop_set_identity(m_pRaop, serverName, hwaddr, sizeof(hwaddr));
+		raop_set_pin(m_pRaop, options.pinMode, options.pin.c_str());
 		if (raop_start(m_pRaop, &raop_port) < 0) {
 			err = LM_E_RAOP_PORT;
 			break;
@@ -95,8 +98,9 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 			err = ret == DNSSD_ERROR_OUTOFMEM ? LM_E_NO_MEMORY : LM_E_MDNS_UNAVAILABLE;
 			break;
 		}
-		if (dnssd_register_raop(m_pDnsSd, serverName, raop_port, hwaddr, sizeof(hwaddr), 0) < 0 ||
-		    dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr)) < 0 ||
+		int password = options.pinMode != 0;   // pw=true: the phone asks the user for the code
+		if (dnssd_register_raop(m_pDnsSd, serverName, raop_port, hwaddr, sizeof(hwaddr), password) < 0 ||
+		    dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr), password) < 0 ||
 		    dnssd_wait(m_pDnsSd) < 0) {
 			err = LM_E_MDNS_REGISTER;
 			break;
@@ -305,6 +309,15 @@ void FgAirplayServer::ap_video_play(void* cls, char* url, double volume, double 
 void FgAirplayServer::ap_video_get_play_info(void* cls, double* duration, double* position, double* rate)
 {
 	*duration = *position = *rate = 0;   // URL playback is up to the shell; nothing to report
+}
+
+void FgAirplayServer::pin_show(void* cls, const char* pin)
+{
+	FgAirplayServer* pServer = (FgAirplayServer*)cls;
+	if (pServer && pServer->m_cb.on_pin)
+	{
+		pServer->m_cb.on_pin(pServer->m_cb.user, pin);
+	}
 }
 
 void FgAirplayServer::log_callback(void* cls, int level, const char* msg)

@@ -42,6 +42,13 @@ typedef enum lm_log_level {  /* syslog values, same as the core */
 } lm_log_level;
 
 #define LM_NAME_MAX 128      /* receiver name buffer size, including the NUL */
+#define LM_PIN_MAX  64       /* fixed PIN buffer size, including the NUL */
+
+typedef enum lm_pin_mode {
+	LM_PIN_OFF = 0,
+	LM_PIN_RANDOM,           /* four digits chosen per connection, given through on_pin */
+	LM_PIN_FIXED             /* the pin passed to lm_server_set_pin */
+} lm_pin_mode;
 
 typedef struct lm_config {
 	const char* name;        /* receiver name shown on the iPhone, UTF-8, under LM_NAME_MAX bytes */
@@ -85,6 +92,8 @@ typedef struct lm_callbacks {
 	void (*on_log)         (void* user, lm_log_level level, const char* msg);
 	/* the picture size changed (first frame, phone rotated); also with a window set */
 	void (*on_video_size)  (void* user, const char* device_id, uint32_t width, uint32_t height);
+	/* LM_PIN_RANDOM: show this code on screen; NULL once the phone got it right or gave up */
+	void (*on_pin)         (void* user, const char* pin);
 } lm_callbacks;
 
 LM_API lm_error    lm_server_create (const lm_callbacks* cb, lm_server** out);
@@ -96,6 +105,10 @@ LM_API lm_error    lm_server_set_window(lm_server* s, void* hwnd);
 /* Play the audio on the default output device; on_audio is then not
  * called. Set it before lm_server_start(); LM_E_RUNNING while started. */
 LM_API lm_error    lm_server_set_audio (lm_server* s, int enable);
+/* Make the phone ask for a PIN before it may connect (HTTP Digest, as an
+ * Apple TV with a password). Set it before lm_server_start(); pin is 1 to
+ * LM_PIN_MAX-1 bytes for LM_PIN_FIXED and ignored otherwise. */
+LM_API lm_error    lm_server_set_pin   (lm_server* s, lm_pin_mode mode, const char* pin);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */
