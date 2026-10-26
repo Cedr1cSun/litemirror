@@ -629,8 +629,10 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	if (!fitWindow()) {
 		return false;
 	}
-	// the shaders only enlarge; a picture bigger than the window is left to the processor
-	bool enlarging = m_clientW > width || m_clientH > height;
+	// the shaders only enlarge; a picture that comes out smaller (the letterbox
+	// decides, a wide short window shrinks a tall picture) is left to the processor
+	RECT box = letterbox(width, height, m_clientW, m_clientH);
+	bool enlarging = (uint32_t)(box.right - box.left) > width;
 	bool fsr = m_super == 1 && enlarging && setupShader() && setupFsr() && setupRgb(width, height);
 	bool sharp = m_super == 0 && m_scaler == 1 && enlarging && setupShader() && setupRgb(width, height);
 	if (!setupProcessor(width, height, sharp || fsr)) {

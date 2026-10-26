@@ -479,6 +479,46 @@ TEST_CASE("FSR keeps the colours and differs from the video processor at edges")
 	DestroyWindow(hwnd);
 }
 
+// A window wider than the picture but much shorter shows it smaller, not
+// larger: the letterbox decides, not the window. The shaders only enlarge
+// (FSR 1.0 is specified for ratios above 1), so here the processor draws
+// and the picture is the same with either setting.
+TEST_CASE("a wide short window shrinks the picture and the shaders step aside")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 640, 100, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+
+	Pixels plain, other;
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, plain));
+	CHECK(plain.width == 640);
+	CHECK(plain.height == 100);
+	for (int mode = 0; mode < 2; mode++) {
+		sink.setScaler(mode == 0);
+		sink.setSuperResolution(mode == 1 && sink.device()->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0);
+		REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+		REQUIRE(read_back(sink, other));
+		int differing = 0;
+		for (int y = 0; y < 100; y++) {
+			for (int x = 0; x < 640; x++) {
+				const uint8_t* a = &plain.bgra[(size_t)y * plain.pitch + (size_t)x * 4];
+				const uint8_t* b = &other.bgra[(size_t)y * other.pitch + (size_t)x * 4];
+				if (a[0] != b[0] || a[1] != b[1] || a[2] != b[2]) differing++;
+			}
+		}
+		INFO("scaler " << (mode == 0) << " super " << (mode == 1));
+		CHECK(differing == 0);
+	}
+	sink.present();
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 // The driver modes are requests to the video processor that another vendor's
 // driver ignores: the picture must still come out right, whichever GPU runs
 // the tests.
