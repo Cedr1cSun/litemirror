@@ -147,6 +147,14 @@ class RtspClient:
                            {'streams': [{'type': 96, 'audioFormat': 0x1000000, 'ct': 8, 'spf': 480}]},
                            headers=[('Transport', 'RTP/AVP/UDP;unicast;mode=record')])
 
+    def setup_mirror(self):
+        """Mirror SETUP (stream type 110). Returns the status and the TCP port
+        the server wants the picture stream on."""
+        status, _, body = self._plist('SETUP', self.SESSION_URL,
+                                      {'streams': [{'type': 110, 'streamConnectionID': 1}]})
+        port = plistlib.loads(body)['streams'][0]['dataPort'] if status == 200 else None
+        return status, port
+
     def set_volume(self, db):
         return self.request('SET_PARAMETER', self.SESSION_URL, f'volume: {db:.6f}\r\n'.encode(), 'text/parameters')
 

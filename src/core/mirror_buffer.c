@@ -94,6 +94,9 @@ mirror_buffer_init(logger_t *logger,
 
 void mirror_buffer_decrypt(mirror_buffer_t *mirror_buffer, unsigned char* input, unsigned char* output, int inputLen) {
     // 开始解密
+    if (mirror_buffer->nextDecryptCount > inputLen) {
+        mirror_buffer->nextDecryptCount = inputLen;   // a short frame: the leftover keystream is lost, the maths below stays in bounds
+    }
     if (mirror_buffer->nextDecryptCount > 0) {//mirror_buffer->nextDecryptCount = 10
         for (int i = 0; i < mirror_buffer->nextDecryptCount; i++) {
             output[i] = (input[i] ^ mirror_buffer->og[(16 - mirror_buffer->nextDecryptCount) + i]);

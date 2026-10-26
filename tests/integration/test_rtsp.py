@@ -411,5 +411,56 @@ class Malformed(unittest.TestCase):
         self.assertServerStillAnswers()
 
 
+class MirrorStream(unittest.TestCase):
+    """The picture arrives on a TCP stream of 128-byte headers and payloads.
+    A broken or stalled sender must neither crash the server nor keep it
+    from stopping."""
+
+    def setUp(self):
+        self.host = TestHost()
+        self.assertEqual(self.host.start(), 'OK')
+        self.client = RtspClient(self.host.raop_port)
+        self.client.pair_setup()
+        self.assertEqual(self.client.pair_verify(), (200, 200))
+        self.assertEqual(self.client.setup_session(DEVICE, DEVICE_ID)[0], 200)
+        status, port = self.client.setup_mirror()
+        self.assertEqual(status, 200)
+        import socket
+        self.stream = socket.create_connection(('127.0.0.1', port), timeout=10)
+
+    def tearDown(self):
+        self.stream.close()
+        self.client.close()
+        self.host.close()
+
+    @staticmethod
+    def header(payload_size, payload_type):
+        return payload_size.to_bytes(4, 'little') + payload_type.to_bytes(2, 'little') + bytes(122)
+
+    def assertServerStopsAndAnswers(self):
+        self.assertIsNone(self.host.proc.poll(), 'testhost died')
+        fresh = RtspClient(self.host.raop_port)
+        try:
+            self.assertEqual(fresh.options()[0], 200)
+        finally:
+            fresh.close()
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_codec_header_too_short_for_its_lengths_is_dropped(self):
+        self.stream.sendall(self.header(5, 1) + bytes(5))
+        import time; time.sleep(0.5)
+        self.assertServerStopsAndAnswers()
+
+    def test_frame_with_zero_nalu_lengths_is_dropped(self):
+        self.stream.sendall(self.header(8, 0) + bytes(8))
+        import time; time.sleep(0.5)
+        self.assertServerStopsAndAnswers()
+
+    def test_stop_does_not_wait_for_a_sender_that_went_quiet_mid_frame(self):
+        self.stream.sendall(self.header(1000, 0) + bytes(10))
+        import time; time.sleep(0.5)
+        self.assertServerStopsAndAnswers()
+
+
 if __name__ == '__main__':
     unittest.main()
