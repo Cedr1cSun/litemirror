@@ -25,7 +25,7 @@
   </picture>
 </p>
 
-## ✨ 亮点
+## ✨ 功能
 
 - 同一网络下任何 iPhone、iPad 的屏幕镜像，带声音
 - H.264 通过 Media Foundation 和 D3D11 在 GPU 上解码，驱动有问题时可退回软件解码
