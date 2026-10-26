@@ -184,6 +184,99 @@ TEST_CASE("sink draws a picture handed over in memory with the same colours")
 	DestroyWindow(hwnd);
 }
 
+// Decode the first frame on the sink's device, ready to draw
+struct FirstFrame {
+	MfH264Decoder dec;
+	const MfH264Decoder::Frame* f = NULL;
+	bool open(LmVideoSink& sink) {
+		std::vector<uint8_t> au = first_access_unit(read_clip());
+		if (au.size() < 100 || !dec.open(sink.device()) || !dec.decode(au.data(), au.size(), 0) || !dec.receive()) return false;
+		f = &dec.frame();
+		return f->texture != NULL;
+	}
+};
+
+TEST_CASE("colour filters adjust the picture and reset puts it back")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+	Pixels px;
+
+	// no saturation: the red bar turns grey
+	LmColour c = {};
+	c.saturation = -1.0f;
+	sink.setColour(c);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, px));
+	if (!sink.supportsFilters()) {
+		MESSAGE("this GPU has no video processor filters; skipped");
+	} else {
+		const uint8_t* p = &px.bgra[(size_t)44 * px.pitch + 256 * 4];
+		CHECK(abs(p[2] - p[1]) <= 12);
+		CHECK(abs(p[1] - p[0]) <= 12);
+
+		// brightness up: the black bar is no longer black
+		c.saturation = 0;
+		c.brightness = 0.5f;
+		sink.setColour(c);
+		REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+		REQUIRE(read_back(sink, px));
+		CHECK(px.diff(8, 8, 0, 0, 0) > 20);
+	}
+
+	// everything back to neutral: ffmpeg's colours again
+	c = LmColour();
+	sink.setColour(c);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, px));
+	CHECK(px.diff(8, 8, 0, 0, 0) <= 3);
+	CHECK(px.diff(256, 44, 253, 0, 0) <= 3);
+	CHECK(px.diff(168, 8, 253, 253, 0) <= 3);
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
+TEST_CASE("colour matrix and range change the conversion")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 320, 240, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+	Pixels px;
+
+	// full range in: Y=16 is a dark grey, not black
+	LmColour c = {};
+	c.range = 2;
+	sink.setColour(c);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, px));
+	CHECK(px.diff(8, 8, 0, 0, 0) >= 10);
+	CHECK(px.diff(8, 8, 16, 16, 16) <= 4);
+
+	// BT.709 for this SD clip: the yellow bar's green changes against BT.601
+	c.range = 0;
+	c.matrix = 2;
+	sink.setColour(c);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, px));
+	CHECK(px.diff(168, 8, 253, 253, 0) > 3);
+	c.matrix = 1;   // explicit BT.601 is what auto picks for 240 rows
+	sink.setColour(c);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, px));
+	CHECK(px.diff(168, 8, 253, 253, 0) <= 3);
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("sink refuses to open without a window")
 {
 	LmVideoSink sink;

@@ -9,6 +9,7 @@
 #include "raop.h"
 #include "FgAirplayChannel.h"
 #include "LmAudioSink.h"
+#include "LmVideoSink.h"
 
 typedef std::map<std::string, FgAirplayChannel*> FgAirplayChannelMap;
 
@@ -21,6 +22,7 @@ struct FgServerOptions {
 	unsigned long address;   // IPv4 to listen and announce on, network byte order; 0 = all
 	unsigned int displayWidth, displayHeight, displayFps;   // what the phone encodes at
 	bool hardwareDecode;  // false: decode on the CPU
+	LmColour colour;      // picture adjustments, kept so a later set_window gets them
 };
 
 // Owns the protocol core (RTSP, HTTP, mDNS) and one FgAirplayChannel per

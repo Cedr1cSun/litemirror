@@ -189,6 +189,37 @@ TEST_CASE("set_hw_decode only works while stopped")
 	lm_server_destroy(server);
 }
 
+TEST_CASE("set_colour checks its ranges and may be changed while running")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	lm_colour c = { 0, 0, 0, 0, 0, 0 };
+	CHECK(lm_server_set_colour(NULL, &c) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_colour(server, NULL) == LM_E_INVALID_ARG);
+	c.matrix = 3;
+	CHECK(lm_server_set_colour(server, &c) == LM_E_INVALID_ARG);
+	c.matrix = 0;
+	c.range = -1;
+	CHECK(lm_server_set_colour(server, &c) == LM_E_INVALID_ARG);
+	c.range = 0;
+	c.hue = 1.5f;
+	CHECK(lm_server_set_colour(server, &c) == LM_E_INVALID_ARG);
+	c.hue = -1.0f;
+	c.contrast = 1.0f;
+	CHECK(lm_server_set_colour(server, &c) == LM_OK);
+
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 64, 64, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	CHECK(lm_server_set_window(server, hwnd) == LM_OK);
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	c.brightness = 0.25f;
+	CHECK(lm_server_set_colour(server, &c) == LM_OK);   // live: the user drags a slider while mirroring
+	lm_server_destroy(server);
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("set_window takes a real window and only while stopped")
 {
 	lm_callbacks cb = no_callbacks();

@@ -18,6 +18,14 @@ struct ID3D11VideoContext;
 struct ID3D11VideoProcessorEnumerator;
 struct ID3D11VideoProcessor;
 
+// Picture adjustments, see lm_colour in litemirror.h
+struct LmColour {
+	LmColour() : matrix(0), range(0), brightness(0), contrast(0), saturation(0), hue(0) {}
+	int matrix;        // 0 auto (BT.709 for HD, BT.601 below), 1 BT.601, 2 BT.709
+	int range;         // 0 auto (studio), 1 studio 16-235, 2 full 0-255
+	float brightness, contrast, saturation, hue;   // -1..1, 0 = as decoded
+};
+
 class LmVideoSink
 {
 public:
@@ -42,9 +50,17 @@ public:
 	bool draw(const uint8_t* y, uint32_t yPitch, const uint8_t* uv, uint32_t uvPitch, uint32_t width, uint32_t height);
 	void present();
 
+	// May be called from any thread while frames are being drawn; the
+	// next draw() uses it
+	void setColour(const LmColour& colour);
+	// Whether this GPU's video processor has brightness, contrast,
+	// saturation and hue filters (valid after the first draw)
+	bool supportsFilters() const { return m_filters; }
+
 private:
 	bool fitWindow();
 	bool setupProcessor(uint32_t width, uint32_t height);
+	void applyColour(uint32_t height);
 
 	HWND m_hwnd;
 	ID3D11Device* m_device;
@@ -59,4 +75,8 @@ private:
 	ID3D11Texture2D* m_staging;      // CPU-written copy of a software-decoded picture
 	ID3D11Texture2D* m_upload;       // its GPU copy the processor reads
 	uint32_t m_uploadW, m_uploadH;
+	CRITICAL_SECTION m_lock;         // guards m_colour and m_colourDirty
+	LmColour m_colour;
+	bool m_colourDirty;
+	bool m_filters;
 };

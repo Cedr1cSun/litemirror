@@ -31,6 +31,24 @@ lm_error lm_server_set_address(lm_server* s, const char* ipv4)
 	return LM_OK;
 }
 
+static bool unit(float f) { return f >= -1.0f && f <= 1.0f; }
+
+lm_error lm_server_set_colour(lm_server* s, const lm_colour* c)
+{
+	if (!s || !c || c->matrix < 0 || c->matrix > 2 || c->range < 0 || c->range > 2 ||
+	    !unit(c->brightness) || !unit(c->contrast) || !unit(c->saturation) || !unit(c->hue)) {
+		return LM_E_INVALID_ARG;
+	}
+	s->options.colour.matrix = c->matrix;
+	s->options.colour.range = c->range;
+	s->options.colour.brightness = c->brightness;
+	s->options.colour.contrast = c->contrast;
+	s->options.colour.saturation = c->saturation;
+	s->options.colour.hue = c->hue;
+	if (s->sink) s->sink->setColour(s->options.colour);
+	return LM_OK;
+}
+
 lm_error lm_server_set_hw_decode(lm_server* s, int enable)
 {
 	if (!s) return LM_E_INVALID_ARG;
@@ -95,6 +113,7 @@ lm_error lm_server_set_window(lm_server* s, void* hwnd)
 		s->sink = NULL;
 		return LM_E_INTERNAL;
 	}
+	s->sink->setColour(s->options.colour);
 	return LM_OK;
 }
 

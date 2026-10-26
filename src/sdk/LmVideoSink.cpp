@@ -16,13 +16,67 @@ LmVideoSink::LmVideoSink()
 	: m_hwnd(NULL), m_device(NULL), m_context(NULL), m_swap(NULL),
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
 	  m_clientW(0), m_clientH(0), m_srcW(0), m_srcH(0),
-	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0)
+	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0),
+	  m_colourDirty(false), m_filters(false)
 {
+	InitializeCriticalSection(&m_lock);
 }
 
 LmVideoSink::~LmVideoSink()
 {
 	close();
+	DeleteCriticalSection(&m_lock);
+}
+
+void LmVideoSink::setColour(const LmColour& colour)
+{
+	EnterCriticalSection(&m_lock);
+	m_colour = colour;
+	m_colourDirty = true;
+	LeaveCriticalSection(&m_lock);
+}
+
+// Colour space and filters on the processor's stream, from the current settings
+void LmVideoSink::applyColour(uint32_t height)
+{
+	EnterCriticalSection(&m_lock);
+	LmColour c = m_colour;
+	m_colourDirty = false;
+	LeaveCriticalSection(&m_lock);
+
+	// Studio-range YCbCr in, full-range RGB out, unless told otherwise. The
+	// stream carries no colour description, so auto follows the usual rule:
+	// BT.709 for HD, BT.601 below.
+	D3D11_VIDEO_PROCESSOR_COLOR_SPACE in = {};
+	in.YCbCr_Matrix = c.matrix == 0 ? height > 576 : c.matrix == 2;
+	in.Nominal_Range = c.range == 2 ? D3D11_VIDEO_PROCESSOR_NOMINAL_RANGE_0_255 : D3D11_VIDEO_PROCESSOR_NOMINAL_RANGE_16_235;
+	m_videoContext->VideoProcessorSetStreamColorSpace(m_processor, 0, &in);
+	D3D11_VIDEO_PROCESSOR_COLOR_SPACE out = {};
+	out.RGB_Range = 0;
+	m_videoContext->VideoProcessorSetOutputColorSpace(m_processor, &out);
+
+	D3D11_VIDEO_PROCESSOR_CAPS caps = {};
+	m_enumerator->GetVideoProcessorCaps(&caps);
+	static const struct { D3D11_VIDEO_PROCESSOR_FILTER filter; UINT cap; } filters[] = {
+		{ D3D11_VIDEO_PROCESSOR_FILTER_BRIGHTNESS, D3D11_VIDEO_PROCESSOR_FILTER_CAPS_BRIGHTNESS },
+		{ D3D11_VIDEO_PROCESSOR_FILTER_CONTRAST,   D3D11_VIDEO_PROCESSOR_FILTER_CAPS_CONTRAST },
+		{ D3D11_VIDEO_PROCESSOR_FILTER_SATURATION, D3D11_VIDEO_PROCESSOR_FILTER_CAPS_SATURATION },
+		{ D3D11_VIDEO_PROCESSOR_FILTER_HUE,        D3D11_VIDEO_PROCESSOR_FILTER_CAPS_HUE },
+	};
+	const float values[] = { c.brightness, c.contrast, c.saturation, c.hue };
+	m_filters = true;
+	for (int i = 0; i < 4; i++) {
+		if (!(caps.FilterCaps & filters[i].cap)) {
+			m_filters = false;
+			continue;
+		}
+		// -1..1 maps onto the driver's own range either side of its default
+		D3D11_VIDEO_PROCESSOR_FILTER_RANGE range = {};
+		m_enumerator->GetVideoProcessorFilterRange(filters[i].filter, &range);
+		float f = values[i];
+		int level = range.Default + (int)(f * (f >= 0 ? range.Maximum - range.Default : range.Default - range.Minimum) + (f >= 0 ? 0.5f : -0.5f));
+		m_videoContext->VideoProcessorSetStreamFilter(m_processor, 0, filters[i].filter, f != 0, level);
+	}
 }
 
 bool LmVideoSink::open(HWND window)
@@ -144,15 +198,7 @@ bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height)
 		return false;
 	}
 
-	// Studio-range YCbCr in, full-range RGB out. The stream carries no colour
-	// description, so follow the usual rule: BT.709 for HD, BT.601 below.
-	D3D11_VIDEO_PROCESSOR_COLOR_SPACE in = {};
-	in.YCbCr_Matrix = height > 576;
-	in.Nominal_Range = D3D11_VIDEO_PROCESSOR_NOMINAL_RANGE_16_235;
-	m_videoContext->VideoProcessorSetStreamColorSpace(m_processor, 0, &in);
-	D3D11_VIDEO_PROCESSOR_COLOR_SPACE out = {};
-	out.RGB_Range = 0;
-	m_videoContext->VideoProcessorSetOutputColorSpace(m_processor, &out);
+	applyColour(height);
 	m_videoContext->VideoProcessorSetStreamFrameFormat(m_processor, 0, D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE);
 	// no driver "enhancements" on the picture
 	m_videoContext->VideoProcessorSetStreamAutoProcessingMode(m_processor, 0, FALSE);
@@ -192,6 +238,9 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	}
 	if (!fitWindow() || !setupProcessor(width, height)) {
 		return false;
+	}
+	if (m_colourDirty) {
+		applyColour(height);   // the user moved a slider
 	}
 	// flip model: buffer 0 is a different texture after every present
 	ID3D11Texture2D* back = NULL;

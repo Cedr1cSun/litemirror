@@ -126,6 +126,17 @@ LM_API lm_error    lm_server_set_display(lm_server* s, uint32_t width, uint32_t 
 /* Decode on the GPU (default, 1) or on the CPU (0), for machines whose GPU
  * decoder misbehaves. Set it before lm_server_start(). */
 LM_API lm_error    lm_server_set_hw_decode(lm_server* s, int enable);
+/* Picture adjustments for the window set with lm_server_set_window. May
+ * be changed at any time, also while mirroring. */
+typedef struct lm_colour {
+	int   matrix;        /* 0 auto (BT.709 for HD, BT.601 below), 1 BT.601, 2 BT.709 */
+	int   range;         /* 0 auto (studio), 1 studio 16-235, 2 full 0-255 */
+	float brightness;    /* -1..1, 0 = as decoded; the GPU's own filter range */
+	float contrast;
+	float saturation;
+	float hue;
+} lm_colour;
+LM_API lm_error    lm_server_set_colour(lm_server* s, const lm_colour* colour);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */
