@@ -35,10 +35,11 @@ Open Screen Mirroring on an iPhone or iPad, pick the PC, and the phone's screen 
 - Any audio output device; the phone's volume buttons set the app's volume in the Windows mixer
 - An overlay with resolution, frame rate, per-frame processing time and decoder
 - Light and dark themes, six accent colours, English and Chinese; runs in the tray, optionally at sign-in
+- Works without a router: over the PC's own mobile hotspot, which a switch in the settings turns on, a phone's personal hotspot, or USB tethering
 
 ## 📦 Install
 
-Download `LiteMirror-<version>-setup.exe` from the [releases page](https://github.com/Cedr1cSun/litemirror/releases) and run it. Windows 10 version 1809 or later, 64-bit; .NET Framework 4.8, which Windows 10 1903 and later and Windows 11 include. The installer puts the program under `Program Files`, adds a Start menu entry and an inbound firewall rule for private networks, and removes all of it on uninstall. Settings live in `%AppData%\LiteMirror` and survive an uninstall.
+Download `LiteMirror-<version>-setup.exe` from the [releases page](https://github.com/Cedr1cSun/litemirror/releases) and run it. Windows 10 version 1809 or later, 64-bit; .NET Framework 4.8, which Windows 10 1903 and later and Windows 11 include. The installer puts the program under `Program Files`, adds a Start menu entry and an inbound firewall rule limited to the local subnet, and removes all of it on uninstall. Settings live in `%AppData%\LiteMirror` and survive an uninstall.
 
 The installer is not code signed yet, so SmartScreen shows an unknown publisher warning the first time.
 
@@ -57,6 +58,18 @@ The installer is not code signed yet, so SmartScreen shows an unknown publisher 
 
 Every setting carries a line underneath that says what it changes and when to change it.
 
+## 📶 Without a router
+
+The phone and the PC only need an IP link between them; the mDNS announcement and the streams go over whatever that is. Three links that leave the router out:
+
+| link | how |
+|---|---|
+| PC hotspot | Settings, **Windows mobile hotspot**. The name and password appear under the switch; join from the phone. Windows needs a Wi-Fi adapter and an existing connection it can share. |
+| phone hotspot | Turn on Personal Hotspot on the phone and join it from the PC. The PC's Internet goes through the phone meanwhile. |
+| USB | Connect the cable and turn on Personal Hotspot. The PC needs Apple's USB network driver, which iTunes or the Apple Devices app installs; a network adapter appears and AirPlay runs over it. |
+
+Windows files these links under the public profile. The installer's firewall rule allows every profile but only the local subnet, so they work out of the box. A build run from `build\bin` gets the Windows firewall prompt instead: tick public networks there.
+
 ## 🧩 How it works
 
 1. **Announce.** The core registers `_airplay._tcp` and `_raop._tcp` through `DnsServiceRegister` in Windows' own `dnsapi.dll`, which is why 1809 is the floor and Bonjour is not needed.
@@ -67,7 +80,7 @@ Three layers, each only talking to the one below: a protocol core in C (`litemir
 
 ## 🔧 Build from source
 
-Visual Studio 2022 Build Tools with the C++ workload (v143) and the .NET SDK 8. The integration tests want Python 3 with `pip install -r tests\integration\requirements.txt`; the installer wants Inno Setup 6 (`winget install JRSoftware.InnoSetup`).
+Visual Studio 2022 Build Tools with the C++ workload (v143) and the .NET SDK 8; the shell references `Windows.winmd` from the Windows SDK the workload brings, for the hotspot switch. The integration tests want Python 3 with `pip install -r tests\integration\requirements.txt`; the installer wants Inno Setup 6 (`winget install JRSoftware.InnoSetup`).
 
 ```
 .\build.ps1                           # Debug x64 into build\bin\Debug

@@ -35,10 +35,11 @@
 - 任意音频输出设备；手机的音量键直接调本程序在 Windows 混音器里的音量
 - 叠加层显示分辨率、帧率、每帧处理耗时和解码方式
 - 浅色和深色主题，六种强调色，中英文；可缩到托盘，可登录时启动
+- 不靠路由器也能连：电脑自己的移动热点（设置里一个开关打开）、手机个人热点，或 USB 共享网络
 
 ## 📦 安装
 
-从[发布页](https://github.com/Cedr1cSun/litemirror/releases)下载 `LiteMirror-<版本>-setup.exe` 运行。要求 Windows 10 1809 或更新、64 位，以及 .NET Framework 4.8（Windows 10 1903 之后和 Windows 11 自带）。安装程序把程序放到 `Program Files`，添加开始菜单项和一条专用网络的入站防火墙规则，卸载时全部删除。设置在 `%AppData%\LiteMirror`，卸载后保留。
+从[发布页](https://github.com/Cedr1cSun/litemirror/releases)下载 `LiteMirror-<版本>-setup.exe` 运行。要求 Windows 10 1809 或更新、64 位，以及 .NET Framework 4.8（Windows 10 1903 之后和 Windows 11 自带）。安装程序把程序放到 `Program Files`，添加开始菜单项和一条只放行本地子网的入站防火墙规则，卸载时全部删除。设置在 `%AppData%\LiteMirror`，卸载后保留。
 
 安装包还没有签名，第一次运行时 SmartScreen 会提示"未知发布者"。
 
@@ -57,6 +58,18 @@
 
 每个设置项下面都有一行说明，讲它改的是什么、什么时候该改。
 
+## 📶 不经过路由器
+
+手机和电脑之间只要有一条 IP 链路，mDNS 广播和音视频流就走这条链路。三种绕开路由器的接法：
+
+| 链路 | 做法 |
+|---|---|
+| 电脑热点 | 设置里打开 **Windows 移动热点**，名称和密码显示在开关下面，手机连上即可。Windows 要求电脑有 Wi-Fi 网卡，并且已有一条可共享的连接。 |
+| 手机热点 | 手机打开个人热点，电脑连上去。期间电脑上网走手机流量。 |
+| USB | 插上数据线，手机打开个人热点。电脑需要 Apple 的 USB 网络驱动（iTunes 或 Apple Devices 应用自带），之后多出一个网络适配器，AirPlay 走它。 |
+
+这些链路在 Windows 里都算公用网络。安装包加的防火墙规则放行所有配置文件但只限本地子网，所以装完直接能用。从 `build\bin` 直接运行的构建会弹 Windows 防火墙提示，勾上公用网络即可。
+
 ## 🧩 工作原理
 
 1. **广播。** 核心通过 Windows 自带 `dnsapi.dll` 的 `DnsServiceRegister` 注册 `_airplay._tcp` 和 `_raop._tcp`，所以最低要 1809，也不需要 Bonjour。
@@ -67,7 +80,7 @@
 
 ## 🔧 从源码构建
 
-Visual Studio 2022 Build Tools 的 C++ 工作负载（v143）和 .NET SDK 8。集成测试需要 Python 3 并 `pip install -r tests\integration\requirements.txt`；打安装包需要 Inno Setup 6（`winget install JRSoftware.InnoSetup`）。
+Visual Studio 2022 Build Tools 的 C++ 工作负载（v143）和 .NET SDK 8；界面引用了工作负载自带的 Windows SDK 里的 `Windows.winmd`，用于热点开关。集成测试需要 Python 3 并 `pip install -r tests\integration\requirements.txt`；打安装包需要 Inno Setup 6（`winget install JRSoftware.InnoSetup`）。
 
 ```
 .\build.ps1                           # Debug x64，输出到 build\bin\Debug
