@@ -76,6 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>.;include;$(SolutionDir)third_party;$(SolutionDir)third_party\plist;$(SolutionDir)third_party\fdk-aac\libAACdec\include;$(SolutionDir)third_party\fdk-aac\libArithCoding\include;$(SolutionDir)third_party\fdk-aac\libDRCdec\include;$(SolutionDir)third_party\fdk-aac\libFDK\include;$(SolutionDir)third_party\fdk-aac\libMpegTPDec\include;$(SolutionDir)third_party\fdk-aac\libPCMutils\include;$(SolutionDir)third_party\fdk-aac\libSACdec\include;$(SolutionDir)third_party\fdk-aac\libSBRdec\include;$(SolutionDir)third_party\fdk-aac\libSYS\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
