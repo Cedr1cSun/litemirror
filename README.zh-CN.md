@@ -29,6 +29,7 @@
 - 同一网络下任何 iPhone、iPad 的屏幕镜像，带声音
 - H.264 通过 Media Foundation 和 D3D11 在 GPU 上解码，驱动有问题时可退回软件解码
 - 默认低延迟：解码器跑在 AVLowLatencyMode，帧一到就呈现，不等垂直同步，DXGI 队列只留一帧，全屏时连垂直消隐也不等；窗口比画面大时可选 Catmull-Rom 双三次放大
+- 窗口比画面大时可开超分辨率：任何显卡上的 AMD FSR 1.0，或驱动自带的 NVIDIA RTX VSR / Intel VSR
 - 窗口保持手机的宽高比并跟着旋转；F11 在你指定的显示器上全屏；图钉按钮置顶
 - PIN：每次连接在电脑上显示一个新的 4 位码，或者固定一个；第二台手机来连时问你是替换还是拒绝
 - 视频处理器上的色彩调节：BT.601/BT.709 矩阵、有限或完整范围、亮度、对比度、饱和度、色相
@@ -90,7 +91,7 @@ Visual Studio 2022 Build Tools 的 C++ 工作负载（v143）和 .NET SDK 8。�
 .\build.ps1 -Config Release -Package  # 生成 build\LiteMirror-<版本>-setup.exe
 ```
 
-通过 `build.ps1` 或解决方案构建，不要单独构建某个工程：包含路径用了 `$(SolutionDir)`。只支持 x64。
+通过 `build.ps1` 或解决方案构建，不要单独构建某个工程：包含路径用了 `$(SolutionDir)`。只支持 x64。FSR 着色器由 Windows SDK 的 fxc 在构建时编译。
 
 | 路径 | 内容 |
 |---|---|
@@ -131,6 +132,7 @@ Visual Studio 2022 Build Tools 的 C++ 工作负载（v143）和 .NET SDK 8。�
 | axTLS crypto | BSD-3-Clause |
 | http_parser | MIT |
 | doctest | MIT |
+| AMD FidelityFX Super Resolution 1.0（ffx_a.h、ffx_fsr1.h） | MIT |
 | SDL2，仅演示程序 | zlib |
 | HandyControl | MIT |
 | Material Design Icons | Apache-2.0 |

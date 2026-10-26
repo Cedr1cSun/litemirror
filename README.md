@@ -29,6 +29,7 @@ Open Screen Mirroring on an iPhone or iPad, pick the PC, and the phone's screen 
 - Screen mirroring with audio from any iPhone or iPad on the same network
 - H.264 decoded on the GPU through Media Foundation and D3D11, with a software fallback for broken drivers
 - Low latency by default: the decoder runs in AVLowLatencyMode, frames are presented without waiting for vsync with one frame in the DXGI queue, and in full screen without waiting for the vertical blank at all; an optional Catmull-Rom bicubic upscaler when the window is larger than the picture
+- Super resolution when the window is larger than the picture: AMD FSR 1.0 on any GPU, or the driver's own NVIDIA RTX VSR / Intel VSR
 - The window keeps the phone's aspect ratio and turns with it; F11 goes full screen on the monitor you choose; a pin keeps it on top
 - A PIN, either a fresh 4-digit code shown on the PC for every connection or a fixed one; when a second phone connects you are asked whether to replace the first or refuse it
 - Colour controls on the video processor: BT.601/BT.709 matrix, limited or full range, brightness, contrast, saturation, hue
@@ -90,7 +91,7 @@ Visual Studio 2022 Build Tools with the C++ workload (v143) and the .NET SDK 8. 
 .\build.ps1 -Config Release -Package  # build\LiteMirror-<version>-setup.exe
 ```
 
-Build through `build.ps1` or the solution, never one project on its own: include paths use `$(SolutionDir)`. x64 only.
+Build through `build.ps1` or the solution, never one project on its own: include paths use `$(SolutionDir)`. x64 only. The FSR shaders are compiled by fxc from the Windows SDK during the build.
 
 | path | what it is |
 |---|---|
@@ -131,6 +132,7 @@ Build through `build.ps1` or the solution, never one project on its own: include
 | axTLS crypto | BSD-3-Clause |
 | http_parser | MIT |
 | doctest | MIT |
+| AMD FidelityFX Super Resolution 1.0 (ffx_a.h, ffx_fsr1.h) | MIT |
 | SDL2, demo only | zlib |
 | HandyControl | MIT |
 | Material Design Icons | Apache-2.0 |
