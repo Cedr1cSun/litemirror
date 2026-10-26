@@ -22,7 +22,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en;zh-CN</SatelliteResourceLanguages>
-    <Version>0.0.2</Version>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
