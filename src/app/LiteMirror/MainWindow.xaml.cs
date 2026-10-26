@@ -413,22 +413,17 @@ namespace LiteMirror
 
         // Another phone wants in while one is mirroring: asked on a network thread, answered
         // by the user in a dialog; the phone waits, so no answer within the dialog's countdown
-        // (or the UI being stuck) counts as no.
+        // counts as no. A UI thread too busy to open the dialog within the timeout gives
+        // null back (this overload does not throw), which also counts as no.
         int AskSecondDevice(string newcomer)
         {
-            try
+            object answer = Dispatcher.Invoke(DispatcherPriority.Normal, TimeSpan.FromSeconds(20), new Func<int>(() =>
             {
-                return (int)Dispatcher.Invoke(DispatcherPriority.Normal, TimeSpan.FromSeconds(20), new Func<int>(() =>
-                {
-                    if (!IsVisible) ShowFromTray();
-                    var dialog = new SecondDeviceDialog(this, newcomer, deviceName ?? "");
-                    return dialog.ShowDialog() == true ? 1 : 0;
-                }));
-            }
-            catch (TimeoutException)
-            {
-                return 0;
-            }
+                if (!IsVisible) ShowFromTray();
+                var dialog = new SecondDeviceDialog(this, newcomer, deviceName ?? "");
+                return dialog.ShowDialog() == true ? 1 : 0;
+            }));
+            return answer is int yes ? yes : 0;
         }
 
         void ShowPin(string code)
