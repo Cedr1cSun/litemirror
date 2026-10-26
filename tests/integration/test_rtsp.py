@@ -378,6 +378,15 @@ class Malformed(unittest.TestCase):
             pass
         self.assertServerStillAnswers()
 
+    def test_fp_setup_answers_only_the_modes_it_knows(self):
+        # the 16-byte first message: version 3 at byte 4, the mode at byte 14 (0 to 3 are known)
+        for mode in (0, 3):
+            status, _, body = self.client.request('POST', '/fp-setup', bytes([0x46, 0x50, 0x4c, 0x59, 3, 1, 1, 0, 0, 0, 0, 4, 0, 0, mode, 0]))
+            self.assertEqual((status, len(body)), (200, 142))
+        status, _, body = self.client.request('POST', '/fp-setup', bytes([0x46, 0x50, 0x4c, 0x59, 3, 1, 1, 0, 0, 0, 0, 4, 0, 0, 200, 0]))
+        self.assertEqual(len(body), 0)
+        self.assertServerStillAnswers()
+
     def test_an_oversized_body_is_cut_off(self):
         try:
             self.client.request('SET_PARAMETER', self.client.SESSION_URL, bytes(2 * 1024 * 1024), 'text/parameters')

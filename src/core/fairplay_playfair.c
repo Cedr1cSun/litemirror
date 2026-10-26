@@ -46,6 +46,10 @@ fairplay_setup(fairplay_t *fp, const unsigned char req[16], unsigned char res[14
     }
 
     mode = req[14];
+    if (mode > 3) {
+        /* only four replies are known */
+        return -1;
+    }
     memcpy(res, reply_message[mode], 142);
     fp->keymsglen = 0;
     return 0;
