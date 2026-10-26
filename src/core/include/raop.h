@@ -72,6 +72,8 @@ RAOP_API void raop_set_pin(raop_t *raop, int mode, const char *pin);
 /* A second client while one has a session: replace=0 answers 453 (busy),
  * replace=1 drops the first. Call before raop_start. */
 RAOP_API void raop_set_second_device(raop_t *raop, int replace);
+/* Listen on this IPv4 address only (network byte order; 0 = every address). Call before raop_start. */
+RAOP_API void raop_set_address(raop_t *raop, unsigned long address);
 RAOP_API int raop_get_pin_mode(raop_t *raop);
 RAOP_API unsigned short raop_get_port(raop_t *raop);
 RAOP_API void *raop_get_callback_cls(raop_t *raop);

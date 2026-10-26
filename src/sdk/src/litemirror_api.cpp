@@ -21,6 +21,16 @@ struct lm_server {
 	FgServerOptions options; // everything else set before start
 };
 
+lm_error lm_server_set_address(lm_server* s, const char* ipv4)
+{
+	if (!s) return LM_E_INVALID_ARG;
+	unsigned long address = 0;
+	if (ipv4 && ipv4[0] && !FgAirplayServer::parseAddress(ipv4, &address)) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.address = address;
+	return LM_OK;
+}
+
 lm_error lm_server_set_second_device(lm_server* s, int replace)
 {
 	if (!s) return LM_E_INVALID_ARG;
@@ -123,6 +133,7 @@ const char* lm_error_string(lm_error e)
 	case LM_E_MDNS_REGISTER:    return "Windows refused the mDNS service registration";
 	case LM_E_INTERNAL:         return "internal error";
 	case LM_E_NO_H264_DECODER:  return "No H.264 decoder found. On Windows N editions install the Media Feature Pack.";
+	case LM_E_ADDRESS:          return "this machine has no such address";
 	}
 	return "unknown error";
 }

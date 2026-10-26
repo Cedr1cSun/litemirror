@@ -103,6 +103,53 @@ class Lifecycle(unittest.TestCase):
             self.assertEqual(self.host.stop(), 'OK')
 
 
+LM_E_ADDRESS = 10
+
+
+def lan_address():
+    """An IPv4 address of this machine other than loopback, or None."""
+    for ip in socket.gethostbyname_ex(socket.gethostname())[2]:
+        if not ip.startswith('127.'):
+            return ip
+    return None
+
+
+class Bind(unittest.TestCase):
+    """Listen and announce on one address only: a user with a VPN or a hotspot
+    adapter picks the one the phone can reach."""
+
+    def setUp(self):
+        self.host = TestHost()
+
+    def tearDown(self):
+        self.host.close()
+
+    def test_bound_receiver_listens_on_that_address_only(self):
+        ip = lan_address()
+        if ip is None:
+            self.skipTest('no LAN address on this machine')
+        self.assertEqual(self.host.cmd(f'bind {ip}'), 'OK')
+        self.assertEqual(self.host.start(name='LiteMirrorBind'), 'OK')
+        socket.create_connection((ip, self.host.raop_port), timeout=5).close()
+        socket.create_connection((ip, self.host.airplay_port), timeout=5).close()
+        with self.assertRaises(OSError):
+            socket.create_connection(('127.0.0.1', self.host.raop_port), timeout=2).close()
+        with MdnsBrowser('LiteMirrorBind') as browser:
+            raop = browser.wait_for('_raop._tcp.local.')
+        # Windows adds the adapter's IPv6 link-local address of its own accord
+        self.assertEqual([a for a in raop.parsed_addresses() if ':' not in a], [ip])
+        self.assertEqual(self.host.stop(), 'OK')
+
+    def test_bind_to_an_address_this_machine_lacks_is_an_error(self):
+        self.assertEqual(self.host.cmd('bind 203.0.113.1'), 'OK')   # valid syntax, nobody here
+        reply = self.host.start()
+        self.assertTrue(reply.startswith('FAIL '), reply)
+        self.assertEqual(int(reply.split()[1]), LM_E_ADDRESS)
+        self.assertEqual(self.host.cmd('bind -'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        self.assertEqual(self.host.stop(), 'OK')
+
+
 class MdnsBrowser:
     """Collects mDNS services whose instance name ends with '@<name>' or
     equals <name> (RAOP prefixes the MAC address, AirPlay does not)."""

@@ -50,6 +50,7 @@ struct httpd_s {
 	/* Server fds for accepting connections */
 	int server_fd4;
 	int server_fd6;
+	unsigned long address;   /* IPv4 to listen on, INADDR_ANY = all */
 };
 
 httpd_t *
@@ -392,6 +393,13 @@ httpd_thread(void *arg)
 	return 0;
 }
 
+void
+httpd_set_address(httpd_t *httpd, unsigned long address)
+{
+	assert(httpd);
+	httpd->address = address;
+}
+
 int
 httpd_start(httpd_t *httpd, unsigned short *port)
 {
@@ -407,7 +415,7 @@ httpd_start(httpd_t *httpd, unsigned short *port)
 		return 0;
 	}
 
-	httpd->server_fd4 = netutils_init_socket(port, 0, 0);
+	httpd->server_fd4 = netutils_init_socket_at(port, 0, 0, httpd->address);
 	if (httpd->server_fd4 == -1) {
 		logger_log(httpd->logger, LOGGER_ERR, "Error initialising socket %d", SOCKET_GET_ERROR());
 		MUTEX_UNLOCK(httpd->run_mutex);

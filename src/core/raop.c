@@ -485,6 +485,13 @@ raop_set_pin(raop_t *raop, int mode, const char *pin)
 }
 
 void
+raop_set_address(raop_t *raop, unsigned long address)
+{
+	assert(raop);
+	httpd_set_address(raop->httpd, address);
+}
+
+void
 raop_set_second_device(raop_t *raop, int replace)
 {
 	assert(raop);

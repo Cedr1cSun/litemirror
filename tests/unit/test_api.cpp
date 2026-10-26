@@ -68,7 +68,7 @@ TEST_CASE("stop and destroy accept NULL")
 TEST_CASE("every error code has its own message")
 {
 	std::set<std::string> seen;
-	for (int e = LM_OK; e <= LM_E_NO_H264_DECODER; e++) {
+	for (int e = LM_OK; e <= LM_E_ADDRESS; e++) {
 		const char* msg = lm_error_string((lm_error)e);
 		REQUIRE(msg != NULL);
 		CHECK(strlen(msg) > 0);
@@ -128,6 +128,31 @@ TEST_CASE("set_second_device only works while stopped")
 	CHECK(lm_server_set_second_device(server, 0) == LM_E_RUNNING);
 	lm_server_stop(server);
 	CHECK(lm_server_set_second_device(server, 0) == LM_OK);
+	lm_server_destroy(server);
+}
+
+TEST_CASE("set_address takes a dotted IPv4 address and only while stopped")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_address(NULL, "127.0.0.1") == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_address(server, "eth0") == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_address(server, "::1") == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_address(server, "127.0.0.1") == LM_OK);
+	CHECK(lm_server_set_address(server, "") == LM_OK);      // back to every address
+	CHECK(lm_server_set_address(server, NULL) == LM_OK);
+
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_address(server, NULL) == LM_E_RUNNING);
+	lm_server_stop(server);
+
+	// well formed but not an address of this machine: start says so instead of "port in use"
+	CHECK(lm_server_set_address(server, "203.0.113.1") == LM_OK);
+	CHECK(lm_server_start(server, &cfg) == LM_E_ADDRESS);
+	CHECK(lm_server_set_address(server, "127.0.0.1") == LM_OK);
+	CHECK(lm_server_start(server, &cfg) == LM_OK);
 	lm_server_destroy(server);
 }
 

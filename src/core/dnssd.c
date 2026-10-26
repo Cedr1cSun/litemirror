@@ -45,6 +45,7 @@ struct dnssd_s {
 	Register_t dereg;
 	FreeInstance_t free_instance;
 	WCHAR hostname[256];
+	IP4_ADDRESS address;   /* 0: every address of the host */
 	service_t raop;
 	service_t airplay;
 };
@@ -84,7 +85,7 @@ static int issue_service(service_t *s, const char *instance_name, unsigned short
 	}
 	if (ok) {
 		/* NULL addresses: Windows announces every address of this host */
-		s->instance = d->construct(wname, d->hostname, NULL, NULL, port, 0, 0,
+		s->instance = d->construct(wname, d->hostname, d->address ? &d->address : NULL, NULL, port, 0, 0,
 		                           count, (PCWSTR*)wkeys, (PCWSTR*)wvalues);
 	}
 	for (i = 0; wkeys && wvalues && i < count; i++) {
@@ -197,6 +198,12 @@ dnssd_t *dnssd_init(int *error)
 	wcscat_s(dnssd->hostname, 256, L".local");
 
 	return dnssd;
+}
+
+void dnssd_set_address(dnssd_t *dnssd, unsigned long address)
+{
+	assert(dnssd);
+	dnssd->address = (IP4_ADDRESS)address;
 }
 
 void dnssd_destroy(dnssd_t *dnssd)

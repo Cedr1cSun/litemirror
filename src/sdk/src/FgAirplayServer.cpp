@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "FgAirplayServer.h"
+#include <ws2tcpip.h>
 #include <thread>
 #include "CAutoLock.h"
 
@@ -9,6 +10,32 @@
 #endif
 
 BOOL GetMacAddress(char strMac[6]);
+
+bool FgAirplayServer::parseAddress(const char* dotted, unsigned long* address)
+{
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) return false;
+	in_addr a;
+	bool ok = inet_pton(AF_INET, dotted, &a) == 1;
+	if (ok) *address = a.s_addr;
+	WSACleanup();
+	return ok;
+}
+
+// Can a socket be bound to this address, i.e. does an adapter carry it?
+static bool addressIsLocal(unsigned long address)
+{
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) return false;
+	SOCKET s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	sockaddr_in sin = {};
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = address;
+	bool ok = s != INVALID_SOCKET && bind(s, (sockaddr*)&sin, sizeof(sin)) == 0;
+	if (s != INVALID_SOCKET) closesocket(s);
+	WSACleanup();
+	return ok;
+}
 
 FgAirplayServer::FgAirplayServer()
 	: m_pDnsSd(NULL)
@@ -70,6 +97,11 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 			err = LM_E_INTERNAL;
 			break;
 		}
+		if (options.address && !addressIsLocal(options.address)) {
+			err = LM_E_ADDRESS;
+			break;
+		}
+		airplay_set_address(m_pAirplay, options.address);
 		if (airplay_start(m_pAirplay, &airplay_port, hwaddr, sizeof(hwaddr), NULL) < 0) {
 			err = LM_E_AIRPLAY_PORT;
 			break;
@@ -88,6 +120,7 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 		raop_set_identity(m_pRaop, serverName, hwaddr, sizeof(hwaddr));
 		raop_set_pin(m_pRaop, options.pinMode, options.pin.c_str());
 		raop_set_second_device(m_pRaop, options.replaceSecond);
+		raop_set_address(m_pRaop, options.address);
 		if (raop_start(m_pRaop, &raop_port) < 0) {
 			err = LM_E_RAOP_PORT;
 			break;
@@ -99,6 +132,7 @@ lm_error FgAirplayServer::start(const char* serverName, unsigned int raopPort, u
 			err = ret == DNSSD_ERROR_OUTOFMEM ? LM_E_NO_MEMORY : LM_E_MDNS_UNAVAILABLE;
 			break;
 		}
+		dnssd_set_address(m_pDnsSd, options.address);
 		int password = options.pinMode != 0;   // pw=true: the phone asks the user for the code
 		if (dnssd_register_raop(m_pDnsSd, serverName, raop_port, hwaddr, sizeof(hwaddr), password) < 0 ||
 		    dnssd_register_airplay(m_pDnsSd, serverName, airplay_port, hwaddr, sizeof(hwaddr), password) < 0 ||

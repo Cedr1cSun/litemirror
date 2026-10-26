@@ -475,6 +475,13 @@ airplay_set_log_callback(airplay_t *airplay, airplay_log_callback_t callback, vo
 	logger_set_callback(airplay->logger, callback, cls);
 }
 
+void airplay_set_address(airplay_t *airplay, unsigned long address)
+{
+	assert(airplay);
+	httpd_set_address(airplay->httpd, address);
+	httpd_set_address(airplay->mirror_server, address);
+}
+
 int airplay_start(airplay_t *airplay, unsigned short *port, const char *hwaddr,
 	int hwaddrlen, const char *password)
 {

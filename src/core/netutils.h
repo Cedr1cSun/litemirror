@@ -19,6 +19,10 @@ int netutils_init();
 void netutils_cleanup();
 
 int netutils_init_socket(unsigned short *port, int use_ipv6, int use_udp);
+/* As above, with the IPv4 address to bind to (network byte order; INADDR_ANY = all) */
+int netutils_init_socket_at(unsigned short *port, int use_ipv6, int use_udp, unsigned long address);
+/* Dotted IPv4 to network byte order; -1 when src is not one */
+int netutils_parse_ipv4(const char *src, unsigned long *address);
 unsigned char *netutils_get_address(void *sockaddr, int *length);
 int netutils_parse_address(int family, const char *src, void *dst, int dstlen);
 

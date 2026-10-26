@@ -21,6 +21,9 @@ typedef struct dnssd_s dnssd_t;
 
 DNSSD_API dnssd_t *dnssd_init(int *error);
 
+/* Announce this IPv4 address (network byte order) instead of every address of the host */
+DNSSD_API void dnssd_set_address(dnssd_t *dnssd, unsigned long address);
+
 DNSSD_API int dnssd_register_raop(dnssd_t *dnssd, const char *name, unsigned short port, const char *hwaddr, int hwaddrlen, int password);
 DNSSD_API int dnssd_register_airplay(dnssd_t *dnssd, const char *name, unsigned short port, const char *hwaddr, int hwaddrlen, int password);
 /* The register calls only issue the request; this collects both answers (0 ok, -1 failed) */

@@ -31,7 +31,8 @@ typedef enum lm_error {
 	LM_E_MDNS_UNAVAILABLE,   /* dnsapi.dll lacks DnsServiceRegister (Windows 10 before 1809) */
 	LM_E_MDNS_REGISTER,      /* Windows refused or timed out registering the service */
 	LM_E_INTERNAL,
-	LM_E_NO_H264_DECODER     /* no Media Foundation H.264 decoder: Windows N without the Media Feature Pack */
+	LM_E_NO_H264_DECODER,    /* no Media Foundation H.264 decoder: Windows N without the Media Feature Pack */
+	LM_E_ADDRESS             /* lm_server_set_address: not an address of this machine */
 } lm_error;
 
 typedef enum lm_log_level {  /* syslog values, same as the core */
@@ -113,6 +114,11 @@ LM_API lm_error    lm_server_set_pin   (lm_server* s, lm_pin_mode mode, const ch
  * the busy answer an Apple TV gives, 1 lets it in and drops the first.
  * Set it before lm_server_start(). */
 LM_API lm_error    lm_server_set_second_device(lm_server* s, int replace);
+/* Listen and announce on one IPv4 address of this machine only (dotted,
+ * e.g. the Wi-Fi adapter's), for machines with VPN or virtual adapters.
+ * NULL or "" means every address. Set it before lm_server_start(), which
+ * fails with LM_E_ADDRESS when the machine has no such address. */
+LM_API lm_error    lm_server_set_address(lm_server* s, const char* ipv4);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

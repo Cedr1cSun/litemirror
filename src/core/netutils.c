@@ -84,6 +84,23 @@ netutils_get_address(void *sockaddr, int *length)
 int
 netutils_init_socket(unsigned short *port, int use_ipv6, int use_udp)
 {
+	return netutils_init_socket_at(port, use_ipv6, use_udp, INADDR_ANY);
+}
+
+int
+netutils_parse_ipv4(const char *src, unsigned long *address)
+{
+	struct sockaddr_in sin;
+	if (netutils_parse_address(AF_INET, src, &sin, sizeof(sin)) < 0) {
+		return -1;
+	}
+	*address = sin.sin_addr.s_addr;
+	return 0;
+}
+
+int
+netutils_init_socket_at(unsigned short *port, int use_ipv6, int use_udp, unsigned long address)
+{
 	int family = use_ipv6 ? AF_INET6 : AF_INET;
 	int type = use_udp ? SOCK_DGRAM : SOCK_STREAM;
 	int proto = use_udp ? IPPROTO_UDP : IPPROTO_TCP;
@@ -138,7 +155,7 @@ netutils_init_socket(unsigned short *port, int use_ipv6, int use_udp)
 
 		/* Initialize sockaddr for bind */
 		sinptr->sin_family = family;
-		sinptr->sin_addr.s_addr = INADDR_ANY;
+		sinptr->sin_addr.s_addr = address;
 		sinptr->sin_port = htons(*port);
 
 		socklen = sizeof(*sinptr);
