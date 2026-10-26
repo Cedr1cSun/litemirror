@@ -3,8 +3,8 @@
 //
 // A plain Win32 child window inside the WPF tree. litemirror.dll owns its
 // swap chain and draws every frame into it; WPF only places and sizes it.
-// Mouse input lands on this window, not on WPF, so the double-click that
-// toggles full screen is picked up here.
+// Mouse and keyboard input land on this window, not on WPF, so the
+// double-click and the shortcut keys are picked up here and handed on.
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
@@ -17,6 +17,8 @@ namespace LiteMirror
         static bool registered;
 
         public event EventHandler DoubleClick;
+        // a key went down while the video had the focus: the virtual-key code
+        public event Action<int> KeyPressed;
 
         protected override HandleRef BuildWindowCore(HandleRef parent)
         {
@@ -53,6 +55,11 @@ namespace LiteMirror
             if (msg == Native.WM_LBUTTONDBLCLK)
             {
                 DoubleClick?.Invoke(this, EventArgs.Empty);
+                handled = true;
+            }
+            else if (msg == Native.WM_KEYDOWN || msg == Native.WM_SYSKEYDOWN)
+            {
+                KeyPressed?.Invoke((int)wParam);
                 handled = true;
             }
             return base.WndProc(hwnd, msg, wParam, lParam, ref handled);

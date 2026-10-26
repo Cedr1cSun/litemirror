@@ -16,6 +16,7 @@
   <ItemGroup>
     <!-- the pure logic under test is compiled in directly; the app exe is not referenced -->
     <Compile Include="..\..\..\src\app\LiteMirror\WindowShape.cs" Link="WindowShape.cs" />
+    <Compile Include="..\..\..\src\app\LiteMirror\Settings.cs" Link="Settings.cs" />
     <Reference Include="WindowsBase" />   <!-- Rect and Size -->
   </ItemGroup>
 

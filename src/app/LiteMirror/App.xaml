@@ -1,14 +1,118 @@
 <Application x:Class="LiteMirror.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ui:ThemesDictionary Theme="Dark" />
-                <ui:ControlsDictionary />
+                <hc:Theme Name="Theme" Skin="Default" AccentColor="#2F7CF6" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Icons from Material Design Icons (Apache-2.0), on a 24x24 grid -->
+            <Geometry x:Key="IconMirror">M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z</Geometry>
+            <Geometry x:Key="IconSettings">M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z</Geometry>
+            <Geometry x:Key="IconInfo">M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z</Geometry>
+            <Geometry x:Key="IconPin">M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z</Geometry>
+            <Geometry x:Key="IconFit">M19 12h-2v3h-3v2h5v-5zM7 9h3V7H5v5h2V9zm14-6H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z</Geometry>
+            <Geometry x:Key="IconFullscreen">M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z</Geometry>
+            <Geometry x:Key="IconFolder">M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z</Geometry>
+            <Geometry x:Key="IconLink">M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z</Geometry>
+
+            <!-- Sidebar entry: the icon comes in Tag, the text is the Content; the chosen one sits in a tinted pill -->
+            <Style x:Key="NavItem" TargetType="RadioButton">
+                <Setter Property="Height" Value="38" />
+                <Setter Property="Margin" Value="0,2" />
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="Pill" CornerRadius="6" Background="Transparent" Padding="11,0" SnapsToDevicePixels="True">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{TemplateBinding Tag}" Fill="{TemplateBinding Foreground}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" />
+                                    <ContentPresenter Margin="12,0,0,0" VerticalAlignment="Center"
+                                                      Visibility="{Binding NavText, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Pill" Property="Background" Value="{DynamicResource DarkMaskBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Pill" Property="Background" Value="{DynamicResource LightPrimaryBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Settings page: a title over a card of rows, label left and control right -->
+            <Style x:Key="GroupTitle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                <Setter Property="Margin" Value="6,20,0,8" />
+            </Style>
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource RegionBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+            </Style>
+            <Style x:Key="Row" TargetType="DockPanel">
+                <Setter Property="MinHeight" Value="48" />
+                <Setter Property="Margin" Value="16,0" />
+                <Setter Property="LastChildFill" Value="True" />
+            </Style>
+            <Style x:Key="RowLabel" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0,0,16,0" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            </Style>
+            <Style x:Key="RowLine" TargetType="Border">
+                <Setter Property="Height" Value="1" />
+                <Setter Property="Margin" Value="16,0" />
+                <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
+            </Style>
+            <Style x:Key="Shortcut" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="4" />
+                <Setter Property="Padding" Value="8,2" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <!-- Theme colour: a filled circle, ringed when chosen; the brush comes in Tag -->
+            <Style x:Key="Swatch" TargetType="RadioButton">
+                <Setter Property="Width" Value="28" />
+                <Setter Property="Height" Value="28" />
+                <Setter Property="Margin" Value="3,0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Grid>
+                                <Ellipse x:Name="Ring" Stroke="{DynamicResource PrimaryTextBrush}" StrokeThickness="0" Fill="Transparent" />
+                                <Ellipse Width="18" Height="18" Fill="{TemplateBinding Tag}" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Ring" Property="StrokeThickness" Value="2" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

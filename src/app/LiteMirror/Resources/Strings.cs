@@ -5,9 +5,11 @@
 // `dotnet build` does not run Visual Studio's resx designer. The culture
 // comes from CultureInfo.CurrentUICulture: Windows' display language, or
 // the one chosen in Settings.
+using System;
 using System.Globalization;
 using System.Resources;
 using System.Threading;
+using System.Windows.Markup;
 
 namespace LiteMirror
 {
@@ -27,5 +29,14 @@ namespace LiteMirror
             CultureInfo.DefaultThreadCurrentUICulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
         }
+    }
+
+    // {local:S Key} in XAML: the string for the current language at load time
+    [MarkupExtensionReturnType(typeof(string))]
+    public class S : MarkupExtension
+    {
+        public S(string key) { Key = key; }
+        public string Key { get; set; }
+        public override object ProvideValue(IServiceProvider serviceProvider) => Strings.Get(Key);
     }
 }

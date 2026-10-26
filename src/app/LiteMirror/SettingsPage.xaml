@@ -1,0 +1,228 @@
+<UserControl x:Class="LiteMirror.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:local="clr-namespace:LiteMirror">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
+        <StackPanel MaxWidth="640" HorizontalAlignment="Left" Margin="0,-12,0,8">
+
+            <TextBlock Style="{StaticResource GroupTitle}" Text="{local:S G_Receive}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Style="{StaticResource Row}">
+                        <TextBox x:Name="NameBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" MaxLength="60" LostFocus="OnName" KeyDown="OnTextKey" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Name}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="AutoStartSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnAutoStart" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_AutoStart}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="PinModeBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnPinMode" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Pin}" />
+                    </DockPanel>
+                    <Border x:Name="PinLine" Style="{StaticResource RowLine}" />
+                    <DockPanel x:Name="PinRow" Style="{StaticResource Row}">
+                        <TextBox x:Name="PinBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" MaxLength="63" LostFocus="OnPin" KeyDown="OnTextKey" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_PinCode}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="SecondBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnSecond" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Second}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="AddressBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnAddress" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Address}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <hc:NumericUpDown x:Name="RaopPortBox" Width="106" Minimum="0" Maximum="65535" ValueChanged="OnPorts" />
+                            <hc:NumericUpDown x:Name="AirplayPortBox" Width="106" Minimum="0" Maximum="65535" Margin="8,0,0,0" ValueChanged="OnPorts" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Ports}" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource GroupTitle}" Text="{local:S G_Picture}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="QualityBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnQuality" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Quality}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="FpsBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnFps" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Fps}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="HwSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnHw" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Hw}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="LowSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnLow" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Low}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="RotateSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnRotate" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Rotate}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="InfoSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnInfo" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Info}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="MonitorBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnMonitor" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Monitor}" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource GroupTitle}" Text="{local:S G_Colour}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="MatrixBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnColour" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Matrix}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="RangeBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnColour" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Range}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Slider x:Name="BrightnessSlider" Width="180" Minimum="-100" Maximum="100" ValueChanged="OnColour" />
+                            <TextBlock Width="36" TextAlignment="Right" VerticalAlignment="Center" Text="{Binding Value, ElementName=BrightnessSlider, StringFormat={}{0:0}}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Brightness}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Slider x:Name="ContrastSlider" Width="180" Minimum="-100" Maximum="100" ValueChanged="OnColour" />
+                            <TextBlock Width="36" TextAlignment="Right" VerticalAlignment="Center" Text="{Binding Value, ElementName=ContrastSlider, StringFormat={}{0:0}}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Contrast}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Slider x:Name="SaturationSlider" Width="180" Minimum="-100" Maximum="100" ValueChanged="OnColour" />
+                            <TextBlock Width="36" TextAlignment="Right" VerticalAlignment="Center" Text="{Binding Value, ElementName=SaturationSlider, StringFormat={}{0:0}}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Saturation}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Slider x:Name="HueSlider" Width="180" Minimum="-100" Maximum="100" ValueChanged="OnColour" />
+                            <TextBlock Width="36" TextAlignment="Right" VerticalAlignment="Center" Text="{Binding Value, ElementName=HueSlider, StringFormat={}{0:0}}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Hue}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <Button x:Name="ResetButton" DockPanel.Dock="Right" Content="{local:S Reset}" VerticalAlignment="Center" Click="OnResetColour" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Reset}" Foreground="{DynamicResource SecondaryTextBrush}" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource GroupTitle}" Text="{local:S G_Sound}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="AudioSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnAudio" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Audio}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="AudioDeviceBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnAudioDevice" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_AudioDevice}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="VolumeSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnVolume" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Volume}" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource GroupTitle}" Text="{local:S G_Shortcuts}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Style="{StaticResource Row}">
+                        <Border DockPanel.Dock="Right" Style="{StaticResource Shortcut}"><TextBlock Text="F11" /></Border>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S K_Full}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <Border DockPanel.Dock="Right" Style="{StaticResource Shortcut}"><TextBlock Text="Ctrl+F" /></Border>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S K_Fit}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <Border DockPanel.Dock="Right" Style="{StaticResource Shortcut}"><TextBlock Text="Ctrl+I" /></Border>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S K_Info}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <Border DockPanel.Dock="Right" Style="{StaticResource Shortcut}"><TextBlock Text="Ctrl+R" /></Border>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S K_Toggle}" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource GroupTitle}" Text="{local:S G_System}" />
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="LanguageBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnLanguage" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Language}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="ThemeBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnTheme" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Theme}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel x:Name="Swatches" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Colour}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ToggleButton x:Name="StartupSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnStartup" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Startup}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="CloseBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnClose" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Close}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <ComboBox x:Name="LogLevelBox" Width="140" SelectionChanged="OnLogLevel" />
+                            <Button x:Name="OpenLogsButton" Margin="8,0,0,0" Content="{local:S OpenLogs}" Click="OnOpenLogs" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Log}" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

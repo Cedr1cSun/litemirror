@@ -5,31 +5,120 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 
-  <data name="AppName" xml:space="preserve"><value>轻投屏</value></data>
-  <data name="Ready" xml:space="preserve"><value>等待投屏</value></data>
-  <data name="NotRunning" xml:space="preserve"><value>未运行</value></data>
-  <data name="HintBody" xml:space="preserve"><value>在 iPhone 或 iPad 上打开控制中心，点按"屏幕镜像"，然后选择：</value></data>
+  <data name="AppName" xml:space="preserve"><value>LiteMirror</value></data>
+  <data name="Nav_Mirror" xml:space="preserve"><value>投屏</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>设置</value></data>
+  <data name="Nav_About" xml:space="preserve"><value>关于</value></data>
 
-  <data name="Settings" xml:space="preserve"><value>设置</value></data>
-  <data name="ReceiverNameLabel" xml:space="preserve"><value>接收端名称（显示在 iPhone 上）</value></data>
-  <data name="RunAtStartup" xml:space="preserve"><value>登录 Windows 时自动运行</value></data>
-  <data name="AlwaysOnTop" xml:space="preserve"><value>窗口保持在最前</value></data>
-  <data name="FollowRotation" xml:space="preserve"><value>手机旋转时转动窗口</value></data>
-  <data name="Language" xml:space="preserve"><value>语言</value></data>
-  <data name="LanguageAuto" xml:space="preserve"><value>跟随系统</value></data>
-  <data name="Save" xml:space="preserve"><value>保存</value></data>
-  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Status_On" xml:space="preserve"><value>正在接收</value></data>
+  <data name="Status_Off" xml:space="preserve"><value>未接收</value></data>
+  <data name="Start" xml:space="preserve"><value>开始接收</value></data>
+  <data name="Stop" xml:space="preserve"><value>停止接收</value></data>
 
-  <data name="TrayOpen" xml:space="preserve"><value>打开轻投屏</value></data>
-  <data name="TraySettings" xml:space="preserve"><value>设置…</value></data>
-  <data name="TrayQuit" xml:space="preserve"><value>退出</value></data>
+  <data name="Hint_Ready" xml:space="preserve"><value>等待投屏</value></data>
+  <data name="Hint_Body" xml:space="preserve"><value>在 iPhone 或 iPad 上打开控制中心，点按"屏幕镜像"，然后选择：</value></data>
+  <data name="Hint_Stopped" xml:space="preserve"><value>未接收</value></data>
+  <data name="Hint_StoppedBody" xml:space="preserve"><value>点"开始接收"（或按 Ctrl+R），iPhone 就能找到这台电脑。</value></data>
+  <data name="Pin_Title" xml:space="preserve"><value>请在 iPhone 上输入这个 PIN</value></data>
+
+  <data name="Tip_Pin" xml:space="preserve"><value>窗口保持在最前</value></data>
+  <data name="Tip_Fit" xml:space="preserve"><value>窗口贴合画面（Ctrl+F）</value></data>
+  <data name="Tip_Full" xml:space="preserve"><value>全屏（F11）</value></data>
+  <data name="Tip_Info" xml:space="preserve"><value>画面信息（Ctrl+I）</value></data>
+
+  <data name="Tray_Open" xml:space="preserve"><value>打开 LiteMirror</value></data>
+  <data name="Tray_Settings" xml:space="preserve"><value>设置…</value></data>
+  <data name="Tray_Quit" xml:space="preserve"><value>退出</value></data>
+
+  <data name="G_Receive" xml:space="preserve"><value>接收</value></data>
+  <data name="R_Name" xml:space="preserve"><value>接收端名称（显示在 iPhone 上）</value></data>
+  <data name="R_AutoStart" xml:space="preserve"><value>打开 LiteMirror 时自动开始接收</value></data>
+  <data name="R_Pin" xml:space="preserve"><value>PIN</value></data>
+  <data name="Pin_Off" xml:space="preserve"><value>关闭</value></data>
+  <data name="Pin_New" xml:space="preserve"><value>每次连接生成新 PIN</value></data>
+  <data name="Pin_Fixed" xml:space="preserve"><value>固定 PIN</value></data>
+  <data name="R_PinCode" xml:space="preserve"><value>PIN 码</value></data>
+  <data name="R_Second" xml:space="preserve"><value>第二台设备连上时</value></data>
+  <data name="Second_Refuse" xml:space="preserve"><value>拒绝它</value></data>
+  <data name="Second_Replace" xml:space="preserve"><value>替换第一台</value></data>
+  <data name="R_Address" xml:space="preserve"><value>网卡</value></data>
+  <data name="Address_All" xml:space="preserve"><value>全部网卡</value></data>
+  <data name="Address_Gone" xml:space="preserve"><value>当前不存在</value></data>
+  <data name="R_Ports" xml:space="preserve"><value>端口：RTSP 和 HTTP（0 = 自动）</value></data>
+
+  <data name="G_Picture" xml:space="preserve"><value>画面</value></data>
+  <data name="R_Quality" xml:space="preserve"><value>画质</value></data>
+  <data name="R_Fps" xml:space="preserve"><value>帧率</value></data>
+  <data name="R_Hw" xml:space="preserve"><value>硬件解码</value></data>
+  <data name="R_Low" xml:space="preserve"><value>低延迟</value></data>
+  <data name="R_Rotate" xml:space="preserve"><value>手机旋转时转动窗口</value></data>
+  <data name="R_Info" xml:space="preserve"><value>在画面上显示信息</value></data>
+  <data name="R_Monitor" xml:space="preserve"><value>全屏使用的显示器</value></data>
+  <data name="Monitor_Same" xml:space="preserve"><value>窗口所在的显示器</value></data>
+  <data name="Monitor_N" xml:space="preserve"><value>显示器 {0}（{1} × {2}）</value></data>
+
+  <data name="G_Colour" xml:space="preserve"><value>色彩</value></data>
+  <data name="R_Matrix" xml:space="preserve"><value>色彩矩阵</value></data>
+  <data name="Matrix_Auto" xml:space="preserve"><value>自动</value></data>
+  <data name="Matrix_601" xml:space="preserve"><value>BT.601</value></data>
+  <data name="Matrix_709" xml:space="preserve"><value>BT.709</value></data>
+  <data name="R_Range" xml:space="preserve"><value>色彩范围</value></data>
+  <data name="Range_Auto" xml:space="preserve"><value>自动</value></data>
+  <data name="Range_Limited" xml:space="preserve"><value>有限（16–235）</value></data>
+  <data name="Range_Full" xml:space="preserve"><value>完整（0–255）</value></data>
+  <data name="R_Brightness" xml:space="preserve"><value>亮度</value></data>
+  <data name="R_Contrast" xml:space="preserve"><value>对比度</value></data>
+  <data name="R_Saturation" xml:space="preserve"><value>饱和度</value></data>
+  <data name="R_Hue" xml:space="preserve"><value>色相</value></data>
+  <data name="R_Reset" xml:space="preserve"><value>恢复手机发来的原始画面</value></data>
+  <data name="Reset" xml:space="preserve"><value>重置</value></data>
+
+  <data name="G_Sound" xml:space="preserve"><value>声音</value></data>
+  <data name="R_Audio" xml:space="preserve"><value>在这台电脑上播放声音</value></data>
+  <data name="R_AudioDevice" xml:space="preserve"><value>输出设备</value></data>
+  <data name="Audio_Default" xml:space="preserve"><value>默认设备</value></data>
+  <data name="R_Volume" xml:space="preserve"><value>音量跟随手机</value></data>
+
+  <data name="G_Shortcuts" xml:space="preserve"><value>快捷键</value></data>
+  <data name="K_Full" xml:space="preserve"><value>全屏（Esc 退出）</value></data>
+  <data name="K_Fit" xml:space="preserve"><value>窗口贴合画面</value></data>
+  <data name="K_Info" xml:space="preserve"><value>画面信息</value></data>
+  <data name="K_Toggle" xml:space="preserve"><value>开始或停止接收</value></data>
+
+  <data name="G_System" xml:space="preserve"><value>系统</value></data>
+  <data name="R_Language" xml:space="preserve"><value>语言</value></data>
+  <data name="Lang_Auto" xml:space="preserve"><value>跟随系统</value></data>
+  <data name="R_Theme" xml:space="preserve"><value>主题</value></data>
+  <data name="Theme_System" xml:space="preserve"><value>跟随系统</value></data>
+  <data name="Theme_Light" xml:space="preserve"><value>浅色</value></data>
+  <data name="Theme_Dark" xml:space="preserve"><value>深色</value></data>
+  <data name="R_Colour" xml:space="preserve"><value>主题色</value></data>
+  <data name="R_Startup" xml:space="preserve"><value>登录 Windows 时自动运行</value></data>
+  <data name="R_Close" xml:space="preserve"><value>关闭窗口时</value></data>
+  <data name="Close_Quit" xml:space="preserve"><value>退出</value></data>
+  <data name="Close_Tray" xml:space="preserve"><value>最小化到托盘继续运行</value></data>
+  <data name="R_Log" xml:space="preserve"><value>日志</value></data>
+  <data name="Log_Error" xml:space="preserve"><value>只记错误</value></data>
+  <data name="Log_Warn" xml:space="preserve"><value>警告</value></data>
+  <data name="Log_Info" xml:space="preserve"><value>信息</value></data>
+  <data name="Log_Debug" xml:space="preserve"><value>全部</value></data>
+  <data name="OpenLogs" xml:space="preserve"><value>打开日志文件夹</value></data>
+
+  <data name="Version" xml:space="preserve"><value>版本 {0}</value></data>
+  <data name="About_Desc" xml:space="preserve"><value>一个小巧的 Windows AirPlay 接收端：把 iPhone 或 iPad 的屏幕和声音投到这台电脑上。</value></data>
+  <data name="About_Licence" xml:space="preserve"><value>自由软件，遵循 GNU 通用公共许可证第 3 版。</value></data>
+  <data name="About_Site" xml:space="preserve"><value>源代码</value></data>
+
+  <data name="Msg_AppliesLater" xml:space="preserve"><value>这项改动会在当前手机断开后生效。</value></data>
+  <data name="Msg_AddressFallback" xml:space="preserve"><value>选定的网卡当前不可用，已改为在全部网卡上接收。</value></data>
 
   <data name="ErrNoDecoder" xml:space="preserve"><value>没有找到 H.264 视频解码器。
 
-如果是 Windows N 版本，请先安装"媒体功能包"（设置 &gt; 应用 &gt; 可选功能），再重新打开轻投屏。</value></data>
-  <data name="ErrMdnsUnavailable" xml:space="preserve"><value>轻投屏需要 Windows 10 1809 或更新的版本。</value></data>
-  <data name="ErrMdnsRegister" xml:space="preserve"><value>Windows 无法在局域网里发布轻投屏。请确认电脑和手机连的是同一个 Wi-Fi，并把网络设为"专用网络"。</value></data>
-  <data name="ErrPort" xml:space="preserve"><value>轻投屏需要的网络端口被其他程序占用了。请关闭那个程序后重新打开轻投屏。</value></data>
+如果是 Windows N 版本，请先安装"媒体功能包"（设置 &gt; 应用 &gt; 可选功能），再重新打开 LiteMirror。</value></data>
+  <data name="ErrMdnsUnavailable" xml:space="preserve"><value>LiteMirror 需要 Windows 10 1809 或更新的版本。</value></data>
+  <data name="ErrMdnsRegister" xml:space="preserve"><value>Windows 无法在局域网里发布 LiteMirror。请确认电脑和手机连的是同一个 Wi-Fi，并把网络设为"专用网络"。</value></data>
+  <data name="ErrPort" xml:space="preserve"><value>LiteMirror 需要的网络端口被其他程序占用了。请关闭那个程序，或在设置里换一个端口。</value></data>
   <data name="ErrNoD3D" xml:space="preserve"><value>这台电脑没有可用的 Direct3D 11，无法显示画面。请更新显卡驱动后重试。</value></data>
-  <data name="ErrOther" xml:space="preserve"><value>轻投屏无法启动：{0}</value></data>
+  <data name="ErrAddress" xml:space="preserve"><value>选定的网卡现在没有可用地址。</value></data>
+  <data name="ErrOther" xml:space="preserve"><value>LiteMirror 无法启动：{0}</value></data>
 </root>
