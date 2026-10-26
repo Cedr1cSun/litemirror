@@ -6,6 +6,7 @@
 // happen (apply at once, or restart the receiver).
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Windows;
@@ -13,9 +14,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using Windows.Foundation;
-using Windows.Networking.Connectivity;
-using Windows.Networking.NetworkOperators;
 using Forms = System.Windows.Forms;
 
 namespace LiteMirror
@@ -33,7 +31,6 @@ namespace LiteMirror
 
         readonly Settings s;
         bool loading;
-        NetworkOperatorTetheringManager hotspot;   // null: this PC cannot open one
 
         public event Action<string> Changed;
 
@@ -170,70 +167,7 @@ namespace LiteMirror
             UpdateSwitch.IsChecked = s.CheckUpdates;
             CloseBox.SelectedIndex = s.CloseToTray ? 1 : 0;
             LogLevelBox.SelectedIndex = Math.Max(0, Array.IndexOf(LogLevels, s.LogLevel));
-            LoadHotspot();
             loading = false;
-        }
-
-        // The Windows mobile hotspot, so a phone can join the PC directly. Not a
-        // setting of ours: the switch shows and changes the system's state.
-        // shortcut: the state is read when the page loads, not while Windows changes it behind us; add a NetworkStatusChanged handler if that confuses people
-        void LoadHotspot()
-        {
-            hotspot = null;
-            string why = null;
-            try
-            {
-                ConnectionProfile profile = NetworkInformation.GetInternetConnectionProfile();
-                if (profile == null) why = Strings.Get("Hotspot_NoNet");
-                else if (NetworkOperatorTetheringManager.GetTetheringCapabilityFromConnectionProfile(profile) != TetheringCapability.Enabled) why = Strings.Get("Hotspot_Unavailable");
-                else hotspot = NetworkOperatorTetheringManager.CreateFromConnectionProfile(profile);
-            }
-            catch (Exception) { why = Strings.Get("Hotspot_Unavailable"); }
-            HotspotSwitch.IsEnabled = hotspot != null;
-            HotspotSwitch.IsChecked = hotspot != null && hotspot.TetheringOperationalState == TetheringOperationalState.On;
-            ShowHotspot(why);
-        }
-
-        // Name and password while it is on, otherwise why it is not
-        void ShowHotspot(string why)
-        {
-            if (HotspotSwitch.IsChecked == true)
-            {
-                NetworkOperatorTetheringAccessPointConfiguration ap = hotspot.GetCurrentAccessPointConfiguration();
-                HotspotInfo.Text = string.Format(Strings.Get("Hotspot_Info"), ap.Ssid, ap.Passphrase);
-            }
-            else HotspotInfo.Text = why ?? "";
-            HotspotInfo.Visibility = HotspotInfo.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        // Starting takes a few seconds; the switch is locked until Windows answers.
-        // The operation reports success while the state is still InTransition, so
-        // on success the switch keeps what was asked for.
-        void OnHotspot(object sender, RoutedEventArgs e)
-        {
-            bool want = HotspotSwitch.IsChecked == true;
-            if (want == (hotspot.TetheringOperationalState == TetheringOperationalState.On))
-            {
-                ShowHotspot(null);   // Windows changed it behind us; nothing to do
-                return;
-            }
-            HotspotSwitch.IsEnabled = false;
-            IAsyncOperation<NetworkOperatorTetheringOperationResult> op = want ? hotspot.StartTetheringAsync() : hotspot.StopTetheringAsync();
-            op.Completed = (o, status) => Dispatcher.BeginInvoke((Action)(() => HotspotDone(o, status, want)));
-        }
-
-        void HotspotDone(IAsyncOperation<NetworkOperatorTetheringOperationResult> op, AsyncStatus status, bool want)
-        {
-            string why = null;
-            if (status != AsyncStatus.Completed) why = op.ErrorCode != null ? op.ErrorCode.Message : status.ToString();
-            else
-            {
-                NetworkOperatorTetheringOperationResult r = op.GetResults();
-                if (r.Status != TetheringOperationStatus.Success) why = string.IsNullOrEmpty(r.AdditionalErrorMessage) ? r.Status.ToString() : r.AdditionalErrorMessage;
-            }
-            HotspotSwitch.IsEnabled = true;
-            HotspotSwitch.IsChecked = why == null ? want : hotspot.TetheringOperationalState == TetheringOperationalState.On;
-            ShowHotspot(why);
         }
 
         void Set(string field, Action apply)
@@ -307,6 +241,7 @@ namespace LiteMirror
             try { Settings.RunAtStartup = StartupSwitch.IsChecked == true; }
             catch (Exception) { StartupSwitch.IsChecked = Settings.RunAtStartup; }   // a locked-down account
         }
+        void OnHotspot(object sender, RoutedEventArgs e) => Process.Start("ms-settings:network-mobilehotspot");
         void OnUpdateCheck(object sender, RoutedEventArgs e) => Set("CheckUpdates", () => s.CheckUpdates = UpdateSwitch.IsChecked == true);
         void OnClose(object sender, SelectionChangedEventArgs e) => Set("CloseToTray", () => s.CloseToTray = CloseBox.SelectedIndex == 1);
         void OnLogLevel(object sender, SelectionChangedEventArgs e) => Set("LogLevel", () => s.LogLevel = LogLevels[Math.Max(0, LogLevelBox.SelectedIndex)]);

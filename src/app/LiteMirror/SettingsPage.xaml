@@ -58,10 +58,9 @@
                     </DockPanel>
                     <Border Style="{StaticResource RowLine}" />
                     <DockPanel Style="{StaticResource Row}">
-                        <ToggleButton x:Name="HotspotSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnHotspot" />
+                        <Button x:Name="HotspotButton" DockPanel.Dock="Right" VerticalAlignment="Center" Content="{local:S Hotspot_Open}" Click="OnHotspot" />
                         <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
                             <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_Hotspot}" />
-                            <TextBlock x:Name="HotspotInfo" Style="{StaticResource RowHint}" Foreground="{DynamicResource PrimaryBrush}" Visibility="Collapsed" />
                             <TextBlock Style="{StaticResource RowHint}" Text="{local:S H_Hotspot}" />
                         </StackPanel>
                     </DockPanel>
