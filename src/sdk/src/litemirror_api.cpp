@@ -67,9 +67,9 @@ lm_error lm_server_set_super_resolution(lm_server* s, int mode)
 	return LM_OK;
 }
 
-unsigned lm_gpu_vendor(void)
+int lm_gpu_has_vendor(unsigned vendor)
 {
-	return LmVideoSink::defaultVendor();
+	return LmVideoSink::hasVendor(vendor) ? 1 : 0;
 }
 
 lm_error lm_server_set_low_latency(lm_server* s, int enable)

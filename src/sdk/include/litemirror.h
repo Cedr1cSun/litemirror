@@ -187,9 +187,10 @@ LM_API lm_error    lm_server_set_scaler(lm_server* s, int quality);
  * driver applies when it can and ignores otherwise, without saying which.
  * 1 to 3 take precedence over the scaler. May be changed at any time. */
 LM_API lm_error    lm_server_set_super_resolution(lm_server* s, int mode);
-/* PCI vendor id of the GPU D3D11 uses by default: 0x10DE NVIDIA, 0x8086
- * Intel, 0x1002 AMD; 0 when there is none. For offering 2 and 3 above. */
-LM_API unsigned    lm_gpu_vendor(void);
+/* 1 when a GPU of that PCI vendor (0x10DE NVIDIA, 0x8086 Intel, 0x1002
+ * AMD) is in this machine, for offering 2 and 3 above. The picture is
+ * processed on the GPU that drives the monitor the window is on. */
+LM_API int         lm_gpu_has_vendor(unsigned vendor);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

@@ -500,9 +500,53 @@ TEST_CASE("driver super resolution modes still draw through the processor")
 		CHECK(out.diff(272, 16, 0, 0, 254) <= 6);
 		sink.present();
 	}
-	CHECK(LmVideoSink::defaultVendor() != 0);
 	sink.close();
 	DestroyWindow(hwnd);
+}
+
+// With two GPUs each driving a monitor, DXGI's default adapter is whichever
+// has the primary screen. The sink must instead use the GPU that drives the
+// monitor the window is on: that is where decoding and presenting belong.
+static BOOL CALLBACK collect_monitor(HMONITOR, HDC, LPRECT rc, LPARAM list)
+{
+	((std::vector<RECT>*)list)->push_back(*rc);
+	return TRUE;
+}
+
+TEST_CASE("sink opens its device on the adapter that drives the window's monitor")
+{
+	std::vector<RECT> monitors;
+	EnumDisplayMonitors(NULL, NULL, collect_monitor, (LPARAM)&monitors);
+	REQUIRE(monitors.size() >= 1);
+	for (const RECT& rc : monitors) {
+		// a window on each screen in turn: on a two-GPU desktop they belong to different adapters
+		HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, rc.left + 10, rc.top + 10, 320, 240, NULL, NULL, NULL, NULL);
+		REQUIRE(hwnd != NULL);
+		HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+		LmVideoSink sink;
+		REQUIRE(sink.open(hwnd));
+		IDXGIDevice* dxgi = NULL;
+		IDXGIAdapter* adapter = NULL;
+		REQUIRE(SUCCEEDED(sink.device()->QueryInterface(IID_PPV_ARGS(&dxgi))));
+		REQUIRE(SUCCEEDED(dxgi->GetAdapter(&adapter)));
+		bool drives = false;
+		IDXGIOutput* output = NULL;
+		for (UINT i = 0; adapter->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND; i++) {
+			DXGI_OUTPUT_DESC od;
+			if (SUCCEEDED(output->GetDesc(&od)) && od.Monitor == monitor) drives = true;
+			output->Release();
+		}
+		DXGI_ADAPTER_DESC ad;
+		adapter->GetDesc(&ad);
+		INFO("monitor at " << rc.left << "," << rc.top << " adapter vendor " << ad.VendorId);
+		CHECK(drives);
+		CHECK(LmVideoSink::hasVendor(ad.VendorId));
+		adapter->Release();
+		dxgi->Release();
+		sink.close();
+		DestroyWindow(hwnd);
+	}
+	CHECK_FALSE(LmVideoSink::hasVendor(0x1234));
 }
 
 TEST_CASE("sink refuses to open without a window")

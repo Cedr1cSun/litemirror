@@ -310,11 +310,12 @@ TEST_CASE("set_super_resolution takes 0 to 3 and may be changed while running")
 	lm_server_destroy(server);
 }
 
-TEST_CASE("gpu_vendor names the default adapter")
+TEST_CASE("gpu_has_vendor knows which GPUs are in this machine")
 {
-	unsigned vendor = lm_gpu_vendor();
-	CHECK(vendor != 0);   // whatever renders this desktop has a PCI vendor id
-	CHECK(vendor == lm_gpu_vendor());
+	CHECK(lm_gpu_has_vendor(0) == 0);
+	CHECK(lm_gpu_has_vendor(0x1234) == 0);
+	// at least one of the three desktop GPU makers renders this desktop
+	CHECK((lm_gpu_has_vendor(0x10DE) + lm_gpu_has_vendor(0x8086) + lm_gpu_has_vendor(0x1002)) >= 1);
 }
 
 TEST_CASE("set_window takes a real window and only while stopped")

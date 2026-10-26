@@ -101,10 +101,9 @@ namespace LiteMirror
         // Off and FSR for every GPU; a driver's own super resolution only where that driver is
         void FillSuper()
         {
-            uint vendor = Native.lm_gpu_vendor();
             var modes = new List<int> { 0, 1 };
-            if (vendor == 0x10DE) modes.Add(2);
-            if (vendor == 0x8086) modes.Add(3);
+            if (Native.lm_gpu_has_vendor(0x10DE) != 0) modes.Add(2);
+            if (Native.lm_gpu_has_vendor(0x8086) != 0) modes.Add(3);
             supers = modes.ToArray();
             foreach (int mode in supers) SuperBox.Items.Add(Strings.Get(SuperKeys[mode]));
         }

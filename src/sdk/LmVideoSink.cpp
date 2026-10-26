@@ -40,6 +40,36 @@ static const char SCALER_HLSL[] =
 
 template <class T> static void release(T*& p) { if (p) { p->Release(); p = NULL; } }
 
+// The adapter driving the monitor the window is on, so decoding, scaling and
+// presenting happen on the GPU that owns that screen; DXGI's default adapter
+// is the one with the primary screen, which on a two-GPU desktop may be the
+// other one. NULL when no output matches (remote session, odd drivers).
+// shortcut: chosen once at open(); a window dragged to a monitor of the other GPU keeps presenting across adapters until the receiver restarts
+static IDXGIAdapter1* adapterForWindow(HWND window)
+{
+	HMONITOR monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+	IDXGIFactory1* factory = NULL;
+	IDXGIAdapter1* adapter = NULL;
+	IDXGIAdapter1* found = NULL;
+	if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))) {
+		return NULL;
+	}
+	for (UINT i = 0; !found && factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND; i++) {
+		IDXGIOutput* output = NULL;
+		for (UINT j = 0; !found && adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND; j++) {
+			DXGI_OUTPUT_DESC od;
+			if (SUCCEEDED(output->GetDesc(&od)) && od.Monitor == monitor) {
+				found = adapter;
+				found->AddRef();
+			}
+			release(output);
+		}
+		release(adapter);
+	}
+	release(factory);
+	return found;
+}
+
 LmVideoSink::LmVideoSink()
 	: m_hwnd(NULL), m_device(NULL), m_context(NULL), m_swap(NULL),
 	  m_videoDevice(NULL), m_videoContext(NULL), m_enumerator(NULL), m_processor(NULL),
@@ -121,9 +151,11 @@ bool LmVideoSink::open(HWND window)
 	static const D3D_FEATURE_LEVEL levels[] = {
 		D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0
 	};
-	HRESULT hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+	IDXGIAdapter1* chosen = adapterForWindow(window);
+	HRESULT hr = D3D11CreateDevice(chosen, chosen ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, NULL,
 	                               D3D11_CREATE_DEVICE_VIDEO_SUPPORT | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
 	                               levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &m_device, NULL, &m_context);
+	release(chosen);
 	if (FAILED(hr)) {
 		close();
 		return false;
@@ -207,17 +239,22 @@ void LmVideoSink::applyLatency()
 	m_maxLatency = latency;
 }
 
-unsigned LmVideoSink::defaultVendor()
+bool LmVideoSink::hasVendor(unsigned vendor)
 {
 	IDXGIFactory1* factory = NULL;
 	IDXGIAdapter1* adapter = NULL;
-	DXGI_ADAPTER_DESC1 desc = {};
-	if (SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))) && SUCCEEDED(factory->EnumAdapters1(0, &adapter))) {
-		adapter->GetDesc1(&desc);
+	bool found = false;
+	if (vendor == 0 || FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))) {
+		return false;
 	}
-	release(adapter);
+	for (UINT i = 0; !found && factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND; i++) {
+		DXGI_ADAPTER_DESC1 desc = {};
+		adapter->GetDesc1(&desc);
+		found = desc.VendorId == vendor && !(desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE);
+		release(adapter);
+	}
 	release(factory);
-	return desc.VendorId;
+	return found;
 }
 
 void LmVideoSink::close()

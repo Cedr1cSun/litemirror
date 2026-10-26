@@ -75,8 +75,8 @@ public:
 	// the video processor; other GPUs and old drivers scale as usual). 1 to 3
 	// take precedence over setScaler(). The next draw() uses it.
 	void setSuperResolution(int mode) { m_super = mode; }
-	// PCI vendor of the GPU D3D11 picks by default; 0 when there is none
-	static unsigned defaultVendor();
+	// Whether a hardware GPU of that PCI vendor is in this machine
+	static bool hasVendor(unsigned vendor);
 
 private:
 	bool fitWindow();

@@ -122,7 +122,7 @@ namespace LiteMirror
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Error lm_server_set_super_resolution(IntPtr server, int mode);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint lm_gpu_vendor();
+        public static extern int lm_gpu_has_vendor(uint vendor);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Error lm_server_start(IntPtr server, ref Config cfg);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]

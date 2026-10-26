@@ -141,7 +141,7 @@
   <data name="H_Hw" xml:space="preserve"><value>通过 Media Foundation 用 GPU 解码 H.264。关闭改为软件解码，CPU 占用明显上升；用于排查驱动问题。</value></data>
   <data name="H_Low" xml:space="preserve"><value>解码器开启 AVLowLatencyMode，Present 间隔为 0，DXGI 队列只留一帧而不是三帧；全屏时呈现不等垂直消隐（允许撕裂）。关闭则按 vsync 呈现、默认队列深度，多两到四帧延迟，无撕裂。</value></data>
   <data name="H_Scaler" xml:space="preserve"><value>画面小于窗口时的放大插值。"标准"由 D3D11 视频处理器（驱动）完成；"锐利"用 Catmull-Rom 双三次着色器，边缘更清晰，多一个全屏 pass。</value></data>
-  <data name="H_Super" xml:space="preserve"><value>只在画面小于窗口时起作用，替代上面的放大方式。AMD FSR 1.0：开源空间放大，两个着色器 pass（EASU、RCAS），特性级别 11 的显卡都能跑，1 ms 以内。RTX VSR / Intel VSR：驱动自带的模型，在视频处理器上执行，每帧多 4 到 8 ms GPU 时间；只有显卡、驱动版本和控制面板都允许时驱动才启用，不启用也不报错，画面可能与"标准"一样。</value></data>
+  <data name="H_Super" xml:space="preserve"><value>只在画面小于窗口时起作用，替代上面的放大方式。AMD FSR 1.0：开源空间放大，两个着色器 pass（EASU、RCAS），特性级别 11 的显卡都能跑，1 ms 以内。RTX VSR / Intel VSR：驱动自带的模型，在视频处理器上执行，每帧多 4 到 8 ms GPU 时间；只有显卡、驱动版本和控制面板都允许时驱动才启用，不启用也不报错，画面可能与"标准"一样。画面在开始接收时窗口所在显示器的显卡上处理。</value></data>
   <data name="H_Rotate" xml:space="preserve"><value>发送端横竖切换时窗口按新宽高比重排，面积不变。关闭则窗口不动，画面加黑边。</value></data>
   <data name="H_Info" xml:space="preserve"><value>左上角叠加分辨率、帧率、每帧处理耗时和解码方式。Ctrl+I 切换。</value></data>
   <data name="H_Monitor" xml:space="preserve"><value>多显示器时 F11 全屏使用的显示器。</value></data>
