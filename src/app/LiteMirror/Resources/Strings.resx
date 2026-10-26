@@ -51,6 +51,9 @@
   <data name="R_Fps" xml:space="preserve"><value>Frame rate</value></data>
   <data name="R_Hw" xml:space="preserve"><value>Hardware decoding</value></data>
   <data name="R_Low" xml:space="preserve"><value>Low latency</value></data>
+  <data name="R_Scaler" xml:space="preserve"><value>Enlarging</value></data>
+  <data name="Scaler_Std" xml:space="preserve"><value>Standard (graphics driver)</value></data>
+  <data name="Scaler_Sharp" xml:space="preserve"><value>Sharp (bicubic)</value></data>
   <data name="R_Rotate" xml:space="preserve"><value>Turn the window when the phone rotates</value></data>
   <data name="R_Info" xml:space="preserve"><value>Show picture info over the picture</value></data>
   <data name="R_Monitor" xml:space="preserve"><value>Full-screen monitor</value></data>

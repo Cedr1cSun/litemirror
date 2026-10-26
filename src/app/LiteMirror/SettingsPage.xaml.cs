@@ -43,6 +43,7 @@ namespace LiteMirror
             FillAddresses();
             Fill(QualityBox, "1080p", "720p", "540p");
             Fill(FpsBox, "60 fps", "30 fps");
+            Fill(ScalerBox, "Scaler_Std", "Scaler_Sharp");
             FillMonitors();
             Fill(MatrixBox, "Matrix_Auto", "Matrix_601", "Matrix_709");
             Fill(RangeBox, "Range_Auto", "Range_Limited", "Range_Full");
@@ -142,6 +143,7 @@ namespace LiteMirror
             FpsBox.SelectedIndex = Math.Max(0, Array.IndexOf(Rates, s.Fps));
             HwSwitch.IsChecked = s.HwDecode;
             LowSwitch.IsChecked = s.LowLatency;
+            ScalerBox.SelectedIndex = s.Scaler;
             RotateSwitch.IsChecked = s.FollowRotation;
             InfoSwitch.IsChecked = s.ShowInfo;
             MonitorBox.SelectedIndex = s.FullscreenMonitor + 1 < MonitorBox.Items.Count ? s.FullscreenMonitor + 1 : 0;
@@ -203,6 +205,7 @@ namespace LiteMirror
         void OnFps(object sender, SelectionChangedEventArgs e) => Set("Fps", () => s.Fps = Rates[Math.Max(0, FpsBox.SelectedIndex)]);
         void OnHw(object sender, RoutedEventArgs e) => Set("HwDecode", () => s.HwDecode = HwSwitch.IsChecked == true);
         void OnLow(object sender, RoutedEventArgs e) => Set("LowLatency", () => s.LowLatency = LowSwitch.IsChecked == true);
+        void OnScaler(object sender, SelectionChangedEventArgs e) => Set("Scaler", () => s.Scaler = Math.Max(0, ScalerBox.SelectedIndex));
         void OnRotate(object sender, RoutedEventArgs e) => Set("FollowRotation", () => s.FollowRotation = RotateSwitch.IsChecked == true);
         void OnInfo(object sender, RoutedEventArgs e) => Set("ShowInfo", () => s.ShowInfo = InfoSwitch.IsChecked == true);
         void OnMonitor(object sender, SelectionChangedEventArgs e) => Set("FullscreenMonitor", () => s.FullscreenMonitor = MonitorBox.SelectedIndex - 1);

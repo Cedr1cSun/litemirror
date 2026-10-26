@@ -104,6 +104,7 @@ namespace LiteMirror
             {
                 err = Native.lm_server_set_window(server, Video.Handle);
                 videoReady = err == Native.Error.Ok;
+                Native.lm_server_set_scaler(server, settings.Scaler);
             }
             ApplyStrings();
             if (err != Native.Error.Ok)
@@ -221,6 +222,9 @@ namespace LiteMirror
                     break;
                 case "Colour":
                     ApplyColour();
+                    break;
+                case "Scaler":
+                    Native.lm_server_set_scaler(server, settings.Scaler);
                     break;
                 case "LogLevel":
                     Log.Level = settings.LogLevel;

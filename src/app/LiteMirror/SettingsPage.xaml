@@ -73,6 +73,11 @@
                     </DockPanel>
                     <Border Style="{StaticResource RowLine}" />
                     <DockPanel Style="{StaticResource Row}">
+                        <ComboBox x:Name="ScalerBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" SelectionChanged="OnScaler" />
+                        <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Scaler}" />
+                    </DockPanel>
+                    <Border Style="{StaticResource RowLine}" />
+                    <DockPanel Style="{StaticResource Row}">
                         <ToggleButton x:Name="RotateSwitch" DockPanel.Dock="Right" Style="{StaticResource ToggleButtonSwitch}" VerticalAlignment="Center" Click="OnRotate" />
                         <TextBlock Style="{StaticResource RowLabel}" Text="{local:S R_Rotate}" />
                     </DockPanel>

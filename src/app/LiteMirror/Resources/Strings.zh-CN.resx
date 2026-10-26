@@ -51,6 +51,9 @@
   <data name="R_Fps" xml:space="preserve"><value>帧率</value></data>
   <data name="R_Hw" xml:space="preserve"><value>硬件解码</value></data>
   <data name="R_Low" xml:space="preserve"><value>低延迟</value></data>
+  <data name="R_Scaler" xml:space="preserve"><value>画面放大方式</value></data>
+  <data name="Scaler_Std" xml:space="preserve"><value>标准（显卡驱动）</value></data>
+  <data name="Scaler_Sharp" xml:space="preserve"><value>锐利（双三次）</value></data>
   <data name="R_Rotate" xml:space="preserve"><value>手机旋转时转动窗口</value></data>
   <data name="R_Info" xml:space="preserve"><value>在画面上显示信息</value></data>
   <data name="R_Monitor" xml:space="preserve"><value>全屏使用的显示器</value></data>

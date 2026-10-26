@@ -115,6 +115,8 @@ namespace LiteMirror
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Error lm_server_set_low_latency(IntPtr server, int enable);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern Error lm_server_set_scaler(IntPtr server, int quality);
+        [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Error lm_server_start(IntPtr server, ref Config cfg);
         [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void lm_server_stop(IntPtr server);

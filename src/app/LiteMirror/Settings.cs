@@ -32,6 +32,7 @@ namespace LiteMirror
         public bool HwDecode = true;
         public bool LowLatency = true;
         public bool FollowRotation = true;
+        public int Scaler;                // 0 video processor, 1 bicubic shader when enlarging
         public int FullscreenMonitor = -1; // -1 = the monitor the window is on
         public int Matrix;                // 0 auto, 1 BT.601, 2 BT.709
         public int Range;                 // 0 auto, 1 limited, 2 full
