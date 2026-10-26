@@ -134,7 +134,7 @@
   <data name="H_Quality" xml:space="preserve"><value>The target resolution advertised to the sender (16:9, by height), which encodes accordingly. Lower means less bitrate and decode load.</value></data>
   <data name="H_Fps" xml:space="preserve"><value>The maximum frame rate advertised to the sender.</value></data>
   <data name="H_Hw" xml:space="preserve"><value>Decode H.264 on the GPU through Media Foundation. Off switches to software decoding at a much higher CPU cost; for isolating driver problems.</value></data>
-  <data name="H_Low" xml:space="preserve"><value>Decoder in AVLowLatencyMode and Present with interval 0, not waiting for vsync. Off presents on vsync: one or two frames more delay, no tearing.</value></data>
+  <data name="H_Low" xml:space="preserve"><value>Decoder in AVLowLatencyMode, Present with interval 0 and one frame in the DXGI queue instead of three; in full screen the present skips the vertical blank (tearing allowed). Off presents on vsync with the default queue: two to four frames more delay, no tearing.</value></data>
   <data name="H_Scaler" xml:space="preserve"><value>Interpolation used when the picture is smaller than the window. "Standard" is the D3D11 video processor (driver); "Sharp" is a Catmull-Rom bicubic shader with crisper edges and one extra full-screen pass.</value></data>
   <data name="H_Rotate" xml:space="preserve"><value>When the sender switches orientation the window is re-laid out at the new aspect ratio with the same area. Off keeps the window and letterboxes.</value></data>
   <data name="H_Info" xml:space="preserve"><value>Overlay in the top-left corner with resolution, frame rate, per-frame processing time and decoder. Ctrl+I toggles it.</value></data>

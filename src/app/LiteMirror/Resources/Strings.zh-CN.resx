@@ -134,7 +134,7 @@
   <data name="H_Quality" xml:space="preserve"><value>向发送端通告的目标分辨率（16:9，按高度），发送端据此编码。越低码率与解码负载越小。</value></data>
   <data name="H_Fps" xml:space="preserve"><value>向发送端通告的最高帧率。</value></data>
   <data name="H_Hw" xml:space="preserve"><value>通过 Media Foundation 用 GPU 解码 H.264。关闭改为软件解码，CPU 占用明显上升；用于排查驱动问题。</value></data>
-  <data name="H_Low" xml:space="preserve"><value>解码器开启 AVLowLatencyMode，Present 间隔为 0，不等待垂直同步。关闭则按 vsync 呈现，多一到两帧延迟，无撕裂。</value></data>
+  <data name="H_Low" xml:space="preserve"><value>解码器开启 AVLowLatencyMode，Present 间隔为 0，DXGI 队列只留一帧而不是三帧；全屏时呈现不等垂直消隐（允许撕裂）。关闭则按 vsync 呈现、默认队列深度，多两到四帧延迟，无撕裂。</value></data>
   <data name="H_Scaler" xml:space="preserve"><value>画面小于窗口时的放大插值。"标准"由 D3D11 视频处理器（驱动）完成；"锐利"用 Catmull-Rom 双三次着色器，边缘更清晰，多一个全屏 pass。</value></data>
   <data name="H_Rotate" xml:space="preserve"><value>发送端横竖切换时窗口按新宽高比重排，面积不变。关闭则窗口不动，画面加黑边。</value></data>
   <data name="H_Info" xml:space="preserve"><value>左上角叠加分辨率、帧率、每帧处理耗时和解码方式。Ctrl+I 切换。</value></data>
