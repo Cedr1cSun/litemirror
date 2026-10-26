@@ -10,7 +10,7 @@
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <DockPanel Style="{StaticResource Row}">
-                        <TextBox x:Name="NameBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" MaxLength="60" LostFocus="OnName" KeyDown="OnTextKey" />
+                        <TextBox x:Name="NameBox" DockPanel.Dock="Right" Width="220" VerticalAlignment="Center" MaxLength="40" LostFocus="OnName" KeyDown="OnTextKey" />
                         <StackPanel VerticalAlignment="Center" Margin="0,9,16,9">
                             <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{local:S R_Name}" />
                             <TextBlock Style="{StaticResource RowHint}" Text="{local:S H_Name}" />
