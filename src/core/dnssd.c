@@ -10,6 +10,7 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <windns.h>
+#include <iphlpapi.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -19,6 +20,8 @@
 #include "dnssdint.h"
 #include "global.h"
 #include "utils.h"
+
+#pragma comment(lib, "iphlpapi.lib")
 
 #define MAX_SERVNAME 256
 #define REGISTER_TIMEOUT_MS 5000
@@ -56,6 +59,31 @@ static WCHAR *to_wide(const char *utf8)
 	WCHAR *out = len > 0 ? malloc(len * sizeof(WCHAR)) : NULL;
 	if (out) MultiByteToWideChar(CP_UTF8, 0, utf8, -1, out, len);
 	return out;
+}
+
+/* The interface that owns an address, so a bound receiver is announced on
+ * that interface only; without it Windows answers the host name on every
+ * interface and a phone may pick an address nobody listens on. 0: unknown. */
+static DWORD interface_index(IP4_ADDRESS address)
+{
+	ULONG size = 0;
+	PMIB_IPADDRTABLE table;
+	DWORD index = 0, i;
+
+	if (GetIpAddrTable(NULL, &size, FALSE) != ERROR_INSUFFICIENT_BUFFER) {
+		return 0;
+	}
+	table = malloc(size);
+	if (table && GetIpAddrTable(table, &size, FALSE) == NO_ERROR) {
+		for (i = 0; i < table->dwNumEntries; i++) {
+			if (table->table[i].dwAddr == address) {
+				index = table->table[i].dwIndex;
+				break;
+			}
+		}
+	}
+	free(table);
+	return index;
 }
 
 static VOID WINAPI on_complete(DWORD status, PVOID context, PDNS_SERVICE_INSTANCE instance)
@@ -102,6 +130,9 @@ static int issue_service(service_t *s, const char *instance_name, unsigned short
 	memset(&s->request, 0, sizeof(s->request));
 	s->request.Version = DNS_QUERY_REQUEST_VERSION1;
 	s->request.pServiceInstance = s->instance;
+	if (d->address) {
+		s->request.InterfaceIndex = interface_index(d->address);
+	}
 	s->request.pRegisterCompletionCallback = on_complete;
 	s->request.pQueryContext = s;
 
