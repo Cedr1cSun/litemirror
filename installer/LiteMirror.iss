@@ -57,7 +57,7 @@ Name: "{autodesktop}\LiteMirror"; Filename: "{app}\LiteMirror.exe"; Tasks: deskt
 
 [Run]
 ; inbound rule on private networks, so the first phone is not stopped by the firewall prompt
-Filename: "netsh"; Parameters: "advfirewall firewall add rule name=""LiteMirror"" dir=in action=allow program=""{app}\LiteMirror.exe"" enable=yes profile=private,domain"; Flags: runhidden
+Filename: "netsh"; Parameters: "advfirewall firewall add rule name=""LiteMirror"" dir=in action=allow program=""{app}\LiteMirror.exe"" enable=yes profile=any remoteip=localsubnet"; Flags: runhidden
 Filename: "{app}\LiteMirror.exe"; Description: "{cm:LaunchProgram,LiteMirror}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
