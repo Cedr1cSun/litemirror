@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using HandyControl.Data;
 using HandyControl.Themes;
+using HandyControl.Tools;
 using Microsoft.Win32;
 
 namespace LiteMirror
@@ -60,14 +61,31 @@ namespace LiteMirror
             base.OnExit(e);
         }
 
-        // Light or dark and the accent colour, from the settings or from Windows
+        // Light or dark and the accent colour, from the settings or from Windows.
+        // HandyControl's brushes take their colours when their dictionary is
+        // created, so both the skin and the theme dictionary are built afresh,
+        // the way HandyControl's own demo switches skins.
         public static void ApplyTheme(Settings s)
         {
-            Theme theme = Theme.GetTheme("Theme", Current.Resources);
-            if (theme == null) return;
             bool dark = s.Theme == 2 || (s.Theme == 0 && WindowsIsDark());
-            theme.Skin = dark ? SkinType.Dark : SkinType.Default;
-            theme.AccentColor = Accent(s.ThemeColour, dark);
+            Color accent = Accent(s.ThemeColour, dark);
+            ResourceDictionary skin = ResourceHelper.GetSkin(dark ? SkinType.Dark : SkinType.Default);
+            foreach (string key in new[] { "PrimaryColor", "DarkPrimaryColor", "TitleColor", "SecondaryTitleColor" })
+            {
+                skin[key] = accent;
+            }
+            // the tint behind the chosen sidebar entry: a wash of the accent over the page
+            Color page = dark ? Color.FromRgb(0x1c, 0x1c, 0x1c) : Colors.White;
+            float wash = dark ? 0.30f : 0.12f;
+            skin["LightPrimaryColor"] = Color.FromRgb(
+                (byte)(accent.R * wash + page.R * (1 - wash)),
+                (byte)(accent.G * wash + page.G * (1 - wash)),
+                (byte)(accent.B * wash + page.B * (1 - wash)));
+            SharedResourceDictionary.SharedDictionaries.Clear();
+            var merged = Current.Resources.MergedDictionaries;
+            merged[0] = skin;
+            merged[1] = new ResourceDictionary { Source = new Uri("pack://application:,,,/HandyControl;component/Themes/Theme.xaml") };
+            Current.MainWindow?.OnApplyTemplate();
         }
 
         static bool WindowsIsDark()

@@ -96,6 +96,12 @@
   <data name="Theme_Light" xml:space="preserve"><value>浅色</value></data>
   <data name="Theme_Dark" xml:space="preserve"><value>深色</value></data>
   <data name="R_Colour" xml:space="preserve"><value>主题色</value></data>
+  <data name="Colour_blue" xml:space="preserve"><value>蓝</value></data>
+  <data name="Colour_teal" xml:space="preserve"><value>青</value></data>
+  <data name="Colour_violet" xml:space="preserve"><value>紫</value></data>
+  <data name="Colour_amber" xml:space="preserve"><value>琥珀</value></data>
+  <data name="Colour_rose" xml:space="preserve"><value>玫红</value></data>
+  <data name="Colour_green" xml:space="preserve"><value>绿</value></data>
   <data name="R_Startup" xml:space="preserve"><value>登录 Windows 时自动运行</value></data>
   <data name="R_Close" xml:space="preserve"><value>关闭窗口时</value></data>
   <data name="Close_Quit" xml:space="preserve"><value>退出</value></data>

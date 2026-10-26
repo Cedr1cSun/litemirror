@@ -5,8 +5,10 @@
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <ResourceDictionary>
+            <!-- skin (colours) and theme (styles); App.ApplyTheme rebuilds both when the user changes them -->
             <ResourceDictionary.MergedDictionaries>
-                <hc:Theme Name="Theme" Skin="Default" AccentColor="#2F7CF6" />
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Icons from Material Design Icons (Apache-2.0), on a 24x24 grid -->

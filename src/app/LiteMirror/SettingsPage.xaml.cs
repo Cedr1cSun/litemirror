@@ -54,7 +54,8 @@ namespace LiteMirror
             Fill(ThemeBox, "Theme_System", "Theme_Light", "Theme_Dark");
             foreach (string colour in App.Colours)
             {
-                var swatch = new RadioButton { Style = (Style)FindResource("Swatch"), Tag = new SolidColorBrush(App.Accent(colour, false)), ToolTip = colour };
+                var swatch = new RadioButton { Style = (Style)FindResource("Swatch"), Tag = new SolidColorBrush(App.Accent(colour, false)), ToolTip = Strings.Get("Colour_" + colour) };
+                System.Windows.Automation.AutomationProperties.SetAutomationId(swatch, "Swatch_" + colour);
                 swatch.Checked += OnSwatch;
                 Swatches.Children.Add(swatch);
             }
