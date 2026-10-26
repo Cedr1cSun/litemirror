@@ -31,6 +31,16 @@ lm_error lm_server_set_address(lm_server* s, const char* ipv4)
 	return LM_OK;
 }
 
+lm_error lm_server_set_display(lm_server* s, uint32_t width, uint32_t height, uint32_t max_fps)
+{
+	if (!s || !width || !height || !max_fps) return LM_E_INVALID_ARG;
+	if (s->impl) return LM_E_RUNNING;
+	s->options.displayWidth = width;
+	s->options.displayHeight = height;
+	s->options.displayFps = max_fps;
+	return LM_OK;
+}
+
 lm_error lm_server_set_second_device(lm_server* s, int replace)
 {
 	if (!s) return LM_E_INVALID_ARG;

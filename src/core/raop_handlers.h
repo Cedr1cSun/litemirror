@@ -86,14 +86,14 @@ raop_handler_info(raop_conn_t *conn,
 
 	display = plist_new_dict();
 	plist_dict_set_item(display, "uuid", plist_new_string("e0ff8a27-6738-3d56-8a16-cc53aacee925"));
-	plist_dict_set_item(display, "width", plist_new_uint(1920));
-	plist_dict_set_item(display, "height", plist_new_uint(1080));
-	plist_dict_set_item(display, "widthPixels", plist_new_uint(1920));
-	plist_dict_set_item(display, "heightPixels", plist_new_uint(1080));
+	plist_dict_set_item(display, "width", plist_new_uint(raop->display_width));
+	plist_dict_set_item(display, "height", plist_new_uint(raop->display_height));
+	plist_dict_set_item(display, "widthPixels", plist_new_uint(raop->display_width));
+	plist_dict_set_item(display, "heightPixels", plist_new_uint(raop->display_height));
 	plist_dict_set_item(display, "widthPhysical", plist_new_bool(0));
 	plist_dict_set_item(display, "heightPhysical", plist_new_bool(0));
-	plist_dict_set_item(display, "refreshRate", plist_new_uint(60));
-	plist_dict_set_item(display, "maxFPS", plist_new_uint(60));   /* the phone caps its frame rate at this */
+	plist_dict_set_item(display, "refreshRate", plist_new_uint(raop->display_fps));
+	plist_dict_set_item(display, "maxFPS", plist_new_uint(raop->display_fps));   /* the phone caps its frame rate at this */
 	plist_dict_set_item(display, "features", plist_new_uint(14));
 	plist_dict_set_item(display, "overscanned", plist_new_bool(0));
 	plist_dict_set_item(display, "rotation", plist_new_bool(0));

@@ -156,6 +156,24 @@ TEST_CASE("set_address takes a dotted IPv4 address and only while stopped")
 	lm_server_destroy(server);
 }
 
+TEST_CASE("set_display wants a real size and frame rate and only while stopped")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_display(NULL, 1280, 720, 30) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_display(server, 0, 720, 30) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_display(server, 1280, 0, 30) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_display(server, 1280, 720, 0) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_display(server, 1280, 720, 30) == LM_OK);
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_display(server, 1920, 1080, 60) == LM_E_RUNNING);
+	lm_server_stop(server);
+	CHECK(lm_server_set_display(server, 1920, 1080, 60) == LM_OK);
+	lm_server_destroy(server);
+}
+
 TEST_CASE("set_window takes a real window and only while stopped")
 {
 	lm_callbacks cb = no_callbacks();

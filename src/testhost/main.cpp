@@ -10,6 +10,7 @@
 //   pin off | pin random | pin fixed <code> -> OK | FAIL <code> <message>   (before start)
 //   second reject | second replace          -> OK | FAIL <code> <message>   (before start)
 //   bind <ipv4> | bind -                    -> OK | FAIL <code> <message>   (before start)
+//   display <width> <height> <fps>          -> OK | FAIL <code> <message>   (before start)
 //   quit
 //
 // Events: EVENT connected <name> <id>, EVENT disconnected <name> <id>,
@@ -108,7 +109,7 @@ int main()
 	while (fgets(line, sizeof(line), stdin)) {
 		char name[128] = {0};
 		char code[64] = {0};
-		unsigned raopPort = 0, airplayPort = 0;
+		unsigned raopPort = 0, airplayPort = 0, fps = 0;
 
 		if (sscanf(line, "start %127s %u %u", name, &raopPort, &airplayPort) == 3) {
 			lm_server_stop(server);
@@ -126,6 +127,8 @@ int main()
 			report(lm_server_set_second_device(server, 1));
 		} else if (sscanf(line, "bind %63s", code) == 1) {
 			report(lm_server_set_address(server, strcmp(code, "-") == 0 ? NULL : code));
+		} else if (sscanf(line, "display %u %u %u", &raopPort, &airplayPort, &fps) == 3) {
+			report(lm_server_set_display(server, raopPort, airplayPort, fps));
 		} else if (strncmp(line, "stop", 4) == 0) {
 			lm_server_stop(server);
 			printf("OK\n");

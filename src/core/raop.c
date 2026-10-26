@@ -62,6 +62,9 @@ struct raop_s {
 	/* One session at a time */
 	int replace_second;
 	struct raop_conn_s *session_conn;   /* the connection that did the first SETUP */
+
+	/* Display offered in /info */
+	unsigned int display_width, display_height, display_fps;
 };
 
 struct raop_conn_s {
@@ -397,6 +400,9 @@ raop_init(int max_clients, raop_callbacks_t *callbacks)
 	memcpy(&raop->callbacks, callbacks, sizeof(raop_callbacks_t));
 	raop->pairing = pairing;
 	raop->httpd = httpd;
+	raop->display_width = 1920;
+	raop->display_height = 1080;
+	raop->display_fps = 60;
 	return raop;
 }
 
@@ -482,6 +488,15 @@ raop_set_pin(raop_t *raop, int mode, const char *pin)
 	raop->random_pin[0] = '\0';
 	raop->pin_failures = 0;
 	raop->pin_conn = NULL;
+}
+
+void
+raop_set_display(raop_t *raop, unsigned int width, unsigned int height, unsigned int fps)
+{
+	assert(raop);
+	raop->display_width = width;
+	raop->display_height = height;
+	raop->display_fps = fps;
 }
 
 void

@@ -221,6 +221,27 @@ class Pin(unittest.TestCase):
         self.assertEqual(self.host.stop(), 'OK')
 
 
+class Display(unittest.TestCase):
+    """The size and frame rate in /info are what the phone encodes at; a
+    smaller display means less bandwidth and CPU."""
+
+    def setUp(self):
+        self.host = TestHost()
+
+    def tearDown(self):
+        self.host.close()
+
+    def test_info_advertises_the_chosen_display(self):
+        self.assertEqual(self.host.cmd('display 1280 720 30'), 'OK')
+        self.assertEqual(self.host.start(), 'OK')
+        display = plistlib.loads(RtspClient(self.host.raop_port).info()[2])['displays'][0]
+        self.assertEqual((display['width'], display['height']), (1280, 720))
+        self.assertEqual((display['widthPixels'], display['heightPixels']), (1280, 720))
+        self.assertEqual(display['maxFPS'], 30)
+        self.assertEqual(display['refreshRate'], 30)
+        self.assertEqual(self.host.stop(), 'OK')
+
+
 class SecondDevice(unittest.TestCase):
     """A second phone while one is mirroring: turned away (the default, with
     the 453 an Apple TV sends when busy) or let in, replacing the first."""
