@@ -115,11 +115,19 @@ on_body(http_parser *parser, const char *at, size_t length)
 {
 	http_request_t *request = parser->data;
 
-	request->data = realloc(request->data, request->datalen+length);
-	assert(request->data);
-
+	/* nothing AirPlay sends comes near a megabyte; a client claiming more is cut off */
+	if (length > (1u << 20) - request->datalen) {
+		return 1;
+	}
+	/* one byte over, so handlers may read the body as a string */
+	char *data = realloc(request->data, request->datalen+length+1);
+	if (!data) {
+		return 1;
+	}
+	request->data = data;
 	memcpy(request->data+request->datalen, at, length);
 	request->datalen += length;
+	request->data[request->datalen] = '\0';
 	return 0;
 }
 

@@ -378,6 +378,13 @@ class Malformed(unittest.TestCase):
             pass
         self.assertServerStillAnswers()
 
+    def test_an_oversized_body_is_cut_off(self):
+        try:
+            self.client.request('SET_PARAMETER', self.client.SESSION_URL, bytes(2 * 1024 * 1024), 'text/parameters')
+        except (ConnectionError, OSError):
+            pass   # dropping the connection is the expected answer
+        self.assertServerStillAnswers()
+
 
 if __name__ == '__main__':
     unittest.main()

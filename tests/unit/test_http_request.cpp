@@ -2,6 +2,7 @@
 // Copyright (C) 2026 LiteMirror contributors
 #include "doctest.h"
 #include <string.h>
+#include <vector>
 extern "C" {
 #include "http_request.h"
 }
@@ -43,6 +44,33 @@ TEST_CASE("request split across TCP reads completes only at the end")
 	http_request_add_data(req, SETUP + half, (int)strlen(SETUP) - half);
 	CHECK(http_request_is_complete(req));
 	CHECK(strcmp(http_request_get_header(req, "CSeq"), "6") == 0);
+	http_request_destroy(req);
+}
+
+// Handlers hand the body to string functions (strncmp, strstr, "%s")
+TEST_CASE("the body is NUL terminated")
+{
+	http_request_t* req = http_request_init();
+	http_request_add_data(req, SETUP, (int)strlen(SETUP));
+	int len = 0;
+	const char* body = http_request_get_data(req, &len);
+	CHECK(len == 5);
+	CHECK(body[5] == '\0');
+	http_request_destroy(req);
+}
+
+// A client announcing a huge body must not make the server grow with it
+TEST_CASE("a body over a megabyte is an error")
+{
+	static const char head[] = "POST /x RTSP/1.0\r\nContent-Length: 3000000\r\nCSeq: 1\r\n\r\n";
+	http_request_t* req = http_request_init();
+	CHECK(http_request_add_data(req, head, (int)strlen(head)) >= 0);
+	std::vector<char> chunk(512 * 1024, 'a');
+	http_request_add_data(req, chunk.data(), (int)chunk.size());
+	http_request_add_data(req, chunk.data(), (int)chunk.size());
+	CHECK(!http_request_has_error(req));
+	http_request_add_data(req, chunk.data(), (int)chunk.size());
+	CHECK(http_request_has_error(req));
 	http_request_destroy(req);
 }
 
