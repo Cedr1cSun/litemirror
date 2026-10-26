@@ -368,7 +368,6 @@ namespace LiteMirror
         void Rail(bool on)
         {
             NavText = on ? Visibility.Collapsed : Visibility.Visible;
-            Brand.Visibility = NavText;
             var a = new DoubleAnimation(on ? SideRail : SideWide, TimeSpan.FromMilliseconds(200)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
             Sidebar.BeginAnimation(WidthProperty, a);
         }

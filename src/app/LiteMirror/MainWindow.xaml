@@ -43,7 +43,13 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock x:Name="Brand" Text="LiteMirror" FontSize="17" FontWeight="SemiBold" Margin="12,2,0,14" />
+            <StackPanel x:Name="Brand" Orientation="Horizontal" Margin="12,2,0,14">
+                <Border Width="26" Height="26" CornerRadius="5" Background="#2F7CF6">
+                    <Path Data="{StaticResource IconLogo}" Fill="White" Stretch="Uniform" Margin="5.5" />
+                </Border>
+                <TextBlock FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" Margin="9,0,0,0"
+                           Visibility="{Binding NavText, RelativeSource={RelativeSource AncestorType=Window}}"><Run Text="Lite" /><Run Text="Mirror" Foreground="{DynamicResource PrimaryBrush}" /></TextBlock>
+            </StackPanel>
             <StackPanel Grid.Row="1">
                 <RadioButton x:Name="NavMirror" Style="{StaticResource NavItem}" Tag="{StaticResource IconMirror}" IsChecked="True" Checked="OnNav" />
                 <RadioButton x:Name="NavSettings" Style="{StaticResource NavItem}" Tag="{StaticResource IconSettings}" Checked="OnNav" />
@@ -84,7 +90,12 @@
 
             <Border x:Name="AboutPage" Visibility="Collapsed" Style="{StaticResource Card}" Padding="28,24">
                 <StackPanel MaxWidth="560" HorizontalAlignment="Left">
-                    <TextBlock Text="LiteMirror" FontSize="26" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="36" Height="36" CornerRadius="7" Background="#2F7CF6" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconLogo}" Fill="White" Stretch="Uniform" Margin="7.5" />
+                        </Border>
+                        <TextBlock FontSize="26" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0"><Run Text="Lite" /><Run Text="Mirror" Foreground="{DynamicResource PrimaryBrush}" /></TextBlock>
+                    </StackPanel>
                     <TextBlock x:Name="AboutVersion" Margin="0,4,0,16" Foreground="{DynamicResource SecondaryTextBrush}" />
                     <TextBlock x:Name="AboutDesc" TextWrapping="Wrap" />
                     <TextBlock x:Name="AboutLicence" TextWrapping="Wrap" Margin="0,8,0,20" Foreground="{DynamicResource SecondaryTextBrush}" />
