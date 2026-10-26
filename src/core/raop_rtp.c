@@ -627,6 +627,7 @@ raop_rtp_set_metadata(raop_rtp_t *raop_rtp, const char *data, int datalen)
 
     /* Set metadata in thread instead */
     MUTEX_LOCK(raop_rtp->run_mutex);
+    free(raop_rtp->metadata);   /* not yet handed to the thread */
     raop_rtp->metadata = metadata;
     raop_rtp->metadata_len = datalen;
     MUTEX_UNLOCK(raop_rtp->run_mutex);
@@ -648,6 +649,7 @@ raop_rtp_set_coverart(raop_rtp_t *raop_rtp, const char *data, int datalen)
 
     /* Set coverart in thread instead */
     MUTEX_LOCK(raop_rtp->run_mutex);
+    free(raop_rtp->coverart);
     raop_rtp->coverart = coverart;
     raop_rtp->coverart_len = datalen;
     MUTEX_UNLOCK(raop_rtp->run_mutex);
@@ -664,6 +666,8 @@ raop_rtp_remote_control_id(raop_rtp_t *raop_rtp, const char *dacp_id, const char
 
     /* Set dacp stuff in thread instead */
     MUTEX_LOCK(raop_rtp->run_mutex);
+    free(raop_rtp->dacp_id);
+    free(raop_rtp->active_remote_header);
     raop_rtp->dacp_id = strdup(dacp_id);
     raop_rtp->active_remote_header = strdup(active_remote_header);
     MUTEX_UNLOCK(raop_rtp->run_mutex);

@@ -407,6 +407,9 @@ raop_handler_setup(raop_conn_t *conn,
 		plist_t device_id_node = plist_dict_get_item(root_node, "deviceID");
 		if (device_id_node) plist_get_string_val(device_id_node, &deviceId);
 
+        /* a second SETUP on the same connection: let go of the first pair */
+        raop_rtp_destroy(conn->raop_rtp);
+        raop_rtp_mirror_destroy(conn->raop_rtp_mirror);
         conn->raop_rtp = raop_rtp_init(conn->raop->logger, &conn->raop->callbacks, conn->remote, conn->remotelen, 
 			name, deviceId,
 			aeskey, aesiv, ecdh_secret, timing_rport);
