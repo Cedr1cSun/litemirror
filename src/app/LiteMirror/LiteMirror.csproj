@@ -21,7 +21,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en;zh-CN</SatelliteResourceLanguages>
-    <Version>0.6.0</Version>
+    <Version>0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
