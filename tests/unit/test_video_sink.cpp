@@ -421,6 +421,90 @@ TEST_CASE("high-quality scaler keeps the colours and differs from the video proc
 	DestroyWindow(hwnd);
 }
 
+// FSR 1.0 is two shader passes, EASU then RCAS. Like the bicubic scaler it
+// must leave flat colours alone and only act at edges, and it must step
+// aside when the picture is not being enlarged.
+TEST_CASE("FSR keeps the colours and differs from the video processor at edges")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 640, 480, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	if (sink.device()->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_0) {
+		sink.close();
+		DestroyWindow(hwnd);
+		return;   // no Gather on this GPU: FSR is not offered there
+	}
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+
+	Pixels plain, fsr;
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, plain));
+	sink.setScaler(1);              // ignored while super resolution is on
+	sink.setSuperResolution(1);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, fsr));
+	CHECK(fsr.width == 640);
+	CHECK(fsr.height == 480);
+
+	CHECK(fsr.diff(16, 16, 0, 0, 0) <= 3);
+	CHECK(fsr.diff(592, 16, 255, 255, 255) <= 3);
+	CHECK(fsr.diff(336, 16, 253, 253, 0) <= 3);
+	CHECK(fsr.diff(272, 16, 0, 0, 254) <= 3);
+	CHECK(fsr.diff(512, 88, 253, 0, 0) <= 3);
+	CHECK(fsr.diff(432, 32, 0, 255, 0) <= 3);
+	CHECK(fsr.diff(208, 16, 254, 0, 253) <= 3);
+	CHECK(fsr.diff(80, 400, 251, 166, 0) <= 3);
+
+	int differing = 0;
+	for (int x = 0; x < 640; x++) {
+		const uint8_t* a = &plain.bgra[(size_t)16 * plain.pitch + (size_t)x * 4];
+		const uint8_t* b = &fsr.bgra[(size_t)16 * fsr.pitch + (size_t)x * 4];
+		if (abs(a[0] - b[0]) > 3 || abs(a[1] - b[1]) > 3 || abs(a[2] - b[2]) > 3) differing++;
+	}
+	CHECK(differing > 0);
+	CHECK(differing < 64);
+	sink.present();
+
+	// not enlarging: the processor draws
+	SetWindowPos(hwnd, NULL, 0, 0, 160, 120, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+	REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+	REQUIRE(read_back(sink, fsr));
+	CHECK(fsr.width == 160);
+	CHECK(fsr.diff(148, 4, 255, 255, 255) <= 6);
+	sink.present();
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
+// The driver modes are requests to the video processor that another vendor's
+// driver ignores: the picture must still come out right, whichever GPU runs
+// the tests.
+TEST_CASE("driver super resolution modes still draw through the processor")
+{
+	HWND hwnd = CreateWindowExA(0, "STATIC", "", WS_POPUP, 0, 0, 640, 480, NULL, NULL, NULL, NULL);
+	REQUIRE(hwnd != NULL);
+	LmVideoSink sink;
+	REQUIRE(sink.open(hwnd));
+	FirstFrame first;
+	REQUIRE(first.open(sink));
+	const MfH264Decoder::Frame& f = *first.f;
+	Pixels out;
+	for (int mode = 2; mode <= 3; mode++) {
+		sink.setSuperResolution(mode);
+		REQUIRE(sink.draw(f.texture, f.subresource, f.width, f.height));
+		REQUIRE(read_back(sink, out));
+		CHECK(out.diff(592, 16, 255, 255, 255) <= 6);
+		CHECK(out.diff(272, 16, 0, 0, 254) <= 6);
+		sink.present();
+	}
+	CHECK(LmVideoSink::defaultVendor() != 0);
+	sink.close();
+	DestroyWindow(hwnd);
+}
+
 TEST_CASE("sink refuses to open without a window")
 {
 	LmVideoSink sink;

@@ -22,6 +22,7 @@ struct ID3D11PixelShader;
 struct ID3D11SamplerState;
 struct ID3D11Buffer;
 struct ID3D11ShaderResourceView;
+struct ID3D11RenderTargetView;
 
 // Picture adjustments, see lm_colour in litemirror.h
 struct LmColour {
@@ -69,6 +70,13 @@ public:
 	// and a Catmull-Rom bicubic shader does the enlarging. May be changed
 	// at any time; the next draw() uses it.
 	void setScaler(int quality) { m_scaler = quality; }
+	// Super resolution while enlarging: 0 off, 1 AMD FSR 1.0 (two shader
+	// passes, feature level 11), 2 NVIDIA RTX VSR, 3 Intel VSR (extensions on
+	// the video processor; other GPUs and old drivers scale as usual). 1 to 3
+	// take precedence over setScaler(). The next draw() uses it.
+	void setSuperResolution(int mode) { m_super = mode; }
+	// PCI vendor of the GPU D3D11 picks by default; 0 when there is none
+	static unsigned defaultVendor();
 
 private:
 	bool fitWindow();
@@ -79,7 +87,12 @@ private:
 	bool setupShader();
 	bool setupRgb(uint32_t width, uint32_t height);
 	bool blit(ID3D11Texture2D* picture, uint32_t subresource, ID3D11Texture2D* target);
+	void pass(ID3D11RenderTargetView* rtv, const RECT& area, ID3D11PixelShader* ps, ID3D11ShaderResourceView* srv, ID3D11Buffer* constants);
 	void enlarge(ID3D11Texture2D* back, uint32_t width, uint32_t height);
+	bool setupFsr();
+	bool setupMid(uint32_t width, uint32_t height);
+	void fsr(ID3D11Texture2D* back, uint32_t width, uint32_t height);
+	void vendorSuper();
 
 	HWND m_hwnd;
 	ID3D11Device* m_device;
@@ -101,6 +114,17 @@ private:
 	ID3D11Texture2D* m_rgb;
 	ID3D11ShaderResourceView* m_rgbView;
 	uint32_t m_rgbW, m_rgbH;
+	// super resolution: FSR's two shaders, its constants and the picture between the passes
+	int m_super;
+	int m_processorSuper;            // the driver mode the processor was set up with
+	unsigned m_vendor;               // PCI vendor of the device's adapter
+	ID3D11PixelShader* m_easu;
+	ID3D11PixelShader* m_rcas;
+	ID3D11Buffer* m_fsrConstants;
+	ID3D11Texture2D* m_mid;
+	ID3D11RenderTargetView* m_midRtv;
+	ID3D11ShaderResourceView* m_midSrv;
+	uint32_t m_midW, m_midH;
 	ID3D11Texture2D* m_staging;      // CPU-written copy of a software-decoded picture
 	ID3D11Texture2D* m_upload;       // its GPU copy the processor reads
 	uint32_t m_uploadW, m_uploadH;

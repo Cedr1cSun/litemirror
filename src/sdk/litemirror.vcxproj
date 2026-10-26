@@ -61,7 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>AIRPLAY2_EXPORTS;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;include;$(SolutionDir)src\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;include;$(SolutionDir)src\core\include;$(SolutionDir)third_party\fsr;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -82,7 +82,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>AIRPLAY2_EXPORTS;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.;include;$(SolutionDir)src\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;include;$(SolutionDir)src\core\include;$(SolutionDir)third_party\fsr;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,6 +94,16 @@
       <AdditionalDependencies>ws2_32.lib;winmm.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <!-- FSR shaders: fxc at build time into byte-array headers under $(IntDir), included by LmVideoSink.cpp -->
+  <ItemGroup>
+    <FsrShader Include="shaders\fsr_easu.hlsl" />
+    <FsrShader Include="shaders\fsr_rcas.hlsl" />
+  </ItemGroup>
+  <Target Name="CompileFsrShaders" BeforeTargets="ClCompile"
+          Inputs="@(FsrShader);$(SolutionDir)third_party\fsr\ffx_a.h;$(SolutionDir)third_party\fsr\ffx_fsr1.h"
+          Outputs="@(FsrShader->'$(IntDir)%(Filename).h')">
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T ps_5_0 /E ps /O3 /Fh &quot;$(IntDir)%(FsrShader.Filename).h&quot; /Vn g_%(FsrShader.Filename) /I &quot;$(SolutionDir)third_party\fsr&quot; &quot;%(FsrShader.FullPath)&quot;" />
+  </Target>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="FgAirplayChannel.cpp" />

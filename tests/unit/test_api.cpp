@@ -294,6 +294,29 @@ TEST_CASE("set_scaler takes 0 or 1 and may be changed while running")
 	lm_server_destroy(server);
 }
 
+TEST_CASE("set_super_resolution takes 0 to 3 and may be changed while running")
+{
+	lm_callbacks cb = no_callbacks();
+	lm_server* server = NULL;
+	REQUIRE(lm_server_create(&cb, &server) == LM_OK);
+	CHECK(lm_server_set_super_resolution(NULL, 1) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_super_resolution(server, 4) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_super_resolution(server, -1) == LM_E_INVALID_ARG);
+	CHECK(lm_server_set_super_resolution(server, 1) == LM_OK);
+	lm_config cfg = { "LiteMirrorUnit", 0, 0 };
+	REQUIRE(lm_server_start(server, &cfg) == LM_OK);
+	CHECK(lm_server_set_super_resolution(server, 3) == LM_OK);
+	CHECK(lm_server_set_super_resolution(server, 0) == LM_OK);
+	lm_server_destroy(server);
+}
+
+TEST_CASE("gpu_vendor names the default adapter")
+{
+	unsigned vendor = lm_gpu_vendor();
+	CHECK(vendor != 0);   // whatever renders this desktop has a PCI vendor id
+	CHECK(vendor == lm_gpu_vendor());
+}
+
 TEST_CASE("set_window takes a real window and only while stopped")
 {
 	lm_callbacks cb = no_callbacks();

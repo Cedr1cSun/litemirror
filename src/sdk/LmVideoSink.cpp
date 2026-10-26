@@ -7,6 +7,12 @@
 #include <dxgi1_5.h>
 #include <string.h>
 #include "LmVideoSink.h"
+#include <math.h>
+#define A_CPU 1
+#include "ffx_a.h"       // AMD FSR 1.0 (MIT, third_party/fsr): FsrEasuCon / FsrRcasCon on the CPU
+#include "ffx_fsr1.h"
+#include "fsr_easu.h"    // the two passes, built by fxc into g_fsr_easu / g_fsr_rcas
+#include "fsr_rcas.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -41,7 +47,9 @@ LmVideoSink::LmVideoSink()
 	  m_staging(NULL), m_upload(NULL), m_uploadW(0), m_uploadH(0),
 	  m_colourDirty(false), m_filters(false), m_lowLatency(true), m_maxLatency(0), m_tearing(false),
 	  m_toTexture(false), m_scaler(0), m_vs(NULL), m_ps(NULL), m_sampler(NULL), m_constants(NULL),
-	  m_rgb(NULL), m_rgbView(NULL), m_rgbW(0), m_rgbH(0)
+	  m_rgb(NULL), m_rgbView(NULL), m_rgbW(0), m_rgbH(0),
+	  m_super(0), m_processorSuper(0), m_vendor(0), m_easu(NULL), m_rcas(NULL), m_fsrConstants(NULL),
+	  m_mid(NULL), m_midRtv(NULL), m_midSrv(NULL), m_midW(0), m_midH(0)
 {
 	InitializeCriticalSection(&m_lock);
 }
@@ -147,6 +155,10 @@ bool LmVideoSink::open(HWND window)
 	          SUCCEEDED(dxgiDevice->GetAdapter(&adapter)) &&
 	          SUCCEEDED(adapter->GetParent(IID_PPV_ARGS(&factory)));
 	if (ok) {
+		DXGI_ADAPTER_DESC ad;
+		if (SUCCEEDED(adapter->GetDesc(&ad))) {
+			m_vendor = ad.VendorId;
+		}
 		// Full screen, a flip-model chain presents straight to the display; with
 		// this flag an interval-0 present there does not wait for the vertical blank
 		IDXGIFactory5* factory5 = NULL;
@@ -195,8 +207,29 @@ void LmVideoSink::applyLatency()
 	m_maxLatency = latency;
 }
 
+unsigned LmVideoSink::defaultVendor()
+{
+	IDXGIFactory1* factory = NULL;
+	IDXGIAdapter1* adapter = NULL;
+	DXGI_ADAPTER_DESC1 desc = {};
+	if (SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))) && SUCCEEDED(factory->EnumAdapters1(0, &adapter))) {
+		adapter->GetDesc1(&desc);
+	}
+	release(adapter);
+	release(factory);
+	return desc.VendorId;
+}
+
 void LmVideoSink::close()
 {
+	release(m_midSrv);
+	release(m_midRtv);
+	release(m_mid);
+	m_midW = m_midH = 0;
+	release(m_fsrConstants);
+	release(m_rcas);
+	release(m_easu);
+	m_processorSuper = 0;
 	release(m_rgbView);
 	release(m_rgb);
 	release(m_constants);
@@ -242,7 +275,8 @@ bool LmVideoSink::fitWindow()
 // letterboxed destination.
 bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height, bool toTexture)
 {
-	if (m_processor && width == m_srcW && height == m_srcH && toTexture == m_toTexture) {
+	int driverMode = m_super >= 2 ? m_super : 0;
+	if (m_processor && width == m_srcW && height == m_srcH && toTexture == m_toTexture && driverMode == m_processorSuper) {
 		return true;
 	}
 	release(m_processor);
@@ -262,8 +296,10 @@ bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height, bool toTexture
 
 	applyColour(height);
 	m_videoContext->VideoProcessorSetStreamFrameFormat(m_processor, 0, D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE);
-	// no driver "enhancements" on the picture
-	m_videoContext->VideoProcessorSetStreamAutoProcessingMode(m_processor, 0, FALSE);
+	// no driver "enhancements" on the picture, unless the driver's own super resolution was asked for
+	m_videoContext->VideoProcessorSetStreamAutoProcessingMode(m_processor, 0, driverMode != 0);
+	vendorSuper();
+	m_processorSuper = driverMode;
 
 	RECT src = { 0, 0, (LONG)width, (LONG)height };
 	m_videoContext->VideoProcessorSetStreamSourceRect(m_processor, 0, TRUE, &src);
@@ -279,6 +315,32 @@ bool LmVideoSink::setupProcessor(uint32_t width, uint32_t height, bool toTexture
 	m_srcH = height;
 	m_toTexture = toTexture;
 	return true;
+}
+
+// NVIDIA RTX Video Super Resolution and Intel VSR are private extensions on
+// the video processor (the GUIDs and payloads are what mpv and Chromium
+// send). The driver applies them when the GPU and its settings allow and
+// returns S_OK either way, so there is nothing to check here.
+void LmVideoSink::vendorSuper()
+{
+	static const GUID NVIDIA_PPE = { 0xd43ce1b3, 0x1f4b, 0x48ac, { 0xba, 0xee, 0xc3, 0xc2, 0x53, 0x75, 0xe6, 0xf7 } };
+	static const GUID INTEL_VPE = { 0xedd1d4b9, 0x8659, 0x4cbc, { 0xa4, 0xd6, 0x98, 0x31, 0xa2, 0x16, 0x3a, 0xc3 } };
+	if (m_super == 2 && m_vendor == 0x10DE) {
+		struct { UINT version, method, enable; } ext = { 1, 2, 1 };
+		m_videoContext->VideoProcessorSetStreamExtension(m_processor, 0, &NVIDIA_PPE, sizeof(ext), &ext);
+	} else if (m_super == 3 && m_vendor == 0x8086) {
+		struct { UINT function; const void* param; } ext;
+		UINT version = 3, mode = 1, scaling = 2;
+		ext.function = 0x1;
+		ext.param = &version;
+		m_videoContext->VideoProcessorSetOutputExtension(m_processor, &INTEL_VPE, sizeof(ext), &ext);
+		ext.function = 0x20;
+		ext.param = &mode;
+		m_videoContext->VideoProcessorSetOutputExtension(m_processor, &INTEL_VPE, sizeof(ext), &ext);
+		ext.function = 0x37;
+		ext.param = &scaling;
+		m_videoContext->VideoProcessorSetStreamExtension(m_processor, 0, &INTEL_VPE, sizeof(ext), &ext);
+	}
 }
 
 // Where a width x height picture goes inside an outW x outH area, aspect kept, centred
@@ -362,6 +424,62 @@ bool LmVideoSink::setupRgb(uint32_t width, uint32_t height)
 	return true;
 }
 
+// FSR's two pixel shaders (fxc output) and their constants, once per device
+bool LmVideoSink::setupFsr()
+{
+	if (m_easu) {
+		return true;
+	}
+	if (m_device->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_0) {
+		return false;   // EASU gathers; below shader model 5 the processor enlarges instead
+	}
+	D3D11_BUFFER_DESC bd = {};
+	bd.ByteWidth = 64;
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bool ok = SUCCEEDED(m_device->CreatePixelShader(g_fsr_easu, sizeof(g_fsr_easu), NULL, &m_easu)) &&
+	          SUCCEEDED(m_device->CreatePixelShader(g_fsr_rcas, sizeof(g_fsr_rcas), NULL, &m_rcas)) &&
+	          SUCCEEDED(m_device->CreateBuffer(&bd, NULL, &m_fsrConstants));
+	if (!ok) {
+		release(m_fsrConstants);
+		release(m_rcas);
+		release(m_easu);
+	}
+	return ok;
+}
+
+// The enlarged picture between EASU and RCAS, at the letterbox size
+bool LmVideoSink::setupMid(uint32_t width, uint32_t height)
+{
+	if (m_mid && width == m_midW && height == m_midH) {
+		return true;
+	}
+	release(m_midSrv);
+	release(m_midRtv);
+	release(m_mid);
+	D3D11_TEXTURE2D_DESC td = {};
+	td.Width = width;
+	td.Height = height;
+	td.MipLevels = 1;
+	td.ArraySize = 1;
+	td.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	td.SampleDesc.Count = 1;
+	td.Usage = D3D11_USAGE_DEFAULT;
+	td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	if (FAILED(m_device->CreateTexture2D(&td, NULL, &m_mid)) ||
+	    FAILED(m_device->CreateRenderTargetView(m_mid, NULL, &m_midRtv)) ||
+	    FAILED(m_device->CreateShaderResourceView(m_mid, NULL, &m_midSrv))) {
+		release(m_midSrv);
+		release(m_midRtv);
+		release(m_mid);
+		return false;
+	}
+	m_midW = width;
+	m_midH = height;
+	return true;
+}
+
 // One VideoProcessorBlt of the picture into target
 bool LmVideoSink::blit(ID3D11Texture2D* picture, uint32_t subresource, ID3D11Texture2D* target)
 {
@@ -385,6 +503,31 @@ bool LmVideoSink::blit(ID3D11Texture2D* picture, uint32_t subresource, ID3D11Tex
 	return ok;
 }
 
+// One triangle over area of rtv, ps reading srv with constants
+void LmVideoSink::pass(ID3D11RenderTargetView* rtv, const RECT& area, ID3D11PixelShader* ps, ID3D11ShaderResourceView* srv, ID3D11Buffer* constants)
+{
+	D3D11_VIEWPORT vp = {};
+	vp.TopLeftX = (float)area.left;
+	vp.TopLeftY = (float)area.top;
+	vp.Width = (float)(area.right - area.left);
+	vp.Height = (float)(area.bottom - area.top);
+	vp.MaxDepth = 1.0f;
+	m_context->OMSetRenderTargets(1, &rtv, NULL);
+	m_context->RSSetViewports(1, &vp);
+	m_context->IASetInputLayout(NULL);
+	m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_context->VSSetShader(m_vs, NULL, 0);
+	m_context->PSSetShader(ps, NULL, 0);
+	m_context->PSSetConstantBuffers(0, 1, &constants);
+	m_context->PSSetShaderResources(0, 1, &srv);
+	m_context->PSSetSamplers(0, 1, &m_sampler);
+	m_context->Draw(3, 0);
+	ID3D11ShaderResourceView* none = NULL;
+	m_context->PSSetShaderResources(0, 1, &none);
+	ID3D11RenderTargetView* noTarget = NULL;
+	m_context->OMSetRenderTargets(1, &noTarget, NULL);
+}
+
 // The shader pass: the RGB picture enlarged into the letterbox area of the back buffer
 void LmVideoSink::enlarge(ID3D11Texture2D* back, uint32_t width, uint32_t height)
 {
@@ -403,27 +546,41 @@ void LmVideoSink::enlarge(ID3D11Texture2D* back, uint32_t width, uint32_t height
 	}
 	const float black[4] = { 0, 0, 0, 1 };
 	m_context->ClearRenderTargetView(rtv, black);
+	pass(rtv, letterbox(width, height, m_clientW, m_clientH), m_ps, m_rgbView, m_constants);
+	release(rtv);
+}
+
+// FSR: EASU enlarges the RGB picture into m_mid at the letterbox size, then
+// RCAS sharpens it into the letterbox area of the back buffer
+void LmVideoSink::fsr(ID3D11Texture2D* back, uint32_t width, uint32_t height)
+{
 	RECT dst = letterbox(width, height, m_clientW, m_clientH);
-	D3D11_VIEWPORT vp = {};
-	vp.TopLeftX = (float)dst.left;
-	vp.TopLeftY = (float)dst.top;
-	vp.Width = (float)(dst.right - dst.left);
-	vp.Height = (float)(dst.bottom - dst.top);
-	vp.MaxDepth = 1.0f;
-	m_context->OMSetRenderTargets(1, &rtv, NULL);
-	m_context->RSSetViewports(1, &vp);
-	m_context->IASetInputLayout(NULL);
-	m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_context->VSSetShader(m_vs, NULL, 0);
-	m_context->PSSetShader(m_ps, NULL, 0);
-	m_context->PSSetConstantBuffers(0, 1, &m_constants);
-	m_context->PSSetShaderResources(0, 1, &m_rgbView);
-	m_context->PSSetSamplers(0, 1, &m_sampler);
-	m_context->Draw(3, 0);
-	ID3D11ShaderResourceView* none = NULL;
-	m_context->PSSetShaderResources(0, 1, &none);
-	ID3D11RenderTargetView* noTarget = NULL;
-	m_context->OMSetRenderTargets(1, &noTarget, NULL);
+	uint32_t outW = dst.right - dst.left, outH = dst.bottom - dst.top;
+	ID3D11RenderTargetView* rtv = NULL;
+	if (!setupMid(outW, outH) || FAILED(m_device->CreateRenderTargetView(back, NULL, &rtv))) {
+		return;
+	}
+	D3D11_MAPPED_SUBRESOURCE map = {};
+	if (SUCCEEDED(m_context->Map(m_fsrConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &map))) {
+		AU1* con = (AU1*)map.pData;
+		FsrEasuCon(con, con + 4, con + 8, con + 12, (AF1)width, (AF1)height, (AF1)width, (AF1)height, (AF1)outW, (AF1)outH);
+		m_context->Unmap(m_fsrConstants, 0);
+	}
+	RECT whole = { 0, 0, (LONG)outW, (LONG)outH };
+	pass(m_midRtv, whole, m_easu, m_rgbView, m_fsrConstants);
+
+	if (SUCCEEDED(m_context->Map(m_fsrConstants, 0, D3D11_MAP_WRITE_DISCARD, 0, &map))) {
+		AU1* con = (AU1*)map.pData;
+		FsrRcasCon(con, 0.2f);   // AMD's default: a fifth of a stop below maximum sharpness
+		con[4] = (AU1)dst.left;
+		con[5] = (AU1)dst.top;
+		con[6] = outW - 1;
+		con[7] = outH - 1;
+		m_context->Unmap(m_fsrConstants, 0);
+	}
+	const float black[4] = { 0, 0, 0, 1 };
+	m_context->ClearRenderTargetView(rtv, black);
+	pass(rtv, dst, m_rcas, m_midSrv, m_fsrConstants);
 	release(rtv);
 }
 
@@ -435,9 +592,11 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	if (!fitWindow()) {
 		return false;
 	}
-	// the shader only enlarges; a picture bigger than the window is left to the processor
-	bool sharp = m_scaler == 1 && (m_clientW > width || m_clientH > height) && setupShader() && setupRgb(width, height);
-	if (!setupProcessor(width, height, sharp)) {
+	// the shaders only enlarge; a picture bigger than the window is left to the processor
+	bool enlarging = m_clientW > width || m_clientH > height;
+	bool fsr = m_super == 1 && enlarging && setupShader() && setupFsr() && setupRgb(width, height);
+	bool sharp = m_super == 0 && m_scaler == 1 && enlarging && setupShader() && setupRgb(width, height);
+	if (!setupProcessor(width, height, sharp || fsr)) {
 		return false;
 	}
 	if (m_colourDirty) {
@@ -448,8 +607,10 @@ bool LmVideoSink::draw(ID3D11Texture2D* picture, uint32_t subresource, uint32_t 
 	if (FAILED(m_swap->GetBuffer(0, IID_PPV_ARGS(&back)))) {
 		return false;
 	}
-	bool ok = blit(picture, subresource, sharp ? m_rgb : back);
-	if (ok && sharp) {
+	bool ok = blit(picture, subresource, sharp || fsr ? m_rgb : back);
+	if (ok && fsr) {
+		this->fsr(back, width, height);
+	} else if (ok && sharp) {
 		enlarge(back, width, height);
 	}
 	release(back);

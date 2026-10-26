@@ -181,6 +181,15 @@ LM_API lm_error    lm_server_set_low_latency(lm_server* s, int enable);
  * be changed at any time. A picture larger than the window is always
  * reduced by the processor. */
 LM_API lm_error    lm_server_set_scaler(lm_server* s, int quality);
+/* Super resolution while enlarging: 0 off, 1 AMD FSR 1.0 (two shader
+ * passes, any feature level 11 GPU), 2 NVIDIA RTX Video Super Resolution,
+ * 3 Intel VSR. 2 and 3 are extensions on the video processor that the
+ * driver applies when it can and ignores otherwise, without saying which.
+ * 1 to 3 take precedence over the scaler. May be changed at any time. */
+LM_API lm_error    lm_server_set_super_resolution(lm_server* s, int mode);
+/* PCI vendor id of the GPU D3D11 uses by default: 0x10DE NVIDIA, 0x8086
+ * Intel, 0x1002 AMD; 0 when there is none. For offering 2 and 3 above. */
+LM_API unsigned    lm_gpu_vendor(void);
 LM_API lm_error    lm_server_start  (lm_server* s, const lm_config* cfg);
 LM_API void        lm_server_stop   (lm_server* s);     /* blocks until workers exit */
 LM_API void        lm_server_destroy(lm_server* s);     /* stops first if needed */

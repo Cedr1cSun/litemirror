@@ -59,6 +59,19 @@ lm_error lm_server_set_scaler(lm_server* s, int quality)
 	return LM_OK;
 }
 
+lm_error lm_server_set_super_resolution(lm_server* s, int mode)
+{
+	if (!s || mode < 0 || mode > 3) return LM_E_INVALID_ARG;
+	s->options.superResolution = mode;
+	if (s->sink) s->sink->setSuperResolution(mode);
+	return LM_OK;
+}
+
+unsigned lm_gpu_vendor(void)
+{
+	return LmVideoSink::defaultVendor();
+}
+
 lm_error lm_server_set_low_latency(lm_server* s, int enable)
 {
 	if (!s) return LM_E_INVALID_ARG;
@@ -175,6 +188,7 @@ lm_error lm_server_set_window(lm_server* s, void* hwnd)
 	}
 	s->sink->setColour(s->options.colour);
 	s->sink->setScaler(s->options.scaler);
+	s->sink->setSuperResolution(s->options.superResolution);
 	return LM_OK;
 }
 
